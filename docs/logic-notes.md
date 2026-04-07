@@ -81,7 +81,7 @@ squads: {
 
 - **role: "eliminatedSigned"** — Member was signed, then eliminated during tournament (pool: eliminated only). Visual: "eliminatedSigned" badge for historical record.
 
-- **Scoring multiplier**: If `substitute === true`, all points earned × 0.5 for entire tournament (new signings in substitute window only)
+- **Scoring multiplier**: If `substitute === true`, all points earned × 0.5 for entire tournament (see rules.md Section 4 for substitute window mechanics)
 
 - Role is ONLY meaningful when pool is "signed" or "eliminated"; check pool first before checking role
 - **Visual indicators**: ⚽ = "starter" (scoring), no badge = "bench" (no scoring)
@@ -254,7 +254,7 @@ squads: {
      isEliminated: boolean;               // Parallel flag: true if tournament-eliminated
      substitute: boolean;                 // Signed following R16. Scores at 50% for entire tournament
      name: string;
-     code: string;
+     countryCode: string;                 // Country code (API format: NET, JAP, SER, etc.)
      flag: string;
      matchPoints: Record<string, number>; // Points by game/week
      totalPoints: number;                 // All points (respects substitute 50% multiplier)
@@ -276,10 +276,10 @@ squads: {
      isEliminated: boolean;               // Parallel flag: true if tournament-eliminated
      substitute: boolean;                 // Signed folowing R16. Scores at 50% for entire tournament
      name: string;
-     position: "FWD" | "MID" | "DEF" | "GK";
+     position: "Goalkeeper" | "Midfielder" | "Defender" | "Attacker";
      number: number;
      teamId: number;
-     code: string;
+     countryCode: string;                 // Country code (API format: NET, JAP, SER, etc.)
      flag: string;
      matchPoints: Record<string, number>; // Points by game/week
      totalPoints: number;                 // All points (respects substitute 50% multiplier)
@@ -295,47 +295,79 @@ squads: {
 
 **File**: `/src/App.tsx`
 
-**Keep as is for now - will need to be tweaked on adding database/initialize other than game start**
+**Architecture**: Three separate datasets:
+1. **National Teams** (source of truth, `nationTeamsSlice`) — All 32 teams from JSON
+2. **Roster Squads** (user selections, `rosterSlice.squads`) — User's selected squads (max 4)
+3. **Roster Players** (user selections, `rosterSlice.players`) — User's selected players (18 total)
 
-**Old structure** (respects isEliminated and pool from JSON):
+Squads and Players are functionally separate except for:
+- Elimination cascade (when national team is eliminated)
+- Clean sheet bonuses
+- Similar team-based game mechanics
+
+**Implementation** (Phase 3.2 complete):
+
 ```typescript
-// Initialize Squads: all in "available" pool, respect isEliminated from JSON
-const rosterSquads: RosterSquad[] = mockSquadsData.map((s: any) => ({
-  type: "squad" as const,
-  id: s.teamId,
-  teamId: s.teamId,
-  pool: "available" as const,
-  role: null,                              // No functional role until signed
-  isEliminated: s.status === "eliminated" ? true : false,  // ← Respect JSON
-  name: s.name,
-  code: s.code,
-  flag: s.flag,
-  matchPoints: {},
-  coaches: s.coaches,
-  officialRoster: s.officialRoster,
-}));
+const allNationalTeams = mockSquadsData.teams || [];
 
-// Initialize Players: all in "available" pool initially, respect isEliminated from JSON
-// NOTE: Pre-eliminated players should NOT appear in available per user spec.
-// If a player is pre-eliminated, initialize them in "eliminated" pool with role "eliminatedSigned"
-const rosterPlayers: RosterPlayer[] = mockSquadsData.flatMap((s: any) =>
-  (s.officialRoster || []).map((p: any) => ({
+// Initialize players from all national teams roster data
+// Players are functionally separate from Squads (which are user selections)
+const rosterPlayers: RosterPlayer[] = allNationalTeams.flatMap((nationalTeam: any) =>
+  (nationalTeam.players || []).map((p: any) => ({
     type: "player" as const,
-    id: p.id,
-    playerId: p.id,
-    pool: p.status === "eliminated" ? "eliminated" : "available" as const,
-    role: p.status === "eliminated" ? "eliminatedSigned" : null,
-    isEliminated: p.status === "eliminated" ? true : false,
-    name: p.name,
+    playerId: p.playerId,
+    pool: p.isEliminated ? "eliminated" : "available" as const,
+    role: p.isEliminated ? "eliminatedSigned" : null,
+    isEliminated: p.isEliminated || false,
+    name: p.playerName,
     position: p.position,
     number: p.number,
-    teamId: s.teamId,
-    code: s.code,
-    flag: s.flag,
+    teamId: nationalTeam.teamId,
+    code: nationalTeam.countryCode,
+    flag: nationalTeam.flag,
     matchPoints: {},
+    totalPoints: 0,
+    substitute: false,
+    playerGames: [],
+    injury: { status: "none", likelyUnavailable: false },
   }))
 );
+
+// Initialize national teams as source of truth for elimination status
+// These are NOT roster selections yet - just the tournament data
+const nationTeamsSquads: RosterSquad[] = allNationalTeams.map((nationalTeam: any) => ({
+  type: "squad" as const,
+  id: nationalTeam.teamId,
+  teamId: nationalTeam.teamId,
+  pool: "available" as const,
+  role: null,
+  isEliminated: nationalTeam.isEliminated || false,
+  rosterElimination: nationalTeam.isEliminated ? "resolved" : null,
+  name: nationalTeam.teamName,
+  code: nationalTeam.countryCode,
+  flag: nationalTeam.flag,
+  matchPoints: {},
+  totalPoints: 0,
+  substitute: false,
+  squadGames: [],
+  coaches: nationalTeam.coaches,
+}));
+
+// Load match data and initialize national teams (source of truth for elimination cascade)
+dispatch(setMatches(mockMatches as Match[]))
+dispatch(initializeNationTeams(nationTeamsSquads))
+
+// Initialize empty roster (user will select squads and players from available pools)
+dispatch(initializeRoster({ players: rosterPlayers, squads: [] }))
 ```
+
+**Key changes from interim guidance**:
+- ✅ Removed `officialRoster` field from RosterSquad type — will be added back when implementing database state persistence
+- ✅ Use actual field names from squads.json: `teamName`, `countryCode`, `playerName` (not generic `name`, `code`, etc.)
+- ✅ Both squads and players default to `isEliminated: false` on initial load
+- ✅ Pre-eliminated players initialize in `"eliminated"` pool with role `"eliminatedSigned"`
+- ✅ `nationTeamsSquads` is NOT a duplicate — it's the 32-team source of truth (different from empty `rosterSlice.squads`)
+- ✅ `rosterSlice.squads` initializes empty, populated only as user selects squads
 
 ---
 
@@ -430,6 +462,7 @@ selectRemainingStarterSlots = 11 - selectStarterPlayers.length  // Useful before
 selectRemainingRosterSlots = 18 - selectSignedPlayers.length
 
 // ===== SCORING RULE =====
+// See rules.md for complete scoring rules (Section 8: Player Scoring, Section 7: Squad Scoring)
 canScorePoints = (member: RosterSquad | RosterPlayer) => member.role === "starter"
   // Only starters score. Role: "starter" implies pool: "signed", so no need to check pool.
 ```
@@ -482,11 +515,13 @@ Validation logic to match new pool/role state model:
 
 ```typescript
 // ===== ROSTER LOCK STATE =====
+// See rules.md Section 3-4 for lock state rules
 isRosterLocked = false  // Set to true when user clicks "Play" for Quarterfinals
   // When true: no add/remove players or squads allowed
   // When true: can still move players between bench ↔ starter (tactical flexibility)
 
 // ===== SQUAD VALIDATION =====
+// See rules.md Section 3: Minimum Roster Requirements
 canAddSquadToUnsigned = (squad: RosterSquad) =>
   !squad.isEliminated &&
   squad.pool === "available" &&
@@ -494,7 +529,7 @@ canAddSquadToUnsigned = (squad: RosterSquad) =>
 
 canSignSquad = () => selectSignedSquads.length < 4 && !isRosterLocked
 
-// Minimum requirement: only enforced before Quarterfinals
+// Minimum requirement: 4 signed squads required before QF "Play" (see rules.md Section 2)
 validateSignedSquadCount = () => {
   if (currentTurn < "Quarterfinals") {
     return selectSignedSquads.length === 4  // Required to play earlier rounds
@@ -503,6 +538,7 @@ validateSignedSquadCount = () => {
 }
 
 // ===== PLAYER VALIDATION (ROSTER ADDITIONS) =====
+// See rules.md Section 3-4 for roster composition rules
 // Only allowed when roster is NOT locked
 canAddPlayerToRoster = (player: RosterPlayer) =>
   !player.isEliminated &&
@@ -517,6 +553,7 @@ canRemovePlayerFromRoster = (player: RosterPlayer) =>
 
 // ===== PLAYER VALIDATION (STARTER ADJUSTMENTS) =====
 // NO LOCK required - players can adjust formation through entire tournament
+// See rules.md Section 5: STARTER Availability for slot limits
 canPromoteToStarter = (player: RosterPlayer) => {
   // Before QF: enforce 11-starter limit
   if (currentTurn < "Quarterfinals") {
@@ -527,11 +564,12 @@ canPromoteToStarter = (player: RosterPlayer) => {
   return player.pool === "signed" && player.role === "bench"
 }
 
-canPromoveToBench = (player: RosterPlayer) =>
+canPromoteToBench = (player: RosterPlayer) =>
   player.pool === "signed" && player.role === "starter"
   // Always allowed, no lock
 
 // ===== ROSTER COMPOSITION VALIDATION =====
+// See rules.md Section 3: Minimum Roster Requirements
 validateRosterCount = () => {
   if (currentTurn < "Quarterfinals") {
     return selectSignedPlayers.length >= 11 && selectSignedPlayers.length <= 18
@@ -545,6 +583,7 @@ validateRosterPositions = () => {
 }
 
 // ===== STARTER COMPOSITION VALIDATION =====
+// See rules.md Section 1: Initial Setup & Section 3: Minimum Requirements
 validateStarterCount = () => {
   if (currentTurn < "Quarterfinals") {
     return selectStarterPlayers.length === 11  // Required to start tournament

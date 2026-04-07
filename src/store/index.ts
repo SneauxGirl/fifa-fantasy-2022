@@ -12,8 +12,11 @@ import uiReducer from "./slices/uiSlice";
 import nationTeamsReducer from "./slices/nationTeamsSlice";
 import lineupReducer from "./slices/lineupSlice";
 import dataSourceReducer from "./slices/dataSourceSlice";
-import { eliminationMiddleware } from "./middleware/eliminationMiddleware";
+import liveScoresReducer from "./slices/liveScoresSlice";
 import type { RootState } from "./types";
+
+// Re-export async thunks for use in components
+export { playTurn } from "./thunks/rosterThunks";
 
 export const store = configureStore({
   reducer: {
@@ -23,9 +26,8 @@ export const store = configureStore({
     nationTeams: nationTeamsReducer,
     lineup: lineupReducer,
     dataSource: dataSourceReducer,
+    liveScores: liveScoresReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(eliminationMiddleware),
 });
 
 // ─── Typed helpers ────────────────────────────────────────────────────────────

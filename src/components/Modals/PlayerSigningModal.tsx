@@ -7,6 +7,7 @@ import {
   selectRosterGKCount,
   selectActiveSignedPlayers,
 } from "../../store/selectors/rosterSelectors";
+import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
 import { Modal } from "./Modal";
 import styles from "./PlayerSigningModal.module.scss";
@@ -41,6 +42,15 @@ export const PlayerSigningModal: React.FC = () => {
     return null;
   }
 
+  // Get team colors and pass to modal
+  const colors = getTeamColors(selectedPlayer.countryCode);
+  const modalStyle = {
+    "--team-primary-color": colors.primary,
+    "--team-secondary-color": colors.secondary,
+    "--team-alt-color": colors.alt,
+    "--team-text-color": colors.text,
+  } as React.CSSProperties;
+
   const isGoalkeeper = selectedPlayer.position === "Goalkeeper";
 
   // Check if player can be added (validator function from selector)
@@ -54,38 +64,39 @@ export const PlayerSigningModal: React.FC = () => {
   const totalRosterCount = activeSignedPlayers.length + 1;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={`Sign ${selectedPlayer.name}?`}>
+    <Modal isOpen={isOpen} onClose={handleClose} title={`Sign ${selectedPlayer.name}?`} style={modalStyle}>
       <div className={styles.container}>
         <h2 className={styles.title}>
           Sign {selectedPlayer.name}?
         </h2>
 
-        <p className={styles.rosterCountText}>
-          This will be player <strong>{totalRosterCount}</strong> of 18 on your roster.
-        </p>
-
         {rosterFullReached && (
           <div className={styles.warningText} role="alert">
-            ⚠ Signed roster full (18/18). Cannot sign additional players.
+            <span>⚠ Signed roster full (18/18). Cannot sign additional players.</span>
           </div>
         )}
 
-        {!rosterFullReached && goalieCapReached && (
-          <div className={styles.warningText} role="alert">
-            ⚠ Goalkeeper cap reached (3/3). Cannot sign additional goalkeepers.
+        {!rosterFullReached && (
+          <div className={styles.reminderText}>
+            <p style={{ margin: 0, marginBottom: goalieCapReached ? "8px" : 0 }}>
+              This will be player <strong>{totalRosterCount}</strong> of 18 on your roster.
+            </p>
+            {goalieCapReached && (
+              <p style={{ margin: 0, color: "#d32f2f", fontWeight: 600 }}>
+                ⚠ Goalkeeper cap reached (3/3). Cannot sign additional goalkeepers.
+              </p>
+            )}
+            {!goalieCapReached && isGoalkeeper && (
+              <p style={{ margin: 0 }}>
+                (Reminder: you have filled {rosterGKCount} of 3 goalkeeper slots, min. 1)
+              </p>
+            )}
+            {!goalieCapReached && !isGoalkeeper && rosterGKCount < 3 && (
+              <p style={{ margin: 0 }}>
+                (Reminder: you have filled {rosterGKCount} of 3 goalkeeper slots, min. 1)
+              </p>
+            )}
           </div>
-        )}
-
-        {!rosterFullReached && isGoalkeeper && !goalieCapReached && (
-          <p className={styles.reminderText}>
-            (Reminder: you have filled {rosterGKCount} of 3 goalkeeper slots, min. 1)
-          </p>
-        )}
-
-        {!rosterFullReached && !isGoalkeeper && rosterGKCount < 3 && (
-          <p className={styles.reminderText}>
-            (Reminder: you have filled {rosterGKCount} of 3 goalkeeper slots, min. 1)
-          </p>
         )}
 
         <div className={styles.buttonGroup}>

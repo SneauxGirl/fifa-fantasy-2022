@@ -26,6 +26,7 @@
   overflow-y: auto;
   box-shadow: $shadow-high;
   animation: slideUp 0.3s ease-out;
+  border: $border-width-4 solid $color-bg-tertiary;
 }
 
 .closeButton {
@@ -33,21 +34,22 @@
   top: $spacing-16;
   right: $spacing-16;
   background: none;
-  border: none;
+  border: $border-width-1 solid var(--team-text-color, $color-neutral-text);
   font-size: $font-size-24;
   cursor: pointer;
-  color: $color-text-default;
+  color: var(--team-text-color, $color-neutral-text);
   padding: $spacing-2 $spacing-8;
   line-height: 1;
   z-index: 1001;
   transition: $transition-colors;
+  border-radius: $border-radius-4;
 
   &:hover {
-    color: $color-bg-tertiary;
+    opacity: 0.7;
   }
 
   &:focus {
-    outline: $border-width-2 solid $color-bg-tertiary;
+    outline: $border-width-2 solid var(--team-text-color, $color-neutral-text);
     outline-offset: $spacing-2;
   }
 }

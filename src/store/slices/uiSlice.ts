@@ -17,6 +17,8 @@ export interface UIState {
     squads: RosterSquad[];
     players: RosterPlayer[];
   };
+  isRosterLocked: boolean;
+  teamName: string;
 }
 
 const initialState: UIState = {
@@ -32,6 +34,8 @@ const initialState: UIState = {
     squads: [],
     players: [],
   },
+  isRosterLocked: false,
+  teamName: "",
 };
 
 const uiSlice = createSlice({
@@ -94,6 +98,14 @@ const uiSlice = createSlice({
         players: [],
       };
     },
+
+    setRosterLocked: (state, action: PayloadAction<boolean>) => {
+      state.isRosterLocked = action.payload;
+    },
+
+    setTeamName: (state, action: PayloadAction<string>) => {
+      state.teamName = action.payload;
+    },
   },
 });
 
@@ -108,6 +120,8 @@ export const {
   toggleSidebar,
   setEliminationNotification,
   clearEliminationNotification,
+  setRosterLocked,
+  setTeamName,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

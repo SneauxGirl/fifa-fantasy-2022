@@ -6,6 +6,9 @@ import {
   selectScoringPlayersGroupedByPosition,
   selectStarterSquads,
 } from "../../store/selectors/rosterSelectors";
+import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
+import { countryToFifa } from "../../lib/formatMapping";
+import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
 import styles from "./StartersLineup.module.scss";
 
@@ -16,7 +19,7 @@ import styles from "./StartersLineup.module.scss";
  */
 export const StartersLineup: React.FC = () => {
   const dispatch = useAppDispatch();
-  const [isDragOver, setIsDragOver] = React.useState(false);
+  const isRosterLocked = useAppSelector(selectIsRosterLocked);
 
   // Show starter players in formation
   const scoringPlayers = useAppSelector(selectScoringPlayers);
@@ -32,16 +35,12 @@ export const StartersLineup: React.FC = () => {
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    if (isRosterLocked) return;
+
     try {
       const data = e.dataTransfer.getData("application/json");
       console.log("Drop received - raw data:", data);
@@ -66,12 +65,16 @@ export const StartersLineup: React.FC = () => {
 
       {/* Signed Squads Section */}
       <div className={styles.squadsSection}>
-        {signedSquads.map((squad) => (
-          <div key={squad.teamId} className={styles.squadCard}>
-            <span className={styles.squadFlag}>{squad.flag}</span>
-            <span className={styles.squadName}>{squad.code}</span>
-          </div>
-        ))}
+        {signedSquads.map((squad) => {
+          const fifaCode = countryToFifa(squad.countryCode);
+          console.log("countryCode:", squad.countryCode, "fifaCode:", fifaCode);
+          return (
+            <div key={squad.teamId} className={styles.squadCard}>
+              <span className={styles.squadFlag}>{squad.flag}</span>
+              <span className={styles.squadName}>{fifaCode}</span>
+            </div>
+          );
+        })}
         {signedSquads.length < 4 &&
           Array(4 - signedSquads.length)
             .fill(null)
@@ -82,21 +85,11 @@ export const StartersLineup: React.FC = () => {
             ))}
       </div>
 
-      {scoringPlayers.length === 0 ? (
-        <div
-          className={styles.emptyState}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <p>No starters yet</p>
-          <p className={styles.hint}>Sign players and drag them here</p>
-        </div>
-      ) : (
-        <div
-          className={styles.formation}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
+      <div
+        className={styles.formation}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
+      >
           {/* Goalkeeper */}
           <div className={styles.positionRow}>
             <div className={styles.positionLabel}>GK</div>
@@ -165,7 +158,6 @@ export const StartersLineup: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };
@@ -186,11 +178,22 @@ const StarterPlayerCard: React.FC<StarterPlayerCardProps> = ({ player, onRemove 
     .join("")
     .slice(0, 2);
 
+  const teamColors = getTeamColors(player.countryCode);
+
   return (
-    <div className={styles.starterCard} title={player.name}>
+    <div
+      className={styles.starterCard}
+      title={player.name}
+      style={{ "--team-primary-color": teamColors.primary } as React.CSSProperties}
+    >
       <div className={styles.cardContent}>
         <span className={styles.number}>{player.number}</span>
-        <span className={styles.initials}>{initials}</span>
+        <span
+          className={styles.initials}
+          style={{ "--team-primary-color": teamColors.primary } as React.CSSProperties}
+        >
+          {initials}
+        </span>
       </div>
       <button
         className={styles.removeBtn}

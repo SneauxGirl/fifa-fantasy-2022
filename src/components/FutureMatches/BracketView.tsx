@@ -3,7 +3,9 @@ import { useAppDispatch, useAppSelector } from "../../store";
 import { openMatchModal } from "../../store/slices/uiSlice";
 import { selectMatchesByStage, selectSignedSquadIds } from "../../store/selectors/scoringSelectors";
 import type { Match } from "../../types/match";
-import { transformMatch } from "../../lib/dataTransform";
+import { transformMatch, formatMatchDate } from "../../lib/dataTransform";
+import { countryToFifa } from "../../lib/formatMapping";
+import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./BracketView.module.scss";
 
 /**
@@ -12,15 +14,22 @@ import styles from "./BracketView.module.scss";
  */
 export const BracketView: React.FC = () => {
   const dispatch = useAppDispatch();
-  const [expandedStage, setExpandedStage] = useState<string | null>("groups");
+  const [expandedStage, setExpandedStage] = useState<string | null>("gs2");
 
   const matchesByStage = useAppSelector(selectMatchesByStage);
   const rosterSquads = useAppSelector(selectSignedSquadIds);
 
-  // EDIT STAGES And tie to API. Update Group Stage to Group Stage 1 & 2, remove Round of 32. #TODO
+  // Split Group Stage matches into 3 phases
+  const groupMatches = matchesByStage["Group Stage"] || [];
+  const matchesPerPhase = Math.ceil(groupMatches.length / 3);
+  const groupStage1 = groupMatches.slice(0, matchesPerPhase);
+  const groupStage2 = groupMatches.slice(matchesPerPhase, matchesPerPhase * 2);
+  const groupStage3 = groupMatches.slice(matchesPerPhase * 2);
+
   const stages = [
-    { id: "groups", name: "Group Stage", matches: matchesByStage["Group Stage"], count: matchesByStage["Group Stage"].length },
-    { id: "round32", name: "Round of 32", matches: matchesByStage["Round of 32"], count: matchesByStage["Round of 32"].length },
+    { id: "gs1", name: "Group Stage 1", matches: groupStage1, count: groupStage1.length },
+    { id: "gs2", name: "Group Stage 2", matches: groupStage2, count: groupStage2.length },
+    { id: "gs3", name: "Group Stage 3", matches: groupStage3, count: groupStage3.length },
     { id: "round16", name: "Round of 16", matches: matchesByStage["Round of 16"], count: matchesByStage["Round of 16"].length },
     { id: "quarters", name: "Quarterfinals", matches: matchesByStage["Quarterfinals"], count: matchesByStage["Quarterfinals"].length },
     { id: "semis", name: "Semifinals", matches: matchesByStage["Semifinals"], count: matchesByStage["Semifinals"].length },
@@ -40,23 +49,28 @@ export const BracketView: React.FC = () => {
   return (
     <div className={styles.bracketView}>
       <div className={styles.bracketContainer}>
-        {stages.map((stage) => (
-          <div key={stage.id} className={styles.stage}>
+        {stages.map((stage) => {
+          const isCompleted = stage.id === "gs1";
+          const isCurrent = stage.id === "gs2" && expandedStage !== stage.id;
+          const isUpcoming = stage.id === "gs3";
+          const isLocked = ["round16", "quarters", "semis", "final"].includes(stage.id);
+          const isExpanded = expandedStage === stage.id;
+          return (
+            <div key={stage.id} className={`${styles.stage} ${isCompleted ? styles.completed : ""} ${isCurrent ? styles.current : ""} ${isUpcoming ? styles.upcoming : ""} ${isLocked ? styles.locked : ""} ${isExpanded ? styles.expanded : ""}`}>
             <button
               type="button"
               className={`${styles.stageHeader} ${
                 expandedStage === stage.id ? styles.expanded : ""
               }`}
-              onClick={() =>
-                setExpandedStage(expandedStage === stage.id ? null : stage.id)
-              }
-              aria-label={`${stage.name}, ${stage.count} matches`}
+              onClick={() => !isLocked && setExpandedStage(expandedStage === stage.id ? null : stage.id)}
+              disabled={isLocked}
+              aria-label={`${stage.name}, ${stage.count} matches${isLocked ? " (locked)" : ""}`}
               aria-expanded={expandedStage === stage.id}
             >
               <span className={styles.stageName}>{stage.name}</span>
               <span className={styles.stageCount}>{stage.count} matches</span>
               <span className={styles.toggle}>
-                {expandedStage === stage.id ? "▼" : "▶"}
+                {isLocked ? "🔒" : expandedStage === stage.id ? "▼" : "▶"}
               </span>
             </button>
 
@@ -78,8 +92,9 @@ export const BracketView: React.FC = () => {
                 <p>No matches scheduled for this stage</p>
               </div>
             )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -114,15 +129,6 @@ const MatchBracketItem: React.FC<MatchBracketItemProps> = ({
     return match.status.short;
   };
 
-  const getCountryFlag = (code: string): string => {
-    const codeUpper = code.toUpperCase();
-    if (codeUpper.length !== 3) return "";
-    return (
-      String.fromCodePoint(0x1f1e6 + codeUpper.charCodeAt(0) - 65) +
-      String.fromCodePoint(0x1f1e6 + codeUpper.charCodeAt(1) - 65)
-    );
-  };
-
   return (
     <button
       type="button"
@@ -137,37 +143,38 @@ const MatchBracketItem: React.FC<MatchBracketItemProps> = ({
       }}
       aria-label={`${match.homeTeam.name} vs ${match.awayTeam.name}, ${getStatusDisplay()}`}
     >
-      <div className={styles.matchHeader}>
-        {isRoster && <span className={styles.rosterBadge}>📊</span>}
-        {isLive && <span className={styles.liveBadge}>🔴</span>}
-      </div>
-
-      <div className={styles.teams}>
-        <div className={styles.team}>
-          <span className={styles.teamName}>{match.homeTeam.code}</span>
-          {isFinished && (
-            <span className={styles.score}>{displayMatch.score.home}</span>
-          )}
+      <div className={styles.matchContent}>
+        <div className={styles.matchHeader}>
+          <div className={styles.teams}>
+            <span className={styles.teamName}>{match.homeTeam.name}</span>
+            <span className={styles.flag}>{getTeamFlag(match.homeTeam.countryCode)}</span>
+            {(isFinished || isLive) && (
+              <>
+                <span className={styles.score}>{displayMatch.score.home}</span>
+                <span className={styles.status}>{getStatusDisplay()}</span>
+                <span className={styles.score}>{displayMatch.score.away}</span>
+              </>
+            )}
+            {!isFinished && !isLive && (
+              <span className={styles.status}>{getStatusDisplay()}</span>
+            )}
+            <span className={styles.flag}>{getTeamFlag(match.awayTeam.countryCode)}</span>
+            <span className={styles.teamName}>{match.awayTeam.name}</span>
+          </div>
         </div>
 
-        <div className={styles.vs}>vs</div>
-
-        <div className={styles.team}>
-          {isFinished && (
-            <span className={styles.score}>{displayMatch.score.away}</span>
-          )}
-          <span className={styles.teamName}>{match.awayTeam.code}</span>
+        <div className={styles.matchDetails}>
+          {match.venue && <span className={styles.venue}>{match.venue.name}</span>}
+          <span className={styles.date}>{formatMatchDate(match.date)}</span>
         </div>
       </div>
 
-      <div className={styles.matchFooter}>
-        <span className={styles.status}>{getStatusDisplay()}</span>
-        {match.venue && (
-          <span className={styles.venue} title={match.venue.name}>
-            {match.venue.city}
-          </span>
-        )}
-      </div>
+      {(isRoster || isLive) && (
+        <div className={styles.badges}>
+          {isRoster && <span className={styles.rosterBadge}>📊</span>}
+          {isLive && <span className={styles.liveBadge}>🔴 LIVE</span>}
+        </div>
+      )}
     </button>
   );
 };

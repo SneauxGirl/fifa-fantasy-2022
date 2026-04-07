@@ -87,8 +87,8 @@ export function validateRosterPlayerAdd(
       reason:       "Player is already on the ROSTER.",
     };
   }
-  //Why are we using does not equal undefined in this instance
-  if (position === "GK" && currentGkCount !== undefined && currentGkCount >= MAX_GK_IN_ROSTER) {
+  // Only enforce GK cap if position and count data are provided by caller
+  if (position === "Goalkeeper" && currentGkCount != null && currentGkCount >= MAX_GK_IN_ROSTER) {
     return {
       allowed:      false,
       isSubstitute: false,
@@ -161,10 +161,10 @@ export function validateStarterSelection(
       rejected.push({ id, reason: "Player is not on the ROSTER." });
     } else if (eliminatedIds.has(id)) {
       rejected.push({ id, reason: "Player is ELIMINATED and cannot START." });
-    } else if (positionById?.get(id) === "GK" && gkStarterCount >= MAX_GK_STARTERS) {
+    } else if (positionById?.get(id) === "Goalkeeper" && gkStarterCount >= MAX_GK_STARTERS) {
       rejected.push({ id, reason: `Only ${MAX_GK_STARTERS} Goalkeeper(s) may START per week.` });
     } else {
-      if (positionById?.get(id) === "GK") gkStarterCount++;
+      if (positionById?.get(id) === "Goalkeeper") gkStarterCount++;
       validIds.push(id);
     }
   }

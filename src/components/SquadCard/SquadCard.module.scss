@@ -1,20 +1,26 @@
 // src/components/SquadCard/SquadCard.module.scss
+
+@use '../../styles/tokens.scss' as *;
+
 .squadCard {
   position: relative;
   border-radius: $border-radius-8;
   overflow: hidden;
-  background: $color-bg-primary;
+  background: $color-bg-primary-alt;
   width: 100%;
+  min-width: 300px;
   box-shadow: $shadow-low;
   font-family: inherit;
 
   @media (min-width: 480px) {
-    max-width: 540px;
+    max-width: 33.75rem;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
   }
 
   @media (min-width: 768px) {
-    max-width: 640px;
+    max-width: 40rem;
   }
 }
 
@@ -22,9 +28,8 @@
 
 .squadCardHeader {
   position: relative;
-  background: var(--jersey-primary);
-  padding: 14px 16px 16px;
-  overflow: hidden;
+  background: var(--team-primary-color);
+  padding: 16px;
 
   // Diagonal geometric accent — mirrors PlayerCard style
   &::after {
@@ -43,8 +48,6 @@
 .squadCardHeaderMeta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: $spacing-6;
   position: relative;
   z-index: 1;
 }
@@ -56,40 +59,20 @@
 }
 
 .squadCardFlagBadge {
-  font-size: $font-size-10;
+  font-size: $font-size-32;
   font-weight: $font-weight-bold;
-  color: var(--jersey-primary);
-  background: $color-text-inverse;
   border-radius: $border-radius-2;
   padding: $spacing-1 $spacing-2;
   letter-spacing: 0.5px;
 }
 
-.squadCardRanking {
-  font-size: $font-size-12;
-  font-weight: $font-weight-bold;
-  color: $color-text-default;
-  letter-spacing: 0.3px;
-  position: relative;
-  z-index: 1;
-}
-
 .squadCardName {
   font-size: $font-size-24;
   font-weight: $font-weight-extrabold;
-  color: $color-text-default;
+  color: var(--team-text-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   line-height: 1.1;
-  position: relative;
-  z-index: 1;
-}
-
-.squadCardLocalName {
-  font-size: $font-size-12;
-  color: rgba(255, 255, 255, 0.7);
-  font-style: italic;
-  margin-top: $spacing-2;
   position: relative;
   z-index: 1;
 }
@@ -100,6 +83,7 @@
   padding: $spacing-12 $spacing-16 $spacing-16;
 
   @media (min-width: 480px) {
+    flex: 1;
     display: flex;
     flex-direction: column;
   }
@@ -113,10 +97,10 @@
 }
 
 .squadCardBadge {
-  font-size: $font-size-10;
+  font-size: $font-size-12;
   font-weight: $font-weight-bold;
   letter-spacing: 0.6px;
-  padding: $spacing-2 $spacing-10;
+  padding: $spacing-4 $spacing-10;
   border-radius: $border-radius-100;
   color: $color-text-inverse;
   background: $color-neutral-medium;
@@ -135,46 +119,40 @@
   background: $color-error-primary;
 }
 
-// ── Toggle ────────────────────────────────────────────────────────────────────
+// ── Coaches ────────────────────────────────────────────────────────────────────
 
-.squadCardToggle {
-  display: flex;
-  gap: $spacing-6;
+.squadCardCoaches {
   margin-bottom: $spacing-12;
   border-bottom: $border-width-1 solid $color-border-low;
   padding-bottom: $spacing-8;
 }
 
-.squadCardToggleBtn {
-  flex: 1;
-  padding: $spacing-6 $spacing-8;
-  font-size: $font-size-10;
-  font-weight: $font-weight-semibold;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: $color-text-medium;
-  background: transparent;
-  border: none;
-  border-bottom: $border-width-2 solid transparent;
-  cursor: pointer;
-  transition: $transition-all;
+.squadCardCoach {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: $spacing-6;
 
-  &:hover {
-    color: $color-neutral-dark;
-  }
-
-  &:focus-visible {
-    outline: 2px solid #0066cc;
-    outline-offset: 2px;
-  }
-
-  &.squadCardToggleBtnActive {
-    color: $color-bg-tertiary;
-    border-bottom-color: $color-bg-tertiary;
+  &:last-child {
+    margin-bottom: 0;
   }
 }
 
-// ── Stats section ────────────────────────────────────────────────────────────
+.coachRole {
+  font-size: $font-size-10;
+  color: $color-text-medium;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: $spacing-2;
+}
+
+.coachName {
+  font-size: $font-size-14;
+  color: $color-text-default;
+  font-weight: $font-weight-semibold;
+}
+
+// ── Stats section ────────────────────────────────────────────────────
 
 .squadCardStatsSection {
   margin-bottom: $spacing-16;
@@ -186,7 +164,7 @@
   font-weight: $font-weight-semibold;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  margin-bottom: $spacing-8;
+  margin-bottom: $spacing-6;
   display: block;
 }
 
@@ -207,13 +185,13 @@
   flex-direction: column;
   align-items: center;
   padding: $spacing-8;
-  background: $color-bg-primary-alt;
+  background: $color-border-low;
   border-radius: $border-radius-4;
   text-align: center;
 }
 
 .squadCardStatBoxValue {
-  font-size: $font-size-16;
+  font-size: $font-size-18;
   font-weight: $font-weight-extrabold;
   color: $color-text-default;
 }
@@ -227,82 +205,93 @@
   margin-top: $spacing-2;
 }
 
-// ── Historical performance ────────────────────────────────────────────────────
+// ── Roster Conflicts ──────────────────────────────────────────────────────────
 
-.squadCardHistoryLabel {
-  font-size: $font-size-10;
-  color: $color-text-medium;
-  font-weight: $font-weight-semibold;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  margin-bottom: $spacing-8;
-  display: block;
-}
-
-.squadCardHistory {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: $spacing-16;
-  font-size: $font-size-12;
-}
-
-.squadCardHistoryHead {
-  th {
-    text-align: right;
-    color: $color-text-medium;
-    font-weight: $font-weight-semibold;
-    padding-bottom: $spacing-4;
-    font-size: $font-size-10;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-
-    &:first-child {
-      text-align: left;
-    }
-  }
-}
-
-.squadCardHistoryRow {
-  border-top: $border-width-1 solid $color-border-low;
-
-  td {
-    padding: $spacing-2 0;
-    text-align: right;
-    color: $color-text-medium;
-
-    &:first-child {
-      text-align: left;
-      font-weight: $font-weight-bold;
-      color: $color-text-default;
-    }
-  }
-
-  &:last-child td {
-    padding-bottom: 0;
-  }
-}
-
-// ── AI button ─────────────────────────────────────────────────────────────────
-
-.squadCardAiBtn {
-  width: 100%;
+.squadCardConflicts {
+  margin-top: $spacing-12;
   padding: $spacing-10;
-  background: $color-bg-tertiary;
-  color: $color-text-inverse;
-  font-size: $font-size-14;
-  font-weight: $font-weight-bold;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  border: none;
-  border-radius: $border-radius-8;
-  cursor: pointer;
-  transition: $transition-all;
+  background: rgba(220, 53, 69, 0.08);
+  border: $border-width-1 solid rgba(220, 53, 69, 0.2);
+  border-radius: $border-radius-4;
 
   @media (min-width: 480px) {
     margin-top: auto;
   }
+}
 
-  &:hover {
-    background: $color-bg-tertiary-alt;
+.conflictsLabel {
+  display: block;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  color: $color-error-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: $spacing-8;
+}
+
+.conflictsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+  margin-bottom: $spacing-8;
+}
+
+.conflictItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-6 $spacing-8;
+  background: $color-bg-primary;
+  border-radius: $border-radius-4;
+}
+
+.playerFlag {
+  font-size: $font-size-20;
+  flex-shrink: 0;
+}
+
+.playerName {
+  font-size: $font-size-12;
+  font-weight: $font-weight-semibold;
+  color: $color-text-default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conflictsNote {
+  margin: 0;
+  font-size: $font-size-10;
+  color: $color-text-medium;
+  font-style: italic;
+}
+
+// ── No Conflicts ──────────────────────────────────────────────────────────────
+
+.squadCardNoConflicts {
+  margin-top: $spacing-12;
+  padding: $spacing-10;
+  background: rgba(40, 167, 69, 0.08);
+  border: $border-width-1 solid rgba(40, 167, 69, 0.2);
+  border-radius: $border-radius-4;
+
+  @media (min-width: 480px) {
+    margin-top: auto;
   }
+}
+
+.noConflictsLabel {
+  display: block;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  color: $color-text-default;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: $spacing-8;
+}
+
+.noConflictsNote {
+  margin: 0;
+  font-size: $font-size-12;
+  color: $color-text-default;
 }

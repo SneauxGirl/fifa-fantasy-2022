@@ -3,6 +3,8 @@ import { useAppDispatch, useAppSelector } from "../../store";
 import { moveSquadToSigned } from "../../store/slices/rosterSlice";
 import { closeModal } from "../../store/slices/uiSlice";
 import { selectSignedSquads } from "../../store/selectors/rosterSelectors";
+import { countryToFifa } from "../../lib/formatMapping";
+import { getTeamColors } from "../../lib/teamColors";
 import type { RosterSquad } from "../../types/match";
 import { Modal } from "./Modal";
 import styles from "./SquadSigningModal.module.scss";
@@ -39,8 +41,17 @@ export const SquadSigningModal: React.FC = () => {
     return null;
   }
 
+  // Get team colors and pass to modal
+  const colors = getTeamColors(selectedSquad.countryCode);
+  const modalStyle = {
+    "--team-primary-color": colors.primary,
+    "--team-secondary-color": colors.secondary,
+    "--team-alt-color": colors.alt,
+    "--team-text-color": colors.text,
+  } as React.CSSProperties;
+
   return (
-    <Modal isOpen={isOpen} onClose={handleCancel} title="Confirm Squad Signing">
+    <Modal isOpen={isOpen} onClose={handleCancel} title="Confirm Squad Signing" style={modalStyle}>
       <div className={styles.container}>
         <div className={styles.header}>
           <span className={styles.flag}>{selectedSquad.flag}</span>
@@ -67,7 +78,7 @@ export const SquadSigningModal: React.FC = () => {
           <div className={styles.details}>
             <div className={styles.detailItem}>
               <span className={styles.label}>Squad Code:</span>
-              <span className={styles.value}>{selectedSquad.code}</span>
+              <span className={styles.value}>{countryToFifa(selectedSquad.countryCode)}</span>
             </div>
             {selectedSquad.coaches && selectedSquad.coaches.length > 0 && (
               <div className={styles.detailItem}>

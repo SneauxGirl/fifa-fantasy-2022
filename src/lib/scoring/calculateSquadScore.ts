@@ -17,32 +17,27 @@ const ZERO_STATUSES = new Set(["NS", "PST", "CANC", "TBD"]);
 /**
  * Calculate a Squad's fantasy score for a single match.
  *
- * --- Goal counting by status ---
+ * --- Goal counting by status (turn-based model) ---
  *
  *   FT:           fulltime goals only
- *   AET / PEN:    fulltime + extra-time goals
- *                 (shootout goals are NOT official goals)
- *   SUSP/ABD/INT: goals scored in play completed so far;
- *                 fallback chain: fulltime ?? halftime ?? 0
- *   Live (1H/HT/2H/ET/BT/P): best available score;
- *                 fallback chain: fulltime ?? halftime ?? 0
+ *   AET / PEN:    fulltime + extra-time goals (shootout goals excluded)
+ *   SUSP/ABD/INT: fulltime goals at point of suspension/abandonment
  *   NS/PST/CANC/TBD: 0 points; return early
  *
  * --- Result points ---
  *
  *   FT / AET / PEN: Win +10, Draw +5, Loss +0
  *   SUSP / ABD / INT: no result points — match was not completed
- *   Live / other: no result points — match not finished
  *
  * --- Win/loss for PEN matches ---
  *   Teams are level on goals after FT+ET; shootout score decides the winner.
  *
  * --- Advancement bonuses ---
- *   NOT calculated here — awarded at end-of-week by the store/selectors
+ *   NOT calculated here — awarded at end-of-turn by the store/selectors
  *   once round advancement is confirmed.
  *
  * @param isSubstitute   true = Squad added as SUBSTITUTE at R16; score is halved
- * @param advancementBonus  optional bonus points awarded separately at week end
+ * @param advancementBonus  optional bonus points awarded separately at turn end
  */
 export function calculateSquadScore(
   team:             Squad,
@@ -86,14 +81,12 @@ export function calculateSquadScore(
     goalsFor     = ftFor     + etFor;
     goalsAgainst = ftAgainst + etAgainst;
   } else {
-    // Partial or live match: use best available score data
-    // Fallback chain: fulltime → halftime → 0
-    goalsFor     = (isHome
-      ? (match.score.fulltime.home ?? match.score.halftime.home ?? 0)
-      : (match.score.fulltime.away ?? match.score.halftime.away ?? 0));
-    goalsAgainst = (isHome
-      ? (match.score.fulltime.away ?? match.score.halftime.away ?? 0)
-      : (match.score.fulltime.home ?? match.score.halftime.home ?? 0));
+    // Partial match (SUSP/ABD/INT): use fulltime score at point of suspension
+    const ftFor     = (isHome ? match.score.fulltime.home : match.score.fulltime.away) ?? 0;
+    const ftAgainst = (isHome ? match.score.fulltime.away : match.score.fulltime.home) ?? 0;
+
+    goalsFor     = ftFor;
+    goalsAgainst = ftAgainst;
   }
 
   // ── Result points (terminal statuses only) ──────────────────────────────────

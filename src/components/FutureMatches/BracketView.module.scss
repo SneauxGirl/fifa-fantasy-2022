@@ -7,6 +7,7 @@
   flex-direction: column;
   gap: 0;
   margin-top: $spacing-24;
+  padding-bottom: $spacing-24;
 }
 
 .bracketContainer {
@@ -20,6 +21,26 @@
   border-radius: $border-radius-8;
   overflow: hidden;
   background: $color-bg-primary;
+
+  &.completed {
+    background: $color-neutral-white;
+  }
+
+  &.current {
+    border: $border-width-2 solid $color-bg-tertiary;
+  }
+
+  &.upcoming {
+    background: $color-neutral-black;
+
+    &.expanded {
+      background: $color-neutral-white;
+    }
+  }
+
+  &.locked {
+    background: $color-bg-primary;
+  }
 }
 
 .stageHeader {
@@ -41,15 +62,49 @@
     background: linear-gradient(90deg, #f0f0f0 0%, #e8e8e8 100%);
   }
 
-  &.expanded {
-    border-bottom-color: $color-bg-tertiary;
-    background: linear-gradient(90deg, #e8f4ff 0%, #d0e8ff 100%);
-    color: $color-bg-tertiary;
+  .completed & {
+    background: $color-success-primary;
+    color: $color-text-inverse;
+    border: $border-width-2 solid $color-success-primary;
   }
 
-  &:focus {
+  .upcoming & {
+    background: $color-neutral-black;
+    color: $color-text-inverse;
+    border: $border-width-2 solid $color-neutral-black;
+  }
+
+  &.expanded {
+    background: $color-neutral-black;
+    color: $color-text-inverse;
+    border-bottom-color: $color-bg-tertiary;
+  }
+
+  .upcoming &.expanded {
+    background: $color-bg-tertiary;
+    color: $color-text-inverse;
+    border: none;
+  }
+
+  .completed &.expanded {
+    background: $color-success-primary;
+    border-bottom: $border-width-1 solid $color-border-low;
+  }
+
+  .locked & {
+    background: $color-bg-tertiary;
+    color: $color-text-inverse;
+    border: none;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
     outline: $border-width-2 solid $color-bg-tertiary;
     outline-offset: -2px;
+  }
+
+  &:disabled {
+    opacity: 0.9;
   }
 }
 
@@ -63,11 +118,38 @@
   font-weight: $font-weight-regular;
   color: $color-text-medium;
   margin: 0 $spacing-12;
+
+  .expanded & {
+    color: $color-text-inverse;
+  }
+
+  .locked & {
+    color: $color-text-inverse;
+  }
+
+  .upcoming & {
+    color: $color-text-inverse;
+  }
+
+  .completed & {
+    color: $color-text-inverse;
+  }
 }
 
 .toggle {
   font-size: $font-size-12;
   transition: transform $transition-all;
+
+  .locked & {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: $color-neutral-white;
+    border-radius: 50%;
+    font-size: $font-size-14;
+  }
 }
 
 .stageMatches {
@@ -75,6 +157,14 @@
   flex-direction: column;
   gap: $spacing-12;
   padding: $spacing-16;
+
+  .completed &.expanded {
+    background: $color-success-primary;
+  }
+
+  .upcoming &.expanded {
+    background: $color-neutral-white;
+  }
 }
 
 .matchItem {
@@ -82,11 +172,11 @@
   flex-direction: column;
   gap: $spacing-12;
   padding: $spacing-16;
-  background: $color-bg-primary;
-  border: $border-width-1 solid $color-border-low;
+  border: $border-width-1 solid $color-neutral-medium;
   border-radius: $border-radius-4;
   cursor: pointer;
   transition: $transition-all;
+  background: $color-bg-primary;
   position: relative;
 
   &:hover {
@@ -94,7 +184,7 @@
     box-shadow: $shadow-low;
   }
 
-  &:focus {
+  &:focus-visible {
     outline: 2px solid $color-bg-tertiary;
     outline-offset: 2px;
   }
@@ -102,26 +192,34 @@
   &.rosterMatch {
     background: rgba($color-bg-tertiary, 0.04);
     border-color: $color-bg-tertiary;
-    border-width: $border-width-2;
-    padding: $spacing-16;
   }
 
   &.liveMatch {
     border-color: $color-error-primary;
-    border-width: $border-width-2;
-    padding: $spacing-16;
   }
+
+  .upcoming & {
+    border-color: $color-neutral-medium;
+  }
+
+  .locked & {
+    background: $color-bg-tertiary;
+    color: $color-text-inverse;
+    border-color: $color-bg-tertiary;
+  }
+}
+
+.matchContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+  flex: 1;
 }
 
 .matchHeader {
   display: flex;
-  justify-content: center;
-  gap: $spacing-8;
-}
-
-.rosterBadge,
-.liveBadge {
-  font-size: $font-size-14;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .teams {
@@ -129,57 +227,79 @@
   align-items: center;
   justify-content: center;
   gap: $spacing-4;
-}
-
-.team {
-  display: flex;
-  align-items: center;
-  gap: $spacing-4;
-  min-width: 0;
   flex: 1;
 }
 
 .teamName {
   font-weight: $font-weight-semibold;
-  font-size: $font-size-14;
+  font-size: $font-size-16;
   color: $color-text-default;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.score {
-  font-weight: $font-weight-bold;
-  font-size: $font-size-14;
-  color: $color-bg-tertiary;
-  min-width: 20px;
+.flag {
+  font-size: $font-size-16;
+  flex-shrink: 0;
 }
 
-.vs {
+.score {
+  font-weight: $font-weight-bold;
+  font-size: $font-size-16;
+  color: $color-text-default;
+  min-width: 24px;
+  text-align: center;
+}
+
+.status {
+  font-weight: $font-weight-regular;
   font-size: $font-size-12;
   color: $color-text-medium;
   flex-shrink: 0;
 }
 
-.matchFooter {
+.matchDetails {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: $spacing-8;
+  gap: $spacing-16;
   font-size: $font-size-12;
   color: $color-text-medium;
 }
 
-.status {
-  font-weight: $font-weight-regular;
-  color: #666;
-}
-
 .venue {
-  font-size: $font-size-10;
+  font-size: $font-size-12;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.date {
+  font-size: $font-size-12;
+  white-space: nowrap;
+}
+
+.badges {
+  display: flex;
+  gap: $spacing-8;
+  align-items: center;
+  position: absolute;
+  top: $spacing-16;
+  right: $spacing-16;
+}
+
+.rosterBadge {
+  font-size: $font-size-16;
+}
+
+.liveBadge {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  color: $color-error-primary;
 }
 
 .noMatches {

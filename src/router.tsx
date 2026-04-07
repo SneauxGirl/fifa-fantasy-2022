@@ -7,6 +7,7 @@ import { lazy, Suspense } from "react";
 const DashboardPage = lazy(() => import("./pages/Dashboard"));
 const RosterPage = lazy(() => import("./pages/Roster"));
 const FutureMatchesPage = lazy(() => import("./pages/FutureMatches"));
+const DemoPage = lazy(() => import("./pages/Demo"));
 
 // Loading fallback
 const PageLoader = () => (
@@ -41,6 +42,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <FutureMatchesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/demo",
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <DemoPage />
           </Suspense>
         ),
       },

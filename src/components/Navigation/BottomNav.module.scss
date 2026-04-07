@@ -7,10 +7,15 @@
   background: $color-bg-secondary;
   border-top: $border-width-1 solid $color-neutral-darker;
   height: 60px;
-  position: sticky;
   bottom: 0;
   z-index: 200;
   padding: 0 $spacing-40;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+    gap: $spacing-16;
+    padding: 0 $spacing-12;
+  }
 }
 
 .navLinks {

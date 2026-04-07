@@ -3,7 +3,6 @@ import { useAppSelector } from "../../store";
 import {
   selectFinishedMatches,
   selectUpcomingMatches,
-  selectLiveMatches,
 } from "../../store/selectors/scoringSelectors";
 import type { Match } from "../../types/match";
 import { transformMatch } from "../../lib/dataTransform";
@@ -19,25 +18,11 @@ import styles from "./SummaryTicker.module.scss";
 export const SummaryTicker: React.FC = () => {
   const finishedMatches = useAppSelector(selectFinishedMatches);
   const upcomingMatches = useAppSelector(selectUpcomingMatches);
-  const liveMatches = useAppSelector(selectLiveMatches);
 
   const renderTickerItem = (match: Match, uniqueKey: string) => {
     const displayMatch = transformMatch(match);
     const isFinished = finishedMatches.includes(match);
-    const isLive = liveMatches.includes(match);
     const isUpcoming = upcomingMatches.includes(match);
-
-    if (isLive) {
-      return (
-        <div key={uniqueKey} className={styles.tickerItem}>
-          <span className={styles.live}>🔴 LIVE</span>
-          <span className={styles.matchScore}>
-            {match.homeTeam.name} {displayMatch.score.home} - {displayMatch.score.away} {match.awayTeam.name}
-          </span>
-          <span className={styles.minute}>{match.status.elapsed}'</span>
-        </div>
-      );
-    }
 
     if (isFinished) {
       return (
@@ -69,7 +54,6 @@ export const SummaryTicker: React.FC = () => {
   };
 
   const tickerItems = [
-    ...liveMatches.map((m) => renderTickerItem(m, `match-${m.id}`)),
     ...finishedMatches.map((m) => renderTickerItem(m, `match-${m.id}`)),
     ...upcomingMatches.slice(0, 5).map((m) => renderTickerItem(m, `match-${m.id}`)),
     <div key="stubhub" className={styles.tickerItem}>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useAppSelector } from "../../store";
 import {
   selectSignedSquads,
@@ -7,29 +8,40 @@ import {
   selectEliminatedSignedSquads,
   selectEliminatedSignedPlayers,
 } from "../../store/selectors/rosterSelectors";
-import styles from "./RosterSidebar.module.scss";
+import styles from "./PageRosterSidebar.module.scss";
 
 /**
- * RosterSidebar Component
+ * PageRosterSidebar Component
  * Shows current roster in simple labeled list format
  * Used on Dashboard and Future Matches pages
  */
-export const RosterSidebar: React.FC = () => {
+export const PageRosterSidebar: React.FC = () => {
   const signedSquads = useAppSelector(selectSignedSquads);
   const starters = useAppSelector(selectStarterPlayers);
   const bench = useAppSelector(selectBenchPlayers);
   const eliminatedSquads = useAppSelector(selectEliminatedSignedSquads);
   const eliminatedPlayers = useAppSelector(selectEliminatedSignedPlayers);
 
+  const hasSignedRoster = signedSquads.length > 0 || starters.length > 0 || bench.length > 0;
+
   return (
     <aside className={styles.rosterSidebar} aria-label="Current roster">
-      <h3 className={styles.title}>ROSTER</h3>
+      <h3 className={styles.title}>
+        <Link to="/roster" aria-label="Go to Roster">ROSTER</Link>
+      </h3>
+
+      {!hasSignedRoster && (
+        <div className={styles.emptyState}>
+          You have not signed anyone to your roster yet.
+        </div>
+      )}
 
       {/* Squads */}
       <div className={styles.section}>
         {signedSquads.map((squad) => (
           <div key={squad.teamId} className={styles.item}>
-            {squad.flag} {squad.name}
+            <span className={styles.flag}>{squad.flag}</span>
+            <span className={styles.squadName}>{squad.name}</span>
           </div>
         ))}
       </div>
@@ -38,7 +50,7 @@ export const RosterSidebar: React.FC = () => {
       {starters.length > 0 && (
         <div className={styles.section}>
           {starters.map((player) => (
-            <div key={player.playerId} className={styles.item}>
+            <div key={player.playerId} className={styles.playerName}>
               {player.name} <span className={styles.badge}>(starter)</span>
             </div>
           ))}
@@ -49,7 +61,7 @@ export const RosterSidebar: React.FC = () => {
       {bench.length > 0 && (
         <div className={styles.section}>
           {bench.map((player) => (
-            <div key={player.playerId} className={styles.item}>
+            <div key={player.playerId} className={styles.playerNameBench}>
               {player.name} <span className={styles.badge}>(bench)</span>
             </div>
           ))}
@@ -62,7 +74,9 @@ export const RosterSidebar: React.FC = () => {
           <div className={styles.sectionLabel}>Eliminated</div>
           {eliminatedSquads.map((squad) => (
             <div key={squad.teamId} className={styles.item}>
-              {squad.flag} {squad.name} <span className={styles.badge}>(eliminated)</span>
+              <span className={styles.flag}>{squad.flag}</span>
+              <span className={styles.name}>{squad.name}</span>
+              <span className={styles.badge}>(eliminated)</span>
             </div>
           ))}
           {eliminatedPlayers.map((player) => (

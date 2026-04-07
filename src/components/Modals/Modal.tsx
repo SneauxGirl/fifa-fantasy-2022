@@ -6,9 +6,10 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   title?: string;
+  style?: React.CSSProperties;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, style }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
 
@@ -53,6 +54,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? "modal-title" : undefined}
+        style={style}
       >
         <button
           type="button"
@@ -69,7 +71,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }
         >
           ✕
         </button>
-        {title && <h2 id="modal-title" style={{ position: "absolute", left: "-9999px" }}>{title}</h2>} #TODO
+        {title && <h2 id="modal-title" style={{ position: "absolute", left: "-9999px" }}>{title}</h2>}
         {children}
       </div>
     </div>

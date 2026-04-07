@@ -16,34 +16,57 @@ import { config } from "../config";
 const API_BASE_URL = config.api.baseUrl;
 const API_KEY = config.api.key;
 
-// REQWORK ALL OF THIS for 2022 #TODO
-// Tournament Configuration
-// International competitions available in API-Football
-// League IDs are configurable via .env (see config/index.ts)
-// Verify actual IDs at https://www.api-football.com/documentation
+// ─── Tournament Configuration ───────────────────────────────────────────
+// FIFA World Cup 2022 (using historical data for turn-based gameplay)
+// League ID and season configured via config/index.ts
 
-export const TOURNAMENTS = {
-  // Current preseason/qualifiers (March 2026)
-  QUALIFIERS: {
-    id: 679, // UEFA Nations League or similar (verify with API)
-    season: 2026,
-    name: "Qualifiers/Preseason",
-  },
-  FRIENDLIES: {
-    id: 680, // Friendly matches competition ID (verify with API)
-    season: 2026,
-    name: "Friendly Matches",
-  },
-  // World Cup 2026 (June 2026) - configured via .env
-  WORLD_CUP: {
-    id: config.api.leagueId,
-    season: config.api.season,
-    name: "FIFA World Cup 2026",
-  },
+const WORLD_CUP = {
+  id: config.api.leagueId,
+  season: config.api.season,
+  name: "FIFA World Cup 2022",
 };
 
-// Default tournament to use (can be changed at runtime)
-let activeTournament = TOURNAMENTS.QUALIFIERS;
+// ─── Turn Structure (Round/Stage + Date Range) ───────────────────────────
+// Maps turn IDs to API query parameters
+// Handles Dec 3 overlap by including it in Group_Stage_Final
+
+export const TURNS = {
+  Group_Stage_1: {
+    round: ["Group A", "Group B", "Group C", "Group D"],
+    dateRange: ["2022-11-20", "2022-11-26"],
+    matchCount: 16,
+  },
+  Group_Stage_2: {
+    round: ["Group A", "Group B", "Group C", "Group D"],
+    dateRange: ["2022-11-26", "2022-11-30"],
+    matchCount: 16,
+  },
+  Group_Stage_Final: {
+    round: ["Group A", "Group B", "Group C", "Group D"],
+    dateRange: ["2022-11-29", "2022-12-03"],
+    matchCount: 16,
+  },
+  R16: {
+    round: "Round of 16",
+    dateRange: ["2022-12-03", "2022-12-07"],
+    matchCount: 8,
+  },
+  Quarterfinals: {
+    round: "Quarter-finals",
+    dateRange: ["2022-12-09", "2022-12-11"],
+    matchCount: 4,
+  },
+  Semifinals: {
+    round: "Semi-finals",
+    dateRange: ["2022-12-14", "2022-12-15"],
+    matchCount: 2,
+  },
+  Final: {
+    round: "Final",
+    dateRange: ["2022-12-18", "2022-12-18"],
+    matchCount: 1,
+  },
+};
 
 // ─── Axios Instance ───────────────────────────────────────────────────────
 
@@ -202,6 +225,7 @@ export function normalizePlayer(
   const position = normalizePosition(apiPlayer.player.position || "D");
 
   return {
+    playerId: apiPlayer.player.playerId,
     id: apiPlayer.player.playerId,
     firstName,
     lastName,
@@ -209,12 +233,11 @@ export function normalizePlayer(
     position,
     positionFull: getPositionFull(position),
     nationality: apiPlayer.team.country || "Unknown",
-    nationalityCode: apiPlayer.team.code || "UNK",
-    nationalityLocal: apiPlayer.team.code || "UNK", // TODO: map via countryNames.ts
+    countryCode: apiPlayer.team.code || "UNK",
+    nationalityLocal: apiPlayer.team.code || "UNK",
     club: apiPlayer.team.name,
-    status: "bench", // TODO: determine from lineups/status
+    status: "bench",
     photoUrl: apiPlayer.player.photo,
-    recentPerformance: normalizePlayerStats(statistics || []),
     tournamentPerformance: [],
   };
 }
@@ -224,18 +247,14 @@ export function normalizePlayer(
  */
 function normalizePlayerStats(stats: any[]): PlayerMatchStats[] {
   return (stats || []).slice(0, 10).map((stat) => ({
-  //REMOVE   minutesPlayed: stat.games?.minutes || 0, #TODO
     goals: stat.goals?.total || 0,
     assists: stat.goals?.assists || 0,
     saves: stat.goals?.saves ?? null,
-  //REMOVE  penaltiesScored: stat.penalty?.scored || 0, #TODO
-  //REMOVE  penaltiesMissed: stat.penalty?.missed ?? null, #TODO
-  //REMOVE  penaltiesSaved: stat.penalty?.saved ?? null, #TODO
     yellowCards: (stat.cards?.yellow || 0) + (stat.cards?.yellowred || 0),
     redCards: stat.cards?.red || 0,
-    ownGoals: 0, // TODO: derive from match events?
-    cleanSheet: stat.games?.minutes >= 45 ? (stat.goals?.conceded === 0 || null) : null,
-    shootoutGoals: null, // TODO: derive from match events
+    ownGoals: 0,
+    cleanSheet: (stat.goals?.conceded === 0 || null),
+    shootoutGoals: null,
     shootoutSaves: null,
     shootoutMisses: null,
   }));
@@ -263,11 +282,9 @@ export function normalizeTeam(apiTeam: any, stats?: any): Squad {
     name: apiTeam.team.country || apiTeam.team.name,
     nameLocal: apiTeam.team.name, // API provides local name
     code: apiTeam.team.code || "UNK",
-    flag: apiTeam.team.flag || "🚩",
+    flag: apiTeam.team.flag || "🌍",
     logoUrl: apiTeam.team.logo,
-    // REMOVE? fifaRanking: stats?.position || undefined,  #todo
     historicalPerformance: [],
-    squadPerformance: normalizeTournamentStats(stats?.matches),
   };
 }
 
@@ -281,8 +298,6 @@ function normalizeTournamentStats(matches: any[]): any {
       goalsAgainst: 0,
       yellowCards: 0,
       redCards: 0,
-//REMOVE      penaltiesScored: 0, #TODO
-//REMOVE      penaltiesMissed: 0, #TODO
       cleanSheets: 0,
       shootoutGoals: 0,
       shootoutMisses: 0,
@@ -308,113 +323,51 @@ function normalizeTournamentStats(matches: any[]): any {
     goalsAgainst,
     yellowCards,
     redCards,
-//REMOVE     penaltiesScored: 0, #TODO
-//REMOVE     penaltiesMissed: 0, #TODO
     shootoutGoals: 0,
     shootoutMisses: 0,
   };
 }
 
-// ─── Tournament Selection ───────────────────────────────────────────────────
+// ─── Turn-Based Match Fetching ───────────────────────────────────────────
 
 /**
- * Switch active tournament
- * Call this to change between Qualifiers → Friendlies → World Cup
+ * Fetch match results for a specific turn
+ * Maps turn ID to date range and API parameters
+ * Called by playTurn() async thunk when user clicks "Play"
+ *
+ * @param turnId - Turn identifier (e.g., "Group_Stage_1", "R16", "Final")
+ * @returns Match data for all fixtures in that turn
  */
-export function setActiveTournament(tournament: typeof TOURNAMENTS.QUALIFIERS): void {
-  activeTournament = tournament;
-  console.log(`Switched to tournament: ${tournament.name}`);
-}
+export async function getMatchResults(turnId: string): Promise<Match[]> {
+  const turn = TURNS[turnId as keyof typeof TURNS];
 
-/**
- * Get currently active tournament
- */
-export function getActiveTournament(): typeof TOURNAMENTS.QUALIFIERS {
-  return activeTournament;
-}
+  if (!turn) {
+    throw new Error(`Invalid turn ID: ${turnId}`);
+  }
 
-// ─── Public API Methods ───────────────────────────────────────────────────
-
-/**
- * Fetch matches from active tournament
- * Optionally filter by team
- */
-async function fetchTournamentMatches(filters?: {
-  teamId?: number;
-  round?: string;
-}): Promise<Match[]> {
   try {
     const params: any = {
-      league: activeTournament.id,
-      season: activeTournament.season,
+      league: WORLD_CUP.id,
+      season: WORLD_CUP.season,
+      from: turn.dateRange[0],
+      to: turn.dateRange[1],
     };
-
-    if (filters?.teamId) {
-      params.team = filters.teamId;
-    }
-    if (filters?.round) {
-      params.round = filters.round;
-    }
 
     const response = await apiClient.get("/fixtures", { params });
 
     if (!response.data?.response) {
-      console.warn(`No fixtures found for ${activeTournament.name}`);
+      console.warn(`No fixtures found for turn: ${turnId}`);
       return [];
     }
 
     return response.data.response.map(normalizeMatch);
   } catch (error) {
-    console.error(`Error fetching ${activeTournament.name} matches:`, error);
+    console.error(`Error fetching match results for turn ${turnId}:`, error);
     throw error;
   }
 }
 
-/**
- * Fetch qualifier/preseason matches (current)
- */
-export async function fetchQualifierMatches(filters?: {
-  teamId?: number;
-}): Promise<Match[]> {
-  const previous = activeTournament;
-  try {
-    setActiveTournament(TOURNAMENTS.QUALIFIERS);
-    return await fetchTournamentMatches(filters);
-  } finally {
-    setActiveTournament(previous);
-  }
-}
-
-/**
- * Fetch friendly international matches
- */
-export async function fetchFriendlyMatches(filters?: {
-  teamId?: number;
-}): Promise<Match[]> {
-  const previous = activeTournament;
-  try {
-    setActiveTournament(TOURNAMENTS.FRIENDLIES);
-    return await fetchTournamentMatches(filters);
-  } finally {
-    setActiveTournament(previous);
-  }
-}
-
-/**
- * Fetch World Cup 2026 matches (June 2026+)
- */
-export async function fetchWorldCupMatches(filters?: {
-  teamId?: number;
-  round?: string;
-}): Promise<Match[]> {
-  const previous = activeTournament;
-  try {
-    setActiveTournament(TOURNAMENTS.WORLD_CUP);
-    return await fetchTournamentMatches(filters);
-  } finally {
-    setActiveTournament(previous);
-  }
-}
+// ─── Public API Methods ───────────────────────────────────────────────────
 
 /**
  * Fetch a specific match with details and events
@@ -437,19 +390,19 @@ export async function fetchMatchDetails(matchId: number): Promise<Match> {
 }
 
 /**
- * Fetch squads/teams from active tournament
+ * Fetch squads/teams from World Cup
  */
-async function fetchTournamentSquads(): Promise<Squad[]> {
+export async function fetchSquads(): Promise<Squad[]> {
   try {
     const response = await apiClient.get("/teams", {
       params: {
-        league: activeTournament.id,
-        season: activeTournament.season,
+        league: WORLD_CUP.id,
+        season: WORLD_CUP.season,
       },
     });
 
     if (!response.data?.response) {
-      console.warn(`No teams found for ${activeTournament.name}`);
+      console.warn(`No teams found for ${WORLD_CUP.name}`);
       return [];
     }
 
@@ -457,16 +410,9 @@ async function fetchTournamentSquads(): Promise<Squad[]> {
       normalizeTeam(teamData)
     );
   } catch (error) {
-    console.error(`Error fetching ${activeTournament.name} squads:`, error);
+    console.error(`Error fetching ${WORLD_CUP.name} squads:`, error);
     throw error;
   }
-}
-
-/**
- * Fetch squads from current tournament
- */
-export async function fetchSquads(): Promise<Squad[]> {
-  return await fetchTournamentSquads();
 }
 
 /**
@@ -477,8 +423,8 @@ export async function fetchSquadRoster(teamId: number): Promise<Player[]> {
     const response = await apiClient.get("/players", {
       params: {
         team: teamId,
-        league: activeTournament.id,
-        season: activeTournament.season,
+        league: WORLD_CUP.id,
+        season: WORLD_CUP.season,
       },
     });
 
@@ -497,20 +443,20 @@ export async function fetchSquadRoster(teamId: number): Promise<Player[]> {
 }
 
 /**
- * Fetch all players in active tournament
+ * Fetch all players in World Cup
  * Note: This may require pagination due to API limits
  */
 export async function fetchAllPlayers(): Promise<Player[]> {
   try {
     const response = await apiClient.get("/players", {
       params: {
-        league: activeTournament.id,
-        season: activeTournament.season,
+        league: WORLD_CUP.id,
+        season: WORLD_CUP.season,
       },
     });
 
     if (!response.data?.response) {
-      console.warn(`No players found for ${activeTournament.name}`);
+      console.warn(`No players found for ${WORLD_CUP.name}`);
       return [];
     }
 
@@ -518,7 +464,7 @@ export async function fetchAllPlayers(): Promise<Player[]> {
       normalizePlayer(playerData, playerData.statistics)
     );
   } catch (error) {
-    console.error(`Error fetching all players for ${activeTournament.name}:`, error);
+    console.error(`Error fetching all players for ${WORLD_CUP.name}:`, error);
     throw error;
   }
 }
@@ -535,8 +481,8 @@ export async function fetchPlayerStats(
     const response = await apiClient.get("/players", {
       params: {
         id: playerId,
-        league: activeTournament.id,
-        season: activeTournament.season,
+        league: WORLD_CUP.id,
+        season: WORLD_CUP.season,
       },
     });
 
@@ -566,60 +512,3 @@ export async function checkAPIHealth(): Promise<boolean> {
   }
 }
 
-// ─── Historical Caching ───────────────────────────────────────────────────
-
-/**
- * In-memory cache for recent API calls
- * Structure: { matchId: { lastFetched, nextFetchAt, pollInterval } }
- */
-const pollMetadataCache: Record<
-  number,
-  { lastFetched: number; nextFetchAt: number; pollInterval: number }
-> = {};
-
-/**
- * Get or create poll metadata for a match
- * Used by polling service to manage refresh intervals
- */
-export function getPollMetadata(
-  matchId: number
-): { lastFetched: number; nextFetchAt: number; pollInterval: number } {
-  if (!pollMetadataCache[matchId]) {
-    const now = Date.now();
-    pollMetadataCache[matchId] = {
-      lastFetched: now,
-      nextFetchAt: now + 30000, // Default 30 seconds
-      pollInterval: 30000,
-    };
-  }
-  return pollMetadataCache[matchId];
-}
-
-/**
- * Update poll metadata after a successful fetch
- */
-export function updatePollMetadata(
-  matchId: number,
-  interval: number
-): void {
-  const now = Date.now();
-  if (pollMetadataCache[matchId]) {
-    pollMetadataCache[matchId] = {
-      lastFetched: now,
-      nextFetchAt: now + interval,
-      pollInterval: interval,
-    };
-  }
-}
-
-/**
- * Clear old cache entries (older than 1 hour)
- */
-export function cleanupPollCache(): void {
-  const oneHourAgo = Date.now() - 60 * 60 * 1000;
-  Object.keys(pollMetadataCache).forEach((key) => {
-    if (pollMetadataCache[Number(key)].lastFetched < oneHourAgo) {
-      delete pollMetadataCache[Number(key)];
-    }
-  });
-}

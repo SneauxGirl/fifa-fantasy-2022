@@ -5,10 +5,14 @@
   flex-direction: column;
   gap: $spacing-12;
   padding: $spacing-12;
-  background: $color-bg-primary-alt;
+  background: $color-bg-secondary;
   border-radius: $border-radius-8;
   border: $border-width-1 solid $color-border-low;
   min-height: 400px;
+
+  @media (max-width: 768px) {
+    background: $color-bg-primary;
+  }
 }
 
 .title {
@@ -17,7 +21,11 @@
   font-weight: $font-weight-bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: $color-text-default;
+  color: $color-text-inverse;
+
+  @media (max-width: 768px) {
+    color: #000000;
+  }
 }
 
 .squadsSection {
@@ -25,7 +33,7 @@
   grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
   gap: $spacing-8;
   padding: 8px 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid $color-border-inverse;
   padding-bottom: 12px;
   justify-items: center;
   justify-content: center;
@@ -33,23 +41,24 @@
 
 .squadCard {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: $spacing-8;
+  gap: $spacing-4;
+  padding: $spacing-6;
   background: $color-bg-primary;
   border: 2px solid #ffa500;
   border-radius: $border-radius-4;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: $color-text-default;
-  width: 50px;
-  height: 50px;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
 }
 
 .squadFlag {
-  font-size: 1.2rem;
+  font-size: $font-size-18;
 }
 
 .squadName {
@@ -62,12 +71,13 @@
   align-items: center;
   justify-content: center;
   padding: $spacing-8;
-  background: $color-bg-primary-alt;
-  border: 1px dashed #ddd;
+  background: rgba($color-neutral-white, 0.15);
+  border: 1px dashed $color-border-high;
   border-radius: $border-radius-4;
-  color: #ccc;
-  font-weight: 700;
-  min-height: 40px;
+  color: $color-border-high;
+  font-weight: 600;
+  height: 40px;
+  width: 40px;
 }
 
 .emptyState {
@@ -80,24 +90,18 @@
   text-align: center;
   padding: $spacing-8;
   border-radius: $border-radius-4;
-  border: 2px dashed transparent;
+  border: 1px dashed $color-border-inverse;
   transition: border-color 0.2s ease;
 
   &:hover {
-    border-color: rgba($color-bg-tertiary, 0.3);
+    border-color: $color-bg-tertiary;
   }
 
   p {
     margin: 0;
-    color: $color-text-medium;
+    color: $color-text-inverse;
     font-size: 0.85rem;
   }
-}
-
-.hint {
-  font-size: 0.75rem !important;
-  color: #bbb !important;
-  font-style: italic;
 }
 
 .formation {
@@ -111,7 +115,7 @@
   transition: border-color 0.2s ease;
 
   &:hover {
-    border-color: rgba($color-bg-tertiary, 0.3);
+    border-color: rgba($color-bg-tertiary, 0.2);
   }
 }
 
@@ -128,9 +132,13 @@
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: #666;
+  color: $color-text-inverse;
   text-align: center;
   letter-spacing: 0.3px;
+
+  @media (max-width: 768px) {
+    color: #000000;
+  }
 }
 
 .positionPlayers {
@@ -149,14 +157,27 @@
   gap: 4px;
   padding: 6px;
   background: $color-bg-primary;
-  border: $border-width-2 solid $color-bg-tertiary;
+  border: 4px solid #ffa500;
   border-radius: $border-radius-4;
   transition: all 0.2s ease;
   min-width: 52px;
 
   &:hover {
+    border-color: var(--team-primary-color);
     box-shadow: 0 4px 12px rgba(0, 85, 164, 0.2);
-    border-color: #003d82;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--team-primary-color);
+      opacity: 0.1;
+      border-radius: $border-radius-4;
+      pointer-events: none;
+    }
   }
 }
 
@@ -171,7 +192,7 @@
 .number {
   font-weight: 700;
   font-size: 0.8rem;
-  color: $color-bg-tertiary;
+  color: $color-text-primary;
 }
 
 .initials {
@@ -180,8 +201,9 @@
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: $color-bg-tertiary;
-  color: $color-text-inverse;
+  background: $color-text-inverse;
+  color: $color-text-primary;
+  border: 2px solid var(--team-primary-color);
   border-radius: 50%;
   font-weight: 700;
   font-size: 0.65rem;
@@ -221,21 +243,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  background: $color-bg-primary-alt;
-  border: 1px dashed #ddd;
+  padding: $spacing-8;
+  background: rgba($color-neutral-white, 0.15);
+  border: 1px dashed $color-border-high;
   border-radius: $border-radius-4;
-  color: #ccc;
-  font-weight: 700;
+  color: $color-border-high;
+  font-weight: 600;
   font-size: 1.2rem;
+  height: 40px;
+  width: 40px;
+  
 }
 
 /* Tabs */
 .tabs {
   display: flex;
   gap: $spacing-8;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid $color-border-mid;
   padding: 0;
   margin: -12px -12px 0 -12px;
   padding: 0 12px;
@@ -283,7 +307,7 @@
   gap: $spacing-12;
   padding: 10px;
   background: $color-bg-primary;
-  border: $border-width-1 solid $color-border-low;
+  border: $border-width-1 solid $color-warning-primary;
   border-radius: $border-radius-4;
   transition: all 0.2s ease;
 

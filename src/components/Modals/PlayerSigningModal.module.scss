@@ -20,20 +20,28 @@
 }
 
 .warningText {
-  color: $color-error-primary;
-  margin-bottom: 24px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: $spacing-12;
+  margin-bottom: $spacing-24;
+  background: rgba($color-error-primary, 0.15);
+  border-left: $border-width-4 solid $color-error-primary;
+  border-radius: $border-radius-4;
+  color: $color-error-secondary;
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: $spacing-8;
 }
 
 .reminderText {
-  color: $color-neutral-text;
-  margin-bottom: 24px;
-  font-size: 0.9rem;
+  padding: $spacing-12;
+  margin-bottom: $spacing-24;
+  background: rgba($color-warning-primary, 0.15);
+  border-left: $border-width-4 solid $color-warning-primary;
+  border-radius: $border-radius-4;
+  color: $color-warning-secondary;
+  font-size: $font-size-14;
+  line-height: 1.5;
 }
 
 .buttonGroup {

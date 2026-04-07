@@ -8,12 +8,15 @@
   overflow: hidden;
   background: $color-bg-primary-alt;
   width: 100%;
+  min-width: 300px;
   box-shadow: $shadow-low;
   font-family: inherit;
 
   @media (min-width: 480px) {
     max-width: 33.75rem;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
   }
 
   @media (min-width: 768px) {
@@ -25,9 +28,10 @@
 
 .playerCardHeader {
   position: relative;
-  background: var(--flag-color-1);
-  padding: 14px 16px 16px;
+  background: var(--team-primary-color);
+  padding: 16px 16px 0 16px;
   overflow: hidden;
+  border-radius: $border-radius-8 $border-radius-8 0 0;
 
   // Diagonal geometric accent
   &::after {
@@ -47,26 +51,36 @@
   display: flex;
   align-items: center;
   gap: $spacing-8;
-  margin-bottom: $spacing-6;
   position: relative;
   z-index: 1;
 }
 
-.playerCardNationalityBadge {
-  font-size: $font-size-10;
+.playerCardPlayerName {
+  font-size: $font-size-24;
   font-weight: $font-weight-bold;
-  color: var(--flag-color-1);
-  background: $color-bg-primary-alt;
-  border-radius: $border-radius-2;
-  padding: $spacing-1 $spacing-2;
+  color: var(--team-text-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+  position: relative;
+  z-index: 1;
+}
+
+.playerCardFlag {
+  font-size: $font-size-28;
+  flex-shrink: 0;
+}
+
+.playerCardPositionLabel,
+.playerCardCountryCode {
+  font-size: $font-size-16;
+  font-weight: 500;
+  color: var(--team-text-color);
   letter-spacing: 0.5px;
 }
 
-.playerCardPositionLabel {
-  font-size: $font-size-12;
-  font-weight: $font-weight-bold;
-  color: $color-text-default;
-  letter-spacing: 0.5px;
+.playerCardDivider {
+  color: var(--team-text-color);
 }
 
 .playerCardMvpTrophy {
@@ -79,17 +93,6 @@
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
 }
 
-.playerCardName {
-  font-size: $font-size-24;
-  font-weight: $font-weight-extrabold;
-  color: $color-text-default;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  line-height: 1.1;
-  position: relative;
-  z-index: 1;
-}
-
 // ── Layout (photo + body wrapper) ─────────────────────────────────────────────
 
 .playerCardLayout {
@@ -100,27 +103,102 @@
   }
 }
 
-// ── Photo ─────────────────────────────────────────────────────────────────────
+// ── Squad Conflicts Section ────────────────────────────────────────────────────
 
-.playerCardPhotoWrap {
+.playerCardSideSection {
   width: 100%;
-  aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: $color-border-low;
+  padding: $spacing-10;
 
   @media (min-width: 480px) {
     width: 200px;
     flex-shrink: 0;
-    aspect-ratio: auto;
+    padding: 0;
   }
 }
 
-.playerCardPhoto {
-  width: 100%;
+.squadConflicts {
+  background: rgba(220, 53, 69, 0.08);
+  border: $border-width-1 solid rgba(220, 53, 69, 0.2);
+  border-radius: $border-radius-4;
+  padding: $spacing-10;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
+}
+
+.conflictsLabel {
   display: block;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  color: $color-error-primary;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: $spacing-8;
+}
+
+.conflictsList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-6;
+  margin-bottom: $spacing-8;
+  flex: 1;
+}
+
+.conflictItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  padding: $spacing-6 $spacing-8;
+  background: $color-bg-primary;
+  border-radius: $border-radius-4;
+}
+
+.squadFlag {
+  font-size: $font-size-20;
+  flex-shrink: 0;
+}
+
+.squadName {
+  font-size: $font-size-12;
+  font-weight: $font-weight-semibold;
+  color: $color-text-default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conflictsNote {
+  margin: 0;
+  font-size: $font-size-10;
+  color: $color-text-medium;
+  font-style: italic;
+}
+
+.noConflicts {
+  background: rgba(40, 167, 69, 0.08);
+  border: $border-width-1 solid rgba(40, 167, 69, 0.2);
+  border-radius: $border-radius-4;
+  padding: $spacing-10;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.noConflictsLabel {
+  display: block;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  color: $color-text-default;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: $spacing-8;
+}
+
+.noConflictsNote {
+  margin: 0;
+  font-size: $font-size-12;
+  color: $color-text-default;
 }
 
 // ── Body ─────────────────────────────────────────────────────────────────────
@@ -153,7 +231,6 @@
   font-weight: $font-weight-bold;
   letter-spacing: 0.6px;
   padding: $spacing-4 $spacing-10;
-  border-radius: $border-radius-100;
   color: $color-text-inverse;
   background: $color-neutral-medium;
   text-transform: uppercase;
@@ -242,29 +319,4 @@
   font-weight: $font-weight-semibold;
   color: $color-text-medium;
   text-transform: uppercase;
-}
-
-// ── AI button ─────────────────────────────────────────────────────────────────
-
-.playerCardAiBtn {
-  width: 100%;
-  padding: $spacing-10;
-  background: $color-bg-tertiary;
-  color: $color-text-inverse;
-  font-size: $font-size-14;
-  font-weight: $font-weight-bold;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  border: none;
-  border-radius: $border-radius-8;
-  cursor: pointer;
-  transition: $transition-all;
-
-  @media (min-width: 480px) {
-    margin-top: auto;
-  }
-
-  &:hover {
-    background: $color-bg-tertiary-alt;
-  }
 }

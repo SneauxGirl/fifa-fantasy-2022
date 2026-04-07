@@ -4,6 +4,7 @@
  * Visible indicator of current data source
  */
 
+import { Link } from "react-router-dom";
 import { useDataSource } from "../../hooks/useDataSource";
 import styles from "./DataSourceToggle.module.scss";
 
@@ -44,6 +45,10 @@ export function DataSourceToggle() {
           </>
         )}
       </button>
+
+      <Link to="/demo" className={styles.demoLink} title="View color palettes demo">
+        Colors Demo
+      </Link>
     </div>
   );
 }

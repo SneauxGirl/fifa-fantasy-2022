@@ -5,6 +5,13 @@
   min-width: 0;
 }
 
+.pageTitle {
+  margin: 0 0 $spacing-24 0;
+  font-size: $font-size-32;
+  font-weight: $font-weight-bold;
+  color: $color-text-default;
+}
+
 // Tablet (768px and up)
 @media (max-width: 768px) {
   .content {

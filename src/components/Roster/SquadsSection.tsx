@@ -1,11 +1,12 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
-import { openSquadSigningModal } from "../../store/slices/uiSlice";
+import { openSquadSigningModal, openSquadModal } from "../../store/slices/uiSlice";
 import { moveSquadToUnsigned, moveSquadToAvailable } from "../../store/slices/rosterSlice";
 import {
   selectUnsignedSquads,
   selectSignedSquads,
 } from "../../store/selectors/rosterSelectors";
+import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
 import type { RosterSquad } from "../../types/match";
 import styles from "./SquadsSection.module.scss";
 
@@ -19,6 +20,7 @@ export const SquadsSection: React.FC = () => {
   const dispatch = useAppDispatch();
   const unsignedSquads = useAppSelector(selectUnsignedSquads);
   const signedSquads = useAppSelector(selectSignedSquads);
+  const isRosterLocked = useAppSelector(selectIsRosterLocked);
   const [dragOver, setDragOver] = React.useState(false);
 
   // Combine unsigned and signed for display
@@ -67,11 +69,19 @@ export const SquadsSection: React.FC = () => {
   }
 
   const handleRemoveSquad = (squad: RosterSquad) => {
-    dispatch(moveSquadToAvailable(squad));
+    if (!isRosterLocked) {
+      dispatch(moveSquadToAvailable(squad));
+    }
   };
 
   const handleSignUnsignedSquad = (squad: RosterSquad) => {
-    dispatch(openSquadSigningModal(squad));
+    if (!isRosterLocked) {
+      dispatch(openSquadSigningModal(squad));
+    }
+  };
+
+  const handleShowSquadCard = (squad: RosterSquad) => {
+    dispatch(openSquadModal(squad));
   };
 
   return (
@@ -87,21 +97,23 @@ export const SquadsSection: React.FC = () => {
         {allSquads.map((squad) => {
           const isUnsigned = squad.pool === "unsigned";
           const isEliminated = squad.isEliminated;
-          const colors = ["#888", "#ccc", "#888"];
-          const [primary] = colors;
+          const isRosterFull = signedSquads.length === 4;
 
           return (
             <div
               key={squad.teamId}
               className={`${styles.squadCard} ${isUnsigned ? styles.unsigned : ""} ${isEliminated ? styles.eliminated : ""}`}
               style={{
-                borderLeftColor: isEliminated ? "#999" : isUnsigned ? "#ffa500" : primary,
+                borderLeftColor: isEliminated ? "#999" : isUnsigned ? (isRosterFull ? "#DC143C" : "#ffa500") : "#228B22",
               }}
             >
               {/* Squad Header */}
               <div className={styles.squadHeader}>
                 <div className={styles.squadInfo}>
-                  <span className={styles.flag}>{squad.flag}</span>
+                  <div className={styles.flagGroup}>
+                    <span className={styles.flag}>{squad.flag}</span>
+                    {squad.group && <span className={styles.group}>{squad.group}</span>}
+                  </div>
                   <div className={styles.nameBlock}>
                     <h3 className={styles.squadName}>{squad.name}</h3>
                     {squad.coaches && squad.coaches.length > 0 && (
@@ -112,6 +124,24 @@ export const SquadsSection: React.FC = () => {
                   </div>
                 </div>
 
+                {isUnsigned && !isEliminated && (
+                  <button
+                    type="button"
+                    className={styles.insightsButton}
+                    onClick={() => handleShowSquadCard(squad)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleShowSquadCard(squad);
+                      }
+                    }}
+                    title={`View ${squad.name} squad details`}
+                    aria-label={`View ${squad.name} squad details`}
+                  >
+                    Insights
+                  </button>
+                )}
+
                 {isEliminated ? (
                   <div className={styles.eliminatedIcon} title="Squad eliminated from tournament">
                     ✕
@@ -120,33 +150,39 @@ export const SquadsSection: React.FC = () => {
                   <div className={styles.buttonGroup}>
                     <button
                       type="button"
-                      className={`${styles.actionButton} ${styles.remove}`}
-                      onClick={() => handleRemoveSquad(squad)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleRemoveSquad(squad);
-                        }
-                      }}
-                      title={`Remove ${squad.name}`}
-                      aria-label={`Remove ${squad.name} from selection`}
-                    >
-                      ✕ Remove
-                    </button>
-                    <button
-                      type="button"
                       className={`${styles.actionButton} ${styles.sign}`}
                       onClick={() => handleSignUnsignedSquad(squad)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleSignUnsignedSquad(squad);
+                          if (!isRosterLocked) {
+                            e.preventDefault();
+                            handleSignUnsignedSquad(squad);
+                          }
                         }
                       }}
-                      title={`Sign ${squad.name} to lock in`}
-                      aria-label={`Sign ${squad.name} to lock in for tournament`}
+                      disabled={isRosterLocked}
+                      title={isRosterLocked ? "Roster locked (Quarterfinals+)" : `Sign ${squad.name} to lock in`}
+                      aria-label={`Sign ${squad.name} to lock in for tournament${isRosterLocked ? " (roster locked)" : ""}`}
                     >
                       ✓ Sign
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.actionButton} ${styles.remove}`}
+                      onClick={() => handleRemoveSquad(squad)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          if (!isRosterLocked) {
+                            e.preventDefault();
+                            handleRemoveSquad(squad);
+                          }
+                        }
+                      }}
+                      disabled={isRosterLocked}
+                      title={isRosterLocked ? "Roster locked (Quarterfinals+)" : `Remove ${squad.name}`}
+                      aria-label={`Remove ${squad.name} from selection${isRosterLocked ? " (roster locked)" : ""}`}
+                    >
+                      ❌
                     </button>
                   </div>
                 ) : (

@@ -1,6 +1,7 @@
 // src/components/MatchCard/MatchCard.tsx
 import React from "react";
 import type { Match, Roster, RosterMember, RosterPlayer } from "../../types/match";
+import { countryToFifa } from "../../lib/formatMapping";
 import styles from "./MatchCard.module.scss";
 
 interface MatchCardProps {
@@ -84,8 +85,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
       <div className={styles.matchCardHeader}>
         <div className={styles.matchCardTeams}>
           <div className={styles.matchCardTeam}>
-            <span className={styles.matchCardTeamName}>{match.homeTeam.name}</span>
-            <span className={styles.matchCardTeamCode}>{match.homeTeam.code}</span>
+            <span className={styles.matchCardTeamName}>{countryToFifa(match.homeTeam.countryCode)}</span>
           </div>
           <div className={styles.matchCardScore}>
             <span className={styles.matchCardScoreValue}>{match.score.fulltime.home ?? "-"}</span>
@@ -93,8 +93,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
             <span className={styles.matchCardScoreValue}>{match.score.fulltime.away ?? "-"}</span>
           </div>
           <div className={styles.matchCardTeam}>
-            <span className={styles.matchCardTeamCode}>{match.awayTeam.code}</span>
-            <span className={styles.matchCardTeamName}>{match.awayTeam.name}</span>
+            <span className={styles.matchCardTeamName}>{countryToFifa(match.awayTeam.countryCode)}</span>
           </div>
         </div>
         <div className={styles.matchCardStatus}>

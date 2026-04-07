@@ -2,16 +2,6 @@
 // Squads
 // ==============================
 
-
-//REEVALUATE for tournament Play - remove penalties, check Squad interface
-export interface SquadHistoricalPerformance {
-  year: number;
-  matchesPlayed: number;
-  goalsFor: number;
-  goalsAgainst: number;
-  penalties: number;              // penalty shootout appearances
-}
-
 export interface SquadPerformanceStats {
   goalsFor: number;               // aggregate goals scored by squad players
   goalsAgainst: number;           // aggregate goals conceded by squad players
@@ -32,8 +22,7 @@ export interface Squad {
   flag: string;                   // emoji flag or URL to SVG — API provides flag URLs
   logoUrl?: string;               // API: team.logo URL
   fifaRanking?: number;
-  historicalPerformance: SquadHistoricalPerformance[]; // last 5 World Cup appearances
   players?: number[];             // optional array of Player IDs
-  squadPerformance?: SquadPerformanceStats; // pre-tournament aggregate stats from squad's last 10 non-tournament matches
   tournamentPerformance?: SquadPerformanceStats; // tournament-only aggregate stats (populated once tournament begins)
+  groupAdvancementStatus?: "winner" | "runner-up" | null; // 2022 World Cup group stage status (used for advancement bonuses at end of group stage)
 }

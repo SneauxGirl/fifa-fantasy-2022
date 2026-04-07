@@ -8,6 +8,7 @@ import {
 } from "../../store/selectors/scoringSelectors";
 import type { Match } from "../../types/match";
 import { transformMatch } from "../../lib/dataTransform";
+import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./MatchList.module.scss";
 
 type FilterStatus = "all" | "upcoming" | "live" | "finished";
@@ -70,16 +71,6 @@ export const MatchList: React.FC = () => {
       default:
         return match.status.short;
     }
-  };
-
-  // Convert country code to flag emoji (e.g., "ARG" → 🇦🇷)
-  const getCountryFlag = (code: string): string => {
-    const codeUpper = code.toUpperCase();
-    if (codeUpper.length !== 3) return "";
-    return (
-      String.fromCodePoint(0x1f1e6 + codeUpper.charCodeAt(0) - 65) +
-      String.fromCodePoint(0x1f1e6 + codeUpper.charCodeAt(1) - 65)
-    );
   };
 
   const handleMatchClick = (match: Match) => {
@@ -196,7 +187,7 @@ export const MatchList: React.FC = () => {
                         <div className={styles.matchHeader}>
                           <div className={styles.teams}>
                             <span className={styles.team}>{match.homeTeam.name}</span>
-                            <span className={styles.flag}>{getCountryFlag(match.homeTeam.code)}</span>
+                            <span className={styles.flag}>{getTeamFlag(match.homeTeam.countryCode)}</span>
                             <span className={styles.score}>
                               {(() => {
                                 const displayMatch = transformMatch(match);
@@ -218,7 +209,7 @@ export const MatchList: React.FC = () => {
                                   : displayMatch.score.away;
                               })()}
                             </span>
-                            <span className={styles.flag}>{getCountryFlag(match.awayTeam.code)}</span>
+                            <span className={styles.flag}>{getTeamFlag(match.awayTeam.countryCode)}</span>
                             <span className={styles.team}>{match.awayTeam.name}</span>
                           </div>
                         </div>

@@ -15,6 +15,8 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../index";
 import type { Match, RosterPlayer, RosterSquad } from "../../types/match";
+import { applyLiveScore, transformMatch } from "../../lib/dataTransform";
+import { generateLiveScore } from "../slices/liveScoresSlice";
 import {
   selectScoringPlayers,
   selectScoringSquads,
@@ -70,21 +72,56 @@ export const selectMatchRoster = createSelector(
   })
 );
 
+// ─── Lock state selector ──────────────────────────────────────────────────────
+
+/**
+ * Roster lock state: true when user clicks "Play" at Quarterfinals or beyond.
+ * When locked, no roster additions/removals allowed, but formation adjustments remain enabled.
+ */
+export const selectIsRosterLocked = (state: RootState) =>
+  state.ui.isRosterLocked;
+
 // ─── Match selectors ──────────────────────────────────────────────────────────
 
-export const selectAllMatches = (state: RootState) =>
-  state.matches.allMatches;
+export const selectAllMatches = createSelector(
+  (state: RootState) => state.matches.allMatches,
+  (state: RootState) => state.liveScores.scores,
+  (matches: Match[], liveScores): Match[] =>
+    matches.map((match) => {
+      const isLive = ["1H", "2H", "ET", "HT", "P"].includes(match.status.short);
+
+      // Get stored live score or generate one for live matches
+      let liveScore = liveScores[match.id];
+      if (!liveScore && isLive) {
+        const finalScore = transformMatch(match);
+        liveScore = generateLiveScore(finalScore.score.home, finalScore.score.away, match.id);
+      }
+
+      if (!liveScore) return match;
+
+      const displayMatch = transformMatch(match);
+      const matchWithLiveScore = applyLiveScore(displayMatch, {
+        home: liveScore.home,
+        away: liveScore.away,
+        elapsed: liveScore.elapsed,
+      });
+
+      return {
+        ...match,
+        score: {
+          ...match.score,
+          fulltime: { home: matchWithLiveScore.score.home, away: matchWithLiveScore.score.away },
+        },
+        status: {
+          ...match.status,
+          elapsed: matchWithLiveScore.status.elapsed,
+        },
+      };
+    })
+);
 
 export const selectRosterMatches = (state: RootState) =>
   state.matches.rosterMatches;
-
-export const selectLiveMatches = createSelector(
-  selectAllMatches,
-  (matches: Match[]): Match[] =>
-    matches.filter((m: Match) =>
-      ["1H", "HT", "2H", "ET", "BT", "P"].includes(m.status.short)
-    )
-);
 
 export const selectUpcomingMatches = createSelector(
   selectAllMatches,
@@ -113,6 +150,12 @@ export const selectScoredMatches = createSelector(
     )
 );
 
+/**
+ * All matches with live score overlays applied (same as selectAllMatches)
+ * For live matches (1H, 2H, etc), applies randomized current scores and elapsed time
+ * For finished/upcoming matches, returns original match data
+ */
+export const selectAllMatchesWithLiveScores = selectAllMatches;
 
 //Adjust for turn based play #TODO
 /** Matches grouped by tournament stage. */

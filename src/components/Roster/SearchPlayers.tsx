@@ -22,7 +22,7 @@ export const SearchPlayers: React.FC<SearchPlayersProps> = ({
           id="search-input"
           type="text"
           className={styles.input}
-          placeholder="CS, 10, Ch P 10"
+          placeholder="Name, Country, #"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value.toUpperCase())}
           aria-label="Search players by name, country code, or number"

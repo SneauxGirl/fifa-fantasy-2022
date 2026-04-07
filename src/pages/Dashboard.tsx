@@ -1,5 +1,5 @@
 import { MatchList } from "../components/Dashboard/MatchList";
-import { RosterSidebar } from "../components/Shared/RosterSidebar";
+import { PageRosterSidebar } from "../components/Shared/PageRosterSidebar";
 import styles from "./Dashboard.module.scss";
 import appLayoutStyles from "../layouts/AppLayout.module.scss";
 
@@ -21,7 +21,7 @@ const Dashboard = () => {
 
         {/* Right Sidebar - Roster Only */}
         <div className={appLayoutStyles.rightSidebar}>
-          <RosterSidebar />
+          <PageRosterSidebar />
         </div>
       </div>
     </>

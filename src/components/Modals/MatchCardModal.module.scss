@@ -1,0 +1,138 @@
+@use '../../styles/tokens.scss' as *;
+
+.matchCardModalContent {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-24;
+  padding: $spacing-24;
+  padding-top: $spacing-32;
+}
+
+.matchCardSection {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  width: 100%;
+  gap: $spacing-16;
+  padding-top: $spacing-16;
+}
+
+
+.affectedSection {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-16;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: $font-size-16;
+  font-weight: $font-weight-bold;
+  color: $color-text-default;
+}
+
+.memberGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+}
+
+.groupTitle {
+  margin: 0;
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
+  color: $color-text-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.memberList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-8;
+}
+
+.memberItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  padding: $spacing-12;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-border-low;
+  border-radius: $border-radius-4;
+  cursor: pointer;
+  transition: $transition-all;
+  font-family: inherit;
+  text-align: left;
+
+  &:hover:not(:disabled) {
+    background: rgba($color-bg-tertiary, 0.05);
+    border-color: $color-bg-tertiary;
+    box-shadow: $shadow-low;
+  }
+
+  &:focus {
+    outline: $border-width-2 solid $color-bg-tertiary;
+    outline-offset: $spacing-2;
+    background: rgba($color-bg-tertiary, 0.05);
+    border-color: $color-bg-tertiary;
+  }
+
+  &:focus-visible {
+    outline: $border-width-2 solid $color-bg-tertiary;
+    outline-offset: $spacing-2;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.flag {
+  flex-shrink: 0;
+  font-size: $font-size-24;
+  line-height: 1;
+}
+
+.name {
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
+  color: $color-text-default;
+  flex: 1;
+  min-width: 0;
+}
+
+.playerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+  flex: 1;
+  min-width: 0;
+}
+
+.meta {
+  font-size: $font-size-12;
+  color: $color-text-medium;
+  font-weight: $font-weight-regular;
+}
+
+.points {
+  flex-shrink: 0;
+  font-size: $font-size-14;
+  font-weight: $font-weight-bold;
+  color: $color-bg-tertiary;
+  padding: $spacing-4 $spacing-8;
+  background: rgba($color-bg-tertiary, 0.1);
+  border-radius: $border-radius-4;
+}
+
+.emptyState {
+  margin: 0;
+  padding: $spacing-16;
+  text-align: center;
+  color: $color-text-medium;
+  font-size: $font-size-14;
+  background: rgba($color-border-low, 0.5);
+  border-radius: $border-radius-4;
+}

@@ -2,8 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Match } from "../../types/match";
 
-//REVIEW for turnbased - I think polling is the only thing I need to remove #TODO
-
 export interface MatchesState {
   allMatches: Match[];
   rosterMatches: Match[];
@@ -89,25 +87,6 @@ const matchesSlice = createSlice({
       }
     },
 
-    setPollMetadata: (
-      state,
-      action: PayloadAction<{
-        matchId: number;
-        lastFetched: number;
-        nextFetchAt: number;
-        pollInterval: number;
-      }>
-    ) => {
-      const match = state.allMatches.find(m => m.id === action.payload.matchId);
-      if (match) {
-        match.pollMetadata = {
-          lastFetched: action.payload.lastFetched,
-          nextFetchAt: action.payload.nextFetchAt,
-          pollInterval: action.payload.pollInterval,
-        };
-      }
-    },
-
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
@@ -124,7 +103,6 @@ export const {
   updateMatch,
   updateScore,
   updateMatchStatus,
-  setPollMetadata,
   setLoading,
   setError,
 } = matchesSlice.actions;

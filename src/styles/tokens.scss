@@ -1,6 +1,10 @@
 /* ==============================
  * FIFA Design Tokens
  * Official FIFA design system values
+ *
+ * NOTE: Country jersey colors (primary, secondary, alt, text) are stored in
+ * src/data/APItoFIFAmaps.json (teamColors section) as the single source of truth.
+ * Access via lib/teamColors.ts getTeamColors(countryCode) utility function.
  * ============================== */
 
 // ========== COLORS - FIFA OFFICIAL ==========
@@ -56,6 +60,7 @@ $color-border-low: #e4e8f0;
 $color-border-mid: #a5acbb;
 $color-border-high: #505b73;
 $color-border-transparent: #666666;
+$color-border-inverse: #ffffff;
 
 // Icon Colors
 $color-icon-background: #404040;

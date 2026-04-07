@@ -10,18 +10,3 @@
   min-width: 0;
 }
 
-.insightsSection {
-  flex: 1;
-  min-width: 0;
-}
-
-// Tablet layout
-@media (max-width: 1024px) {
-  .bracketSection {
-    order: 1;
-  }
-
-  .insightsSection {
-    order: 2;
-  }
-}

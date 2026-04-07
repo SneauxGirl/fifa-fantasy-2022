@@ -2,17 +2,10 @@
 // Matches
 // ==============================
 
-//REVIEW and update for turn play. Could probably whittle for finals  - is there anything else that need #TODO
-
 // API-Football fixture status short codes (all 16 possible values)
 export type MatchStatusShort =
   | "NS"    // Not Started
-  | "1H"    // First Half (live)
   | "HT"    // Half Time (live)
-  | "2H"    // Second Half (live)
-  | "ET"    // Extra Time (live)
-  | "BT"    // Break Time between ET halves (live)
-  | "P"     // Penalty Shootout (live)
   | "SUSP"  // Suspended
   | "INT"   // Interrupted
   | "FT"    // Full Time
@@ -51,7 +44,7 @@ export interface MatchEvent {
   };
   team: {
     id: number;
-    code: string;                 // 3-letter team code
+    countryCode: string;          // 3-letter country code
   };
   player: {
     id: number;
@@ -72,12 +65,13 @@ export interface MatchScore {
   fulltime: { home: number | null; away: number | null; };
   extratime: { home: number | null; away: number | null; };
   penalty: { home: number | null; away: number | null; };
+  live?: { home: number | null; away: number | null; };
 }
 
 export interface Match {
   id: number;
-  homeTeam: { id: number; code: string; name: string; };
-  awayTeam: { id: number; code: string; name: string; };
+  homeTeam: { id: number; countryCode: string; name: string; };
+  awayTeam: { id: number; countryCode: string; name: string; };
   date: string;                   // ISO 8601 string (e.g. "2026-06-10T15:00:00Z")
   status: {
     short: MatchStatusShort;
@@ -94,11 +88,6 @@ export interface Match {
   stage?: {
     id: number;
     name: string;
-  };
-  pollMetadata?: {
-    lastFetched: number;          // Unix timestamp of last API call
-    nextFetchAt: number;          // Unix timestamp for next scheduled poll
-    pollInterval: number;         // Milliseconds between polls
   };
 }
 
@@ -160,7 +149,7 @@ export interface RosterSquad {
 
   // Core data
   name: string;
-  code: string;
+  countryCode: string;
   flag: string;
 
   // Points tracking
@@ -175,7 +164,7 @@ export interface RosterSquad {
 
   // Squad-specific
   coaches?: Coach[];                   // Head coach(es) info
-  officialRoster?: RosterPlayer[];     // Full squad roster from official source
+  group?: string;                      // Tournament group (e.g., "A", "B")
 }
 
 /**
@@ -195,7 +184,7 @@ export interface RosterPlayer {
   position: "Goalkeeper" | "Defender" | "Midfielder" | "Attacker"; // API format
   number: number;                      // Jersey number
   teamId: number;                      // National team ID
-  code: string;                        // FIFA country code (e.g., "ARG", "BRA")
+  countryCode: string;                 // Country code (API format, e.g., "ARG", "BRA", "NET", "JAP")
   flag: string;                        // Country flag emoji
 
   // Points tracking
@@ -219,6 +208,12 @@ export type RosterMember = RosterSquad | RosterPlayer;
  * User's fantasy roster.
  * 4 squads + 18 players (11 starters, 7 inactive).
  * Eliminated members retain historical points but don't count toward active tally.
+ *
+ * TODO (Phase 4): Add database persistence fields when Auth/Database integration begins
+ * - userId: string (Firebase UID or custom)
+ * - gameId: string (allows multiple games per user)
+ * - createdAt: timestamp
+ * - lastSavedAt: timestamp
  */
 export interface Roster {
   squads: RosterSquad[];  // 4 squads

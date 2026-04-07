@@ -2,6 +2,8 @@ import React from "react";
 import type { RosterSquad } from "../../types/match";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { closeModal } from "../../store/slices/uiSlice";
+import { getTeamColors } from "../../lib/teamColors";
+import { SquadCard } from "../SquadCard/SquadCard";
 import { Modal } from "./Modal";
 
 export const SquadCardModal: React.FC = () => {
@@ -20,20 +22,21 @@ export const SquadCardModal: React.FC = () => {
     return null;
   }
 
+  // Get team colors and pass to modal
+  const colors = getTeamColors(selectedSquad.countryCode);
+  const modalStyle = {
+    "--team-primary-color": colors.primary,
+    "--team-secondary-color": colors.secondary,
+    "--team-alt-color": colors.alt,
+    "--team-text-color": colors.text,
+  } as React.CSSProperties;
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
-      <div style={{ padding: "20px" }}>
-        <h3>{selectedSquad.name}</h3>
-        <p>Squad details for {selectedSquad.code}</p>
-        {selectedSquad.coaches && selectedSquad.coaches.length > 0 && (
-          <p>
-            <strong>Coaches:</strong> {selectedSquad.coaches.map((c) => c.name).join(", ")}
-          </p>
-        )}
-        <p>
-          <strong>Players in Squad:</strong> {selectedSquad.officialRoster?.length || 0}
-        </p>
-      </div>
+    <Modal isOpen={isOpen} onClose={handleClose} style={modalStyle}>
+      <SquadCard
+        team={selectedSquad as any}
+        fantasyStatus={selectedSquad.isEliminated ? "eliminated" : "active"}
+      />
     </Modal>
   );
 };

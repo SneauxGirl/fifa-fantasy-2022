@@ -1,14 +1,12 @@
 @use '../../styles/tokens.scss' as *;
 
-//STYLE #TODO
-
 .rosterSidebar {
   display: flex;
   flex-direction: column;
   gap: $spacing-16;
   padding: $spacing-16;
-  background: $color-bg-secondary;
-  border: $border-width-1 solid $color-neutral-darker;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-border-low;
   border-radius: $border-radius-4;
   min-height: 400px;
   max-height: 80vh;
@@ -20,7 +18,7 @@
   padding: 0;
   font-size: 0.95rem;
   font-weight: 700;
-  color: $color-text-inverse;
+  color: $color-text-default;
   letter-spacing: 0.5px;
 }
 
@@ -29,7 +27,7 @@
   flex-direction: column;
   gap: $spacing-8;
   padding-bottom: 12px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid $color-border-low;
 
   &:last-child {
     border-bottom: none;
@@ -49,7 +47,7 @@
 .empty {
   margin: 0;
   font-size: 0.8rem;
-  color: #777;
+  color: $color-text-medium;
   font-style: italic;
 }
 
@@ -64,26 +62,32 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  background: #222;
-  border: 1px solid #444;
+  background: $color-bg-primary;
+  border: 1px solid $color-neutral-black;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
   text-align: left;
   width: 100%;
+  color: $color-text-default;
 
   &:focus-visible:not(.eliminated) {
     outline: 2px solid $color-bg-tertiary;
     outline-offset: 2px;
-    background: #2a2a2a;
+    background: var(--team-bg, $color-bg-primary-alt);
+    color: var(--team-text, $color-text-default);
+    opacity: 0.8;
     border-color: $color-bg-tertiary;
   }
 
   &:hover:not(.eliminated) {
-    background: #2a2a2a;
+    background: var(--team-bg, $color-bg-primary-alt);
+    opacity: 0.8;
     border-color: $color-bg-tertiary;
+    color: var(--team-text, $color-text-default);
     box-shadow: 0 2px 8px rgba($color-bg-tertiary, 0.2);
   }
 
@@ -92,8 +96,8 @@
   }
 
   &.eliminated {
-    background: #1a1a1a;
-    border-color: #333;
+    background: $color-bg-primary-alt;
+    border-color: $color-border-low;
     opacity: 0.6;
     cursor: not-allowed;
 
@@ -102,8 +106,8 @@
     }
 
     &:hover {
-      background: #1a1a1a;
-      border-color: #333;
+      background: $color-bg-primary-alt;
+      border-color: $color-border-low;
       box-shadow: none;
     }
 
@@ -113,25 +117,51 @@
   }
 }
 
+.playerItem:hover:not(.eliminated) .playerName,
+.playerItem:focus-visible:not(.eliminated) .playerName {
+  color: var(--team-text, $color-text-default);
+}
+
+.playerItem:hover:not(.eliminated) .playerNumber,
+.playerItem:focus-visible:not(.eliminated) .playerNumber {
+  color: var(--team-text, $color-text-default);
+}
+
 .playerName {
   flex: 1;
   font-weight: 500;
-  color: $color-text-inverse;
+  color: $color-text-default;
   min-width: 0;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+
+}
+
+.playerNumber {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-default;
+  font-weight: 700;
+  font-size: 0.7rem;
+  margin-left: 4px;
+  margin-right: 6px;
+  
 }
 
 .playerPosition {
   flex-shrink: 0;
   margin-left: 8px;
   padding: 2px 6px;
-  background: rgba($color-bg-tertiary, 0.1);
-  color: $color-bg-tertiary;
+  background: $color-bg-tertiary;
+  color: $color-text-inverse;
+  border: 1px solid $color-bg-tertiary;
   border-radius: 3px;
   font-weight: 600;
   font-size: 0.7rem;
+
 }
 
 .starterIcon {

@@ -1,0 +1,72 @@
+@use '../../styles/tokens.scss' as *;
+
+.container {
+  padding: $spacing-24;
+  background: $color-bg-primary;
+  min-height: 100vh;
+
+  h2 {
+    margin: 0 0 $spacing-24 0;
+    font-size: $font-size-24;
+    font-weight: $font-weight-bold;
+    color: $color-text-default;
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $spacing-16;
+}
+
+.teamCard {
+  padding: $spacing-16;
+  background: $color-bg-primary-alt;
+  border: $border-width-1 solid $color-border-low;
+  border-radius: $border-radius-8;
+  box-shadow: $shadow-low;
+
+  h3 {
+    margin: 0 0 $spacing-12 0;
+    font-size: $font-size-16;
+    font-weight: $font-weight-bold;
+    color: $color-text-default;
+  }
+}
+
+.colorRow {
+  display: flex;
+  gap: $spacing-8;
+  margin-bottom: $spacing-12;
+}
+
+.colorBox {
+  flex: 1;
+  height: 80px;
+  border-radius: $border-radius-4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-12;
+  text-align: center;
+  padding: $spacing-8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  span {
+    line-height: 1.2;
+  }
+}
+
+.textColor {
+  font-size: $font-size-14;
+  color: $color-text-medium;
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+
+  span {
+    font-size: $font-size-20;
+    line-height: 1;
+  }
+}

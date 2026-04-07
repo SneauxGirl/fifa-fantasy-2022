@@ -2,10 +2,13 @@ import React, { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
   movePlayerToAvailable,
+  movePlayerToUnsigned,
 } from "../../store/slices/rosterSlice";
-import { openPlayerSigningModal } from "../../store/slices/uiSlice";
+import { openPlayerSigningModal, openPlayerModal } from "../../store/slices/uiSlice";
 import { selectUnsignedPlayers } from "../../store/selectors/rosterSelectors";
+import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
+import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
 import styles from "./RosterDragZone.module.scss";
 
@@ -18,6 +21,7 @@ type Position = "GK" | "DEF" | "MID" | "FWD";
  */
 export const RosterDragZone: React.FC = () => {
   const dispatch = useAppDispatch();
+  const isRosterLocked = useAppSelector(selectIsRosterLocked);
 
   // Get unsigned players (pending contracts)
   const unsignedPlayers = useAppSelector(selectUnsignedPlayers);
@@ -39,8 +43,8 @@ export const RosterDragZone: React.FC = () => {
     // Sort each position group by country code, then by number
     Object.keys(positions).forEach((position) => {
       positions[position as Position].sort((a, b) => {
-        if (a.code !== b.code) {
-          return a.code.localeCompare(b.code);
+        if (a.countryCode !== b.countryCode) {
+          return a.countryCode.localeCompare(b.countryCode);
         }
         return (a.number || 0) - (b.number || 0);
       });
@@ -50,11 +54,42 @@ export const RosterDragZone: React.FC = () => {
   }, [unsignedPlayers]);
 
   const handleSignPlayer = (player: RosterPlayer) => {
-    dispatch(openPlayerSigningModal(player));
+    if (!isRosterLocked) {
+      dispatch(openPlayerSigningModal(player));
+    }
   };
 
   const handleRemovePlayer = (player: RosterPlayer) => {
-    dispatch(movePlayerToAvailable(player));
+    if (!isRosterLocked) {
+      dispatch(movePlayerToAvailable(player));
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDragLeave = () => {
+    // Drag leave handler
+  };
+
+  const handleDrop = () => (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isRosterLocked) return;
+
+    try {
+      const data = e.dataTransfer.getData("application/json");
+      const payload = JSON.parse(data);
+
+      if (payload.type === "unsigned-player" && payload.player) {
+        dispatch(movePlayerToUnsigned(payload.player));
+      }
+    } catch (err) {
+      console.error("Drop handler error:", err);
+    }
   };
 
   return (
@@ -62,7 +97,13 @@ export const RosterDragZone: React.FC = () => {
       {/* Bench by Position - Four Column Layout */}
       <div className={styles.benchByPosition}>
         {(['GK', 'DEF', 'MID', 'FWD'] as Position[]).map((position) => (
-          <div key={position} className={styles.positionColumn}>
+          <div
+            key={position}
+            className={styles.positionColumn}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop()}
+          >
             <h4 className={styles.positionHeader}>
               {position}
               <span className={styles.positionCount}>
@@ -80,6 +121,7 @@ export const RosterDragZone: React.FC = () => {
                     player={player}
                     onSign={() => handleSignPlayer(player)}
                     onRemove={() => handleRemovePlayer(player)}
+                    isRosterLocked={isRosterLocked}
                   />
                 ))
               )}
@@ -99,39 +141,70 @@ interface BenchPlayerCardProps {
   player: RosterPlayer;
   onSign: () => void;
   onRemove: () => void;
+  isRosterLocked: boolean;
 }
 
-const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRemove }) => {
-  const initials = player.name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2);
+const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRemove, isRosterLocked }) => {
+  const dispatch = useAppDispatch();
+  const firstName = player.name.split(" ")[0];
+  const lastName = player.name.split(" ").pop() || player.name;
+  const displayName = `${firstName[0]} ${lastName}`;
+  const countryCode = player.countryCode;
+  const teamColors = getTeamColors(player.countryCode);
+
+  const handlePlayerLabelClick = () => {
+    dispatch(openPlayerModal(player));
+  };
+
+  const handlePlayerLabelKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      dispatch(openPlayerModal(player));
+    }
+  };
 
   return (
     <div className={styles.benchPlayerCard}>
-      <div className={styles.playerInfo}>
+      <div
+        className={styles.playerInfo}
+        onClick={handlePlayerLabelClick}
+        onKeyDown={handlePlayerLabelKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${player.name} details`}
+      >
         <span className={styles.playerNumber}>{player.number}</span>
-        <div className={styles.playerName}>
-          <span className={styles.initials}>{initials}</span>
-          <span className={styles.name}>{player.name}</span>
+        <div className={styles.playerNamebox}>
+          <span
+            className={styles.countryBadge}
+            style={{ "--team-primary-color": teamColors.primary } as React.CSSProperties}
+          >
+            {countryCode}
+          </span>
+          <span className={styles.name}>{displayName}</span>
         </div>
       </div>
 
       <div className={styles.playerActions}>
         <button
+          type="button"
           className={`${styles.actionBtn} ${styles.signBtn}`}
           onClick={onSign}
-          title="Sign player"
+          disabled={isRosterLocked}
+          aria-label={`Sign ${player.name}${isRosterLocked ? " (roster locked)" : ""}`}
+          title={isRosterLocked ? "Roster locked (Quarterfinals+)" : `Sign ${player.name}`}
         >
           Sign
         </button>
         <button
+          type="button"
           className={`${styles.actionBtn} ${styles.removeBtn}`}
           onClick={onRemove}
-          title="Remove to available"
+          disabled={isRosterLocked}
+          aria-label={`Remove ${player.name} to available${isRosterLocked ? " (roster locked)" : ""}`}
+          title={isRosterLocked ? "Roster locked (Quarterfinals+)" : "Remove to available"}
         >
-          ✕
+          ❌
         </button>
       </div>
     </div>

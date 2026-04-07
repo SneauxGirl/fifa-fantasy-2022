@@ -8,6 +8,7 @@ import {
   selectEliminatedSignedPlayers,
   selectActiveAvailablePlayers,
 } from "../../store/selectors/rosterSelectors";
+import { getTeamColors } from "../../lib/teamColors";
 import { Modal } from "./Modal";
 import { PlayerCard } from "../PlayerCard";
 
@@ -52,8 +53,17 @@ export const PlayerCardModal: React.FC = () => {
     return null;
   }
 
+  // Get team colors and pass to modal
+  const colors = getTeamColors(selectedPlayer.countryCode);
+  const modalStyle = {
+    "--team-primary-color": colors.primary,
+    "--team-secondary-color": colors.secondary,
+    "--team-alt-color": colors.alt,
+    "--team-text-color": colors.text,
+  } as React.CSSProperties;
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal isOpen={isOpen} onClose={handleClose} style={modalStyle}>
       <PlayerCard player={selectedPlayer} fantasyStatus={fantasyStatus} />
     </Modal>
   );

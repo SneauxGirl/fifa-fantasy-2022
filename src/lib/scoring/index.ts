@@ -11,7 +11,6 @@ export { applySubstitutionModifier }           from "./applySubstitutionModifier
 export {
   GOAL_POINTS,
   CLEAN_SHEET_POINTS,
-  // REMOVE ALL MINUTES logic throughout  calcMinutesPoints,
   calcGoalPoints,
   calcCleanSheetPoints,
   calcHatTrickBonus,

@@ -1,8 +1,11 @@
 // src/components/PlayerCard/PlayerCard.tsx
-import React, { useState } from "react";
+import React from "react";
 import type { Player } from "../../types/player";
-import type { RosterPlayer } from "../../types/match";
+import type { RosterPlayer, RosterSquad } from "../../types/match";
+import { useAppSelector } from "../../store";
+import { selectSignedSquads } from "../../store/selectors/rosterSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
+import { getTeamColors } from "../../lib/teamColors";
 import styles from "./PlayerCard.module.scss";
 
 //ADD Name, number, and style. Photos??? Replace with Insight?? Go through this whole thing top to bottom. #TODO
@@ -13,33 +16,60 @@ interface PlayerCardProps {
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus }) => {
-  const [showTournament, setShowTournament] = useState(false);
+  const signedSquads = useAppSelector(selectSignedSquads);
 
   const isRosterPlayer = (p: Player | RosterPlayer): p is RosterPlayer => "type" in p && p.type === "player";
 
-  const firstName = !isRosterPlayer(player) ? player.firstName : "";
-  const lastName = !isRosterPlayer(player) ? player.lastName : "";
+  const playerName = !isRosterPlayer(player) ? `${player.firstName} ${player.lastName}` : player.name;
   const position = player.position;
   const fifaPosition = positionToFifa(position);
-  const nationalityCode = !isRosterPlayer(player) ? player.nationalityCode : player.code;
+  const countryCode = !isRosterPlayer(player) ? player.countryCode : player.countryCode;
   const club = !isRosterPlayer(player) ? player.club : "—";
-  const photoUrl = !isRosterPlayer(player) ? player.photoUrl : undefined;
-  const recentPerformance = !isRosterPlayer(player) ? player.recentPerformance : [];
   const tournamentPerformance = !isRosterPlayer(player) ? player.tournamentPerformance : undefined;
   const isMvp = !isRosterPlayer(player) ? player.isMvp : false;
 
-  const flagColors = ["#888", "#ccc", "#888"];
-  const flagEmoji  = "";
+  // Find conflicts with signed squads in opponent teams
+  const squadConflicts = React.useMemo(() => {
+    if (!isRosterPlayer(player)) return [];
 
-  // Choose performance data: tournament if available and selected, else pre-tournament
-  const performanceData = (showTournament && tournamentPerformance?.length) ? tournamentPerformance : recentPerformance;
+    const rosterPlayer = player as RosterPlayer;
+    if (!rosterPlayer.playerGames) return [];
+
+    const upcomingGames = rosterPlayer.playerGames.filter((game) => !game.isComplete);
+    const conflictSquads: RosterSquad[] = [];
+
+    upcomingGames.forEach((game) => {
+      // Determine opponent
+      const opponent = game.homeTeam === rosterPlayer.countryCode ? game.awayTeam : game.homeTeam;
+
+      // Find signed squads from opponent team
+      const squadsFromOpponent = signedSquads.filter(
+        (squad: RosterSquad) => squad.countryCode === opponent && squad.pool !== "eliminated"
+      );
+
+      conflictSquads.push(...squadsFromOpponent);
+    });
+
+    // Remove duplicates
+    return Array.from(new Map(conflictSquads.map((s: RosterSquad) => [s.teamId, s])).values());
+  }, [player, signedSquads]);
+
+  // Get team colors from APItoFIFAmaps.json via utility function
+  const colors = getTeamColors(countryCode);
+  const countryColorVars = {
+    "--team-primary-color": colors.primary,
+    "--team-secondary-color": colors.secondary,
+    "--team-alt-color": colors.alt,
+    "--team-text-color": colors.text,
+  } as React.CSSProperties;
+
+  // Tournament performance data (empty array before tournament starts)
+  const performanceData = tournamentPerformance ?? [];
   const matchCount = performanceData.length;
 
   // Aggregate stats
-  const totalMinutes       = performanceData.reduce((sum, s) => sum + s.minutesPlayed, 0);
   const totalGoals         = performanceData.reduce((sum, s) => sum + s.goals, 0);
   const totalAssists       = performanceData.reduce((sum, s) => sum + s.assists, 0);
-  const totalPenalties     = performanceData.reduce((sum, s) => sum + s.penaltiesScored, 0);
   const totalYellowCards   = performanceData.reduce((sum, s) => sum + s.yellowCards, 0);
   const totalRedCards      = performanceData.reduce((sum, s) => sum + s.redCards, 0);
   const totalShootoutGoals = performanceData.reduce((sum, s) => sum + (s.shootoutGoals ?? 0), 0);
@@ -62,33 +92,52 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus })
   return (
     <div
       className={styles.playerCard}
-      style={{
-        "--flag-color-1": flagColors[0],
-        "--flag-color-2": flagColors[1],
-        "--flag-color-3": flagColors[2],
-      } as React.CSSProperties}
+      style={countryColorVars}
     >
       {/* Header */}
       <div className={styles.playerCardHeader}>
+        <h1 className={styles.playerCardPlayerName}>{isRosterPlayer(player) ? (player as RosterPlayer).number : ""} {playerName}</h1>
         <div className={styles.playerCardHeaderMeta}>
-          <span className={styles.playerCardNationalityBadge}>{flagEmoji} {nationalityCode}</span>
-          <span className={styles.playerCardPositionLabel}>{fifaPosition}</span>
+            <span className={styles.playerCardFlag}>{isRosterPlayer(player) ? (player as RosterPlayer).flag : ""}</span>
+            <span className={styles.playerCardPositionLabel}>{fifaPosition}</span>
+            <span className={styles.playerCardDivider}>|</span>
+            <span className={styles.playerCardCountryCode}>{countryCode}</span>
         </div>
-        <div className={styles.playerCardName}>{firstName} {lastName}</div>
         {isMvp && (
           <span className={styles.playerCardMvpTrophy} aria-label="MVP">🏆</span>
         )}
       </div>
 
-      {/* Photo + Body — stacked on mobile, side-by-side at tablet+ */}
+      {/* Roster Conflicts + Body — stacked on mobile, side-by-side at tablet+ */}
       <div className={styles.playerCardLayout}>
-        <div className={styles.playerCardPhotoWrap}>
-          <img
-            src={photoUrl ?? ""}
-            alt={`${firstName} ${lastName}`}
-            className={styles.playerCardPhoto}
-          />
-        </div>
+        {/* Squad Conflicts Section (replaces photo) */}
+        {isRosterPlayer(player) && squadConflicts.length > 0 && (
+          <div className={styles.playerCardSideSection}>
+            <div className={styles.squadConflicts}>
+              <span className={styles.conflictsLabel} aria-label="Squad Conflicts">⚠️ Squad Conflicts</span>
+              <div className={styles.conflictsList}>
+                {squadConflicts.map((squad) => (
+                  <div key={squad.teamId} className={styles.conflictItem}>
+                    <span className={styles.squadFlag}>{squad.flag}</span>
+                    <span className={styles.squadName}>{squad.name}</span>
+                  </div>
+                ))}
+              </div>
+              <p className={styles.conflictsNote}>
+                These squads face {countryCode} in upcoming matches
+              </p>
+            </div>
+          </div>
+        )}
+
+        {isRosterPlayer(player) && squadConflicts.length === 0 && (
+          <div className={styles.playerCardSideSection}>
+            <div className={styles.noConflicts}>
+              <span className={styles.noConflictsLabel} aria-label="Roster Conflicts">⚠️ Roster Conflicts</span>
+              <p className={styles.noConflictsNote}>None of your signed squads oppose this player's team</p>
+            </div>
+          </div>
+        )}
 
         <div className={styles.playerCardBody}>
           <div className={styles.playerCardMeta}>
@@ -97,23 +146,8 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus })
             </span>
           </div>
 
-          {/* Toggle button — club name or tournament */}
-          {tournamentPerformance?.length ? (
-            <div className={styles.playerCardToggle}>
-              <button
-                className={`${styles.playerCardToggleBtn} ${!showTournament ? styles.playerCardToggleBtnActive : ""}`}
-                onClick={() => setShowTournament(false)}
-              >
-                {club}
-              </button>
-              <button
-                className={`${styles.playerCardToggleBtn} ${showTournament ? styles.playerCardToggleBtnActive : ""}`}
-                onClick={() => setShowTournament(true)}
-              >
-                Tournament
-              </button>
-            </div>
-          ) : null}
+          {/* Club info */}
+          <div className={styles.playerCardClub}>{club}</div>
 
           <span className={styles.playerCardStatsLabel}>
             Last {matchCount} Matches
@@ -122,20 +156,12 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus })
           {/* Primary stats row */}
           <div className={styles.playerCardStatsRow}>
             <div className={styles.playerCardStatItem}>
-              <span className={styles.playerCardStatValue}>⏱ {totalMinutes}</span>
-              <span className={styles.playerCardStatUnit}>m</span>
-            </div>
-            <div className={styles.playerCardStatItem}>
               <span className={styles.playerCardStatValue}>{totalGoals}</span>
               <span className={styles.playerCardStatUnit}>g</span>
             </div>
             <div className={styles.playerCardStatItem}>
               <span className={styles.playerCardStatValue}>{totalAssists}</span>
               <span className={styles.playerCardStatUnit}>a</span>
-            </div>
-            <div className={styles.playerCardStatItem}>
-              <span className={styles.playerCardStatValue}>{totalPenalties}</span>
-              <span className={styles.playerCardStatUnit}>p</span>
             </div>
           </div>
 
@@ -160,9 +186,6 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus })
               </div>
             )}
           </div>
-
-          {/* TODO Phase 4: wire onClick to AI insight dispatch */}
-          <button className={styles.playerCardAiBtn}>💡 AI Insights</button>
         </div>
       </div>
     </div>

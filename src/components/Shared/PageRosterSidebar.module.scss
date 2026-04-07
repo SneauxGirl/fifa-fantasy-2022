@@ -1,6 +1,6 @@
 @use '../../styles/tokens.scss' as *;
 
-//Style #TODO
+//Style
 
 .rosterSidebar {
   display: none;
@@ -18,11 +18,12 @@
 
 .title {
   margin: 0 0 $spacing-12 0;
-  font-size: $font-size-12;
-  font-weight: 700;
+  font-size: $font-size-16;
+  font-weight: 600;
   color: $color-text-default;
   text-transform: uppercase;
   letter-spacing: 0.6px;
+  margin-top: $spacing-4;
 }
 
 .section {
@@ -41,19 +42,40 @@
 }
 
 .sectionLabel {
-  font-size: $font-size-10;
-  font-weight: 600;
+  font-size: $font-size-14;
+  font-weight: 500;
   color: $color-text-medium;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
 }
 
-.item {
-  font-size: $font-size-12;
+.flag {
+  font-size: 1rem; // 16px
+  flex-shrink: 0;
+  padding-right: $spacing-4;
+}
+
+.squadName {
+  font-size: $font-size-16;
+  font-weight: 400;
+}
+
+.playerName {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
   color: $color-text-default;
-  line-height: 1.4;
-  word-break: break-word;
+  font-size: $font-size-16;
+  font-weight: 400;
+}
+
+.playerNameBench {
+  display: flex;
+  align-items: center;
+  gap: $spacing-4;
+  color: $color-text-default;
+  font-size: $font-size-14;
 }
 
 .badge {
@@ -61,5 +83,13 @@
   color: $color-text-medium;
   font-weight: 500;
   margin-left: $spacing-2;
+  font-style: italic;
+}
+
+.emptyState {
+  padding: $spacing-16;
+  text-align: center;
+  color: $color-text-medium;
+  font-size: $font-size-14;
   font-style: italic;
 }

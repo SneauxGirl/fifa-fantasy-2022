@@ -19,7 +19,7 @@
   position: relative;
 
   /* Mobile: single column layout */
-  @media (max-width: 479px) {
+  @media (max-width: 767px) {
     flex-direction: column;
     gap: $spacing-16;
     padding: 0 $spacing-12;
@@ -47,5 +47,83 @@
 
   [data-active-tab] .rightSidebar {
     display: flex;
+    width: 100%;
+  }
+}
+
+// ── Team Naming Form ──────────────────────────────────────────────────────────
+
+.teamNameForm {
+  display: flex;
+  gap: $spacing-12;
+  align-items: center;
+  width: 100%;
+}
+
+.teamNameInput {
+  flex: 1;
+  padding: $spacing-8 $spacing-12;
+  font-size: $font-size-28;
+  font-weight: $font-weight-bold;
+  border: none;
+  background: #ffffff;
+  font-family: inherit;
+
+  &::placeholder {
+    color: $color-bg-tertiary;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: inset 0 0 0 2px #000000;
+  }
+      @media (max-width: 767px) {
+      max-width: 280px;
+      padding: $spacing-4 $spacing-6;
+  }
+}
+
+.teamNameConfirmBtn {
+  padding: $spacing-8 $spacing-16;
+  background: #304ffe;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: $border-radius-4;
+  cursor: pointer;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-14;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.2s;
+
+  &:focus {
+    outline-color: #000000;
+  }
+
+  &:blur {
+    outline-color: transparent;
+  }
+}
+
+.teamNameDisplay {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: $spacing-8;
+  cursor: pointer;
+  font-size: $font-size-28;
+  font-weight: $font-weight-bold;
+  color: inherit;
+  font-family: inherit;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.2s;
+
+  &:focus {
+    outline-color: #000000;
+  }
+
+  &:blur {
+    outline-color: transparent;
   }
 }

@@ -3,9 +3,6 @@
 // All point values defined in docs/rules/rules.md
 // ==============================
 
-//Clean up - remove minutes, penalties, and adjust tournament rounds #TODO
-
-
 // Tournament rounds — used to enforce substitution eligibility rules:
 //   Group / R32:  SUBSTITUTE additions allowed, score at 100%
 //   R16:          SUBSTITUTE additions allowed, score at 50%
@@ -32,13 +29,10 @@ export const SUBSTITUTE_PENALTY_ROUNDS: TournamentRound[] = ["round_of_16"];
 // Full per-match player score breakdown.
 // All fields are always present; 0 when not applicable for that match/position.
 export interface PlayerScoreBreakdown {
-  minutesPoints: number;          // +1 per 5 min played, rounded up (1 min = +1, 5:01 = +2)
   goalPoints: number;             // FWD +3 | MID +4 | DEF +5 | GK +7 per goal
   assistPoints: number;           // +2 per assist (all positions)
-  cleanSheetPoints: number;       // GK +7 | DEF +4 | MID +1 | FWD 0 — requires ≥ 45 min played
+  cleanSheetPoints: number;       // GK +7 | DEF +4 | MID +1 | FWD 0
   savePoints: number;             // GK only: +1 per save
-  penaltySavePoints: number;      // GK only: +5 per on-field penalty save (shootout saves tracked separately)
-  penaltyMissPoints: number;      // non-GK: -2 per on-field miss
   hatTrickBonus: number;          // +21 if player scores ≥ 3 goals in one match (non-shootout goals only)
   yellowCardPoints: number;       // -3 per yellow card
   redCardPoints: number;          // -7 per red card (direct red or second yellow); yellow-red = -10 total
@@ -66,25 +60,24 @@ export interface SquadScoreBreakdown {
   goalsConcededPoints: number;    // -1 per goal conceded
   cleanSheetBonus: number;        // +5 if Squad kept clean sheet
   advancementBonus: number;       // see advancement table in rules.md:
-                                  //   Group Winner +30 | Group Advances +20
-                                  //   R32 win +45 | R16 win +60 | QF win +75 | SF win +100 | Final win +125
+                                  //   Group Winner +40 | Group Advances +20
 }
 
 // isSubstitute mirrors PlayerScore — 50% rule is identical for Squads and Players
 export interface SquadScore {
   teamId: number;
   matchId?: number;               // omit for cumulative totals
-  weeklyPoints?: number;
+  turnPoints?: number;
   totalPoints: number;
   isSubstitute: boolean;          // true = added at R16; scores at 50% for remainder of tournament
   breakdown: SquadScoreBreakdown;
 }
 
-// Weekly totals — sum of all 4 Squads + 11 STARTER Players
-export interface WeeklyScore {
-  week: number;
-  playerPoints: number;           // sum of all STARTER Player points for the week
-  squadPoints: number;            // sum of all 4 Squad points for the week
+// Turn totals — sum of all 4 Squads + 11 STARTER Players for a single tournament turn
+export interface TurnScore {
+  turn: number;
+  playerPoints: number;           // sum of all STARTER Player points for this turn
+  squadPoints: number;            // sum of all 4 Squad points for this turn
   totalPoints: number;            // playerPoints + squadPoints
   mvpPlayerId?: number;           // highest-scoring STARTER Player (trophy icon only, no bonus)
 }
@@ -92,6 +85,6 @@ export interface WeeklyScore {
 // Full tournament cumulative score per user
 export interface TournamentScore {
   userId: string;
-  weeklyScores: WeeklyScore[];
-  cumulativeTotal: number;        // sum of all WeeklyScore.totalPoints
+  turnScores: TurnScore[];
+  cumulativeTotal: number;        // sum of all TurnScore.totalPoints
 }

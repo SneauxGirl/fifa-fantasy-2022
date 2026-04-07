@@ -2,6 +2,7 @@ import React from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { openMatchModal } from "../../store/slices/uiSlice";
 import { selectAllMatches, selectMatchesByStage } from "../../store/selectors/scoringSelectors";
+import { countryToFifa } from "../../lib/formatMapping";
 import styles from "./BracketDropdown.module.scss";
 
 /**
@@ -40,7 +41,7 @@ export const BracketDropdown: React.FC = () => {
           <optgroup key={stageName} label={stageName}>
             {matches.map((match) => (
               <option key={match.id} value={match.id}>
-                {match.homeTeam.code} vs {match.awayTeam.code} •{" "}
+                {countryToFifa(match.homeTeam.countryCode)} vs {countryToFifa(match.awayTeam.countryCode)} •{" "}
                 {new Date(match.date).toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",

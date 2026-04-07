@@ -6,6 +6,8 @@ import {
   selectEliminatedSignedPlayers,
   selectEliminatedSignedSquads,
 } from "../../store/selectors/rosterSelectors";
+import { positionToFifa } from "../../lib/formatMapping";
+import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
 import styles from "./RosterSidebar.module.scss";
 
@@ -18,10 +20,10 @@ import styles from "./RosterSidebar.module.scss";
 
 // Position order for sorting
 const POSITION_ORDER: Record<string, number> = {
-  "GK": 0,
-  "DEF": 1,
-  "MID": 2,
-  "FWD": 3,
+  "Goalkeeper": 0,
+  "Defender": 1,
+  "Midfielder": 2,
+  "Attacker": 3,
 };
 
 const sortPlayersByPosition = (players: RosterPlayer[]): RosterPlayer[] => {
@@ -75,6 +77,7 @@ export const RosterSidebar: React.FC = () => {
           <div className={styles.playersList}>
             {sortedBenchPlayers.map((player) => {
               const isStarter = player.role === "starter";
+              const teamColors = getTeamColors(player.countryCode);
               return (
                 <button
                   type="button"
@@ -91,12 +94,17 @@ export const RosterSidebar: React.FC = () => {
                   }}
                   title={isStarter ? `${player.name} - In starters formation` : `${player.name} - Click to move to starter, or drag to formation`}
                   aria-label={isStarter ? `${player.name} (${player.position}) - In starters formation` : `${player.name} (${player.position}) - Click to move to starter formation`}
+                  style={{
+                    "--team-bg": teamColors.primary,
+                    "--team-text": teamColors.text,
+                  } as React.CSSProperties}
                 >
+                  <span className={styles.playerNumber}>{player.number}</span>
                   <span className={styles.playerName}>
                     {player.name}
                     {isStarter && <span className={styles.starterIcon} title="In starters formation">⚽</span>}
                   </span>
-                  <span className={styles.playerPosition}>{player.position}</span>
+                  <span className={styles.playerPosition}>{positionToFifa(player.position)}</span>
                 </button>
               );
             })}

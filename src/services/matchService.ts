@@ -8,11 +8,9 @@
 import type { Match } from "../types/match";
 import mockMatches from "../data/matches.json";
 import {
-  fetchQualifierMatches,
   fetchMatchDetails as fetchMatchDetailsAPI,
 } from "./apiFootball";
 
-//REWORK FOR 2022 #TODO
 /**
  * Get the current data source preference from localStorage
  * Falls back to 'mock' if not set or API not available
@@ -31,31 +29,14 @@ function getDataSource(): "mock" | "live" {
 }
 
 /**
- * Fetch all matches from selected data source (mock or live API)
+ * Fetch all matches from mock data
+ * Phase 3: API calls now use turn-based getMatchResults(turnId) instead
  */
 export const fetchAllMatches = async (): Promise<Match[]> => {
-  const source = getDataSource();
-
-  try {
-    if (source === "live") {
-      return await fetchQualifierMatches();
-    } else {
-      // Mock data
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockMatches as Match[]), 500);
-      });
-    }
-  } catch (error) {
-    console.error(`Error fetching matches from ${source} source:`, error);
-    // Graceful fallback to mock if live fails
-    if (source === "live") {
-      console.warn("Live API failed, falling back to mock data");
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockMatches as Match[]), 500);
-      });
-    }
-    throw error;
-  }
+  // Mock data only (turn-based API calls handled by playTurn() thunk)
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(mockMatches as Match[]), 500);
+  });
 };
 
 /**
@@ -108,21 +89,7 @@ export const fetchMatchDetails = async (matchId: number): Promise<Match> => {
 };
 
 /**
- * Poll for match score updates
- * Called at specific intervals based on match status
- */
-export const pollMatchScore = async (matchId: number): Promise<Match> => {
-  try {
-    return await fetchMatchDetails(matchId);
-  } catch (error) {
-    console.error("Error polling match score:", error);
-    throw error;
-  }
-};
-
-/**
  * Normalize API-Football response to Match type
- * TODO: Implement when integrating real API
  */
 export const normalizeMatches = (apiMatches: any[]): Match[] => {
   return apiMatches.map((m) => ({

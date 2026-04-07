@@ -128,10 +128,7 @@ export const selectActiveSignedSquads = createSelector(
 /**
  * Players currently scoring (starters only)
  */
-export const selectScoringPlayers = createSelector(
-  selectStarterPlayers,
-  (starters: RosterPlayer[]) => starters
-);
+export const selectScoringPlayers = selectStarterPlayers;
 
 /**
  * Squads currently scoring (all signed squads are starters)
@@ -152,8 +149,8 @@ export const selectScoringPlayersGroupedByPosition = createSelector(
   (scoringPlayers: RosterPlayer[]) => {
     const sortByCountryThenNumber = (players: RosterPlayer[]) =>
       [...players].sort((a, b) => {
-        if (a.code !== b.code) {
-          return a.code.localeCompare(b.code);
+        if (a.countryCode !== b.countryCode) {
+          return a.countryCode.localeCompare(b.countryCode);
         }
         return (a.number || 0) - (b.number || 0);
       });

@@ -1,6 +1,10 @@
 /* ==============================
  * Styles Index
  * Main entry point - imports tokens and globals
+ *
+ * NOTE: Country jersey colors (primary, secondary, alt, text) have been moved
+ * to src/data/squads.json as the single source of truth. This consolidates
+ * all country data (code, flag, colors) in one place. Access via team.colors.
  * ============================== */
 
 @use './tokens.scss' as *;

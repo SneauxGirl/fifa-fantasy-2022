@@ -30,12 +30,7 @@ export interface DisplayPlayer extends Omit<RosterPlayer, 'injury' | 'eliminated
   lastName: string;
   club: string;
   isMvp?: boolean;
-  recentPerformance: Array<{
-    minutesPlayed: number;
-    goals: number;
-    assists: number;
-  }>;
-  nationalityCode: string;
+  countryCode: string;
   injury?: RosterPlayer['injury'];
   eliminatedReason?: RosterPlayer['eliminatedReason'];
 }
@@ -68,6 +63,31 @@ export function transformMatch(match: Match): DisplayMatch {
 }
 
 /**
+ * Apply live score to a match display
+ * For live matches, override the score and elapsed time with live values
+ */
+export function applyLiveScore(
+  displayMatch: DisplayMatch,
+  liveScore: { home: number; away: number; elapsed: number } | null
+): DisplayMatch {
+  if (!liveScore) {
+    return displayMatch;
+  }
+
+  return {
+    ...displayMatch,
+    score: {
+      home: liveScore.home,
+      away: liveScore.away,
+    },
+    status: {
+      ...displayMatch.status,
+      elapsed: liveScore.elapsed,
+    },
+  };
+}
+
+/**
  * Enrich RosterPlayer with Player display data
  * Combines roster player data with player stats/info
  */
@@ -81,8 +101,7 @@ export function enrichPlayerForDisplay(
     lastName: playerStats.lastName,
     club: playerStats.club,
     isMvp: playerStats.isMvp,
-    recentPerformance: playerStats.recentPerformance,
-    nationalityCode: playerStats.nationalityCode,
+    countryCode: playerStats.countryCode,
   };
 }
 
@@ -105,8 +124,7 @@ export function enrichPlayersForDisplay(
           lastName: "",
           club: "",
           isMvp: false,
-          recentPerformance: [],
-          nationalityCode: rosterPlayer.code,
+          countryCode: rosterPlayer.countryCode,
         } as DisplayPlayer;
       }
       return enrichPlayerForDisplay(rosterPlayer, playerStats);
@@ -118,7 +136,7 @@ export function enrichPlayersForDisplay(
  * Handles both RosterSquad and general squad data
  */
 export function getSquadDisplayName(squad: RosterSquad): string {
-  return `${squad.name} (${squad.code})`;
+  return `${squad.name} (${squad.countryCode})`;
 }
 
 /**
@@ -137,8 +155,8 @@ export function getPlayerFullName(
  * Get match display string (e.g., "ARG vs BRA" or "ARG 2-1 BRA")
  */
 export function getMatchDisplayString(match: DisplayMatch): string {
-  const home = match.homeTeam.code;
-  const away = match.awayTeam.code;
+  const home = match.homeTeam.countryCode;
+  const away = match.awayTeam.countryCode;
 
   if (match.status.short === "NS") {
     return `${home} vs ${away}`;
@@ -184,4 +202,15 @@ export function formatMatchTime(dateString: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+/**
+ * Format match date as DD.MM.YYYY
+ */
+export function formatMatchDateShort(dateString: string): string {
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, "0");
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
 }

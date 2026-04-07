@@ -1,46 +1,65 @@
 // src/components/SquadCard/SquadCard.tsx
-import React, { useState } from "react";
+import React from "react";
 import type { Squad } from "../../types/squad";
+import type { RosterSquad, RosterPlayer } from "../../types/match";
+import { useAppSelector } from "../../store";
+import { selectAllPlayers } from "../../store/selectors/rosterSelectors";
+import { getTeamColors } from "../../lib/teamColors";
 import styles from "./SquadCard.module.scss";
 
 interface SquadCardProps {
-  team: Squad;
+  team: Squad | RosterSquad;
   fantasyStatus: "active" | "substitute" | "eliminated";
 }
 
 export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => {
-  const [showTournament, setShowTournament] = useState(false);
+  const rosterPlayers = useAppSelector(selectAllPlayers) as RosterPlayer[];
 
-  const {
-    name,
-    nameLocal,
-    code,
-    flag,
-    fifaRanking,
-    historicalPerformance,
-    squadPerformance,
-    tournamentPerformance,
-  } = team;
+  const isRosterSquad = (t: Squad | RosterSquad): t is RosterSquad =>
+    "type" in t && t.type === "squad";
 
-  // Choose performance data: tournament if available and selected, else squad
-  const performanceData = (showTournament && tournamentPerformance) ? tournamentPerformance : squadPerformance;
+  // Extract data conditionally based on team type
+  const name = team.name;
+  const countryCode = isRosterSquad(team) ? team.countryCode : (team as Squad).code;
+  const flag = team.flag;
+  const coaches = isRosterSquad(team) ? team.coaches : undefined;
+  const tournamentPerformance = !isRosterSquad(team) ? (team as Squad).tournamentPerformance : undefined;
 
-  const colors = ["#888", "#ccc", "#888"];
-  const [primary, secondary] = colors;
+  // Find conflicts with roster players in upcoming games
+  const conflicts = React.useMemo(() => {
+    if (!isRosterSquad(team)) return [];
 
-  const handleToggleKeyDown = (e: React.KeyboardEvent, isSquad: boolean) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      setShowTournament(!isSquad);
-    }
-  };
+    const rosterTeam = team as RosterSquad;
+    if (!rosterTeam.squadGames) return [];
 
-  const handleAiKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      // TODO Phase 4: wire onClick to AI insight dispatch
-    }
-  };
+    const upcomingGames = rosterTeam.squadGames.filter((game) => !game.isComplete);
+    const conflictPlayers: RosterPlayer[] = [];
+
+    upcomingGames.forEach((game) => {
+      // Determine opponent
+      const opponent = game.homeTeam === rosterTeam.countryCode ? game.awayTeam : game.homeTeam;
+
+      // Find roster players from opponent team
+      const playersFromOpponent = rosterPlayers.filter(
+        (player: RosterPlayer) => player.countryCode === opponent && player.pool !== "eliminated"
+      );
+
+      conflictPlayers.push(...playersFromOpponent);
+    });
+
+    // Remove duplicates
+    return Array.from(new Map(conflictPlayers.map((p: RosterPlayer) => [p.playerId, p])).values());
+  }, [team, rosterPlayers]);
+
+  // Get team colors from APItoFIFAmaps.json via utility function
+  const colors = getTeamColors(countryCode);
+  console.log("SquadCard - countryCode:", countryCode, "colors:", colors);
+  const countryColorVars = {
+    "--team-primary-color": colors.primary,
+    "--team-secondary-color": colors.secondary,
+    "--team-alt-color": colors.alt,
+    "--team-text-color": colors.text,
+  } as React.CSSProperties;
 
   const badgeClass =
     fantasyStatus === "active"     ? styles.squadCardBadgeActive     :
@@ -50,25 +69,16 @@ export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => 
   return (
     <div
       className={styles.squadCard}
-      style={{
-        "--jersey-primary":   primary,
-        "--jersey-secondary": secondary,
-      } as React.CSSProperties}
+      style={countryColorVars}
     >
       {/* Header */}
       <div className={styles.squadCardHeader}>
         <div className={styles.squadCardHeaderMeta}>
           <div className={styles.squadCardHeaderLeft}>
-            <span className={styles.squadCardFlagBadge}>{flag} {code}</span>
+            <span className={styles.squadCardFlagBadge}>{flag}</span>
+            <span className={styles.squadCardName}>{name}</span>
           </div>
-          {fifaRanking != null && (
-            <span className={styles.squadCardRanking}>FIFA #{fifaRanking}</span>
-          )}
         </div>
-        <div className={styles.squadCardName}>{name}</div>
-        {nameLocal !== name && (
-          <div className={styles.squadCardLocalName}>{nameLocal}</div>
-        )}
       </div>
 
       {/* Body */}
@@ -79,102 +89,75 @@ export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => 
           </span>
         </div>
 
-        {/* Toggle for squad vs tournament stats */}
-        {tournamentPerformance ? (
-          <div className={styles.squadCardToggle}>
-            <button
-              type="button"
-              aria-label="Show squad stats"
-              aria-pressed={!showTournament}
-              className={`${styles.squadCardToggleBtn} ${!showTournament ? styles.squadCardToggleBtnActive : ""}`}
-              onClick={() => setShowTournament(false)}
-              onKeyDown={(e) => handleToggleKeyDown(e, true)}
-            >
-              Players Last 10
-            </button>
-            <button
-              type="button"
-              aria-label="Show tournament stats"
-              aria-pressed={showTournament}
-              className={`${styles.squadCardToggleBtn} ${showTournament ? styles.squadCardToggleBtnActive : ""}`}
-              onClick={() => setShowTournament(true)}
-              onKeyDown={(e) => handleToggleKeyDown(e, false)}
-            >
-              Tournament
-            </button>
+        {/* Coaches */}
+        {coaches && coaches.length > 0 && (
+          <div className={styles.squadCardCoaches}>
+            {coaches.map((coach) => (
+              <div key={coach.name} className={styles.squadCardCoach}>
+                <span className={styles.coachRole}>{coach.role}</span>
+                <span className={styles.coachName}>{coach.name}</span>
+              </div>
+            ))}
           </div>
-        ) : null}
+        )}
 
-        {/* Current season/tournament stats */}
-        {performanceData ? (
+        {/* Tournament stats */}
+        {tournamentPerformance ? (
           <div className={styles.squadCardStatsSection}>
-            <span className={styles.squadCardStatsLabel}>
-              {showTournament ? "Tournament" : "Squad"} Stats
-            </span>
+            <span className={styles.squadCardStatsLabel}>Tournament Stats</span>
             <div className={styles.squadCardStatsGrid}>
               <div className={styles.squadCardStatBox}>
-                <span className={styles.squadCardStatBoxValue}>{performanceData.goalsFor}</span>
+                <span className={styles.squadCardStatBoxValue}>{tournamentPerformance.goalsFor}</span>
                 <span className={styles.squadCardStatBoxLabel}>Goals For</span>
               </div>
               <div className={styles.squadCardStatBox}>
-                <span className={styles.squadCardStatBoxValue}>{performanceData.goalsAgainst}</span>
+                <span className={styles.squadCardStatBoxValue}>{tournamentPerformance.goalsAgainst}</span>
                 <span className={styles.squadCardStatBoxLabel}>Goals Against</span>
               </div>
               <div className={styles.squadCardStatBox}>
-                <span className={styles.squadCardStatBoxValue}>{performanceData.cleanSheets}</span>
+                <span className={styles.squadCardStatBoxValue}>{tournamentPerformance.cleanSheets}</span>
                 <span className={styles.squadCardStatBoxLabel}>Clean Sheets</span>
               </div>
               <div className={styles.squadCardStatBox}>
-                <span className={styles.squadCardStatBoxValue}>🟨 {performanceData.yellowCards} / 🔴 {performanceData.redCards}</span>
+                <span className={styles.squadCardStatBoxValue}>🟨 {tournamentPerformance.yellowCards} / 🔴 {tournamentPerformance.redCards}</span>
                 <span className={styles.squadCardStatBoxLabel}>Cards</span>
               </div>
               <div className={styles.squadCardStatBox}>
-                <span className={styles.squadCardStatBoxValue}>{performanceData.penaltiesScored}/{performanceData.penaltiesMissed}</span>
+                <span className={styles.squadCardStatBoxValue}>{tournamentPerformance.penaltiesScored}/{tournamentPerformance.penaltiesMissed}</span>
                 <span className={styles.squadCardStatBoxLabel}>Penalties</span>
               </div>
               <div className={styles.squadCardStatBox}>
-                <span className={styles.squadCardStatBoxValue}>{performanceData.shootoutGoals}/{performanceData.shootoutMisses}</span>
+                <span className={styles.squadCardStatBoxValue}>{tournamentPerformance.shootoutGoals}/{tournamentPerformance.shootoutMisses}</span>
                 <span className={styles.squadCardStatBoxLabel}>Shootout</span>
               </div>
             </div>
           </div>
         ) : null}
 
-        <span className={styles.squadCardHistoryLabel}>
-          World Cup History (Last {historicalPerformance.length})
-        </span>
-        <table className={styles.squadCardHistory}>
-          <thead className={styles.squadCardHistoryHead}>
-            <tr>
-              <th>Year</th>
-              <th>MP</th>
-              <th>GF</th>
-              <th>GA</th>
-              <th>PEN</th>
-            </tr>
-          </thead>
-          <tbody>
-            {historicalPerformance.map((h) => (
-              <tr key={h.year} className={styles.squadCardHistoryRow}>
-                <td>{h.year}</td>
-                <td>{h.matchesPlayed}</td>
-                <td>{h.goalsFor}</td>
-                <td>{h.goalsAgainst}</td>
-                <td>{h.penalties}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Player Conflicts in Upcoming Games */}
+        {isRosterSquad(team) && conflicts.length > 0 && (
+          <div className={styles.squadCardConflicts}>
+            <span className={styles.conflictsLabel} aria-label="Roster Conflicts">⚠️ Roster Conflicts</span>
+            <div className={styles.conflictsList}>
+              {conflicts.map((player) => (
+                <div key={player.playerId} className={styles.conflictItem}>
+                  <span className={styles.playerFlag}>{player.flag}</span>
+                  <span className={styles.playerName}>{player.name}</span>
+                </div>
+              ))}
+            </div>
+            <p className={styles.conflictsNote}>
+              These players face {name} in upcoming matches
+            </p>
+          </div>
+        )}
 
-        {/* TODO Phase 4: wire onClick to AI insight dispatch */}
-        <button
-          type="button"
-          className={styles.squadCardAiBtn}
-          aria-label="Get AI insights about this squad"
-          onKeyDown={handleAiKeyDown}
-        >
-          💡 AI Insights
-        </button>
+        {isRosterSquad(team) && conflicts.length === 0 && (
+          <div className={styles.squadCardNoConflicts}>
+            <span className={styles.noConflictsLabel} aria-label="Roster Conflicts">⚠️ Roster Conflicts</span>
+            <p className={styles.noConflictsNote}>This area will show match conflicts with signed Squads and Players</p>
+          </div>
+        )}
       </div>
     </div>
   );

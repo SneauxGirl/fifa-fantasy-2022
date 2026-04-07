@@ -3,6 +3,7 @@ import { useAppSelector } from "../../store";
 import { selectSignedSquads } from "../../store/selectors/rosterSelectors";
 import type { Match } from "../../types/match";
 import { transformMatch } from "../../lib/dataTransform";
+import { countryToFifa } from "../../lib/formatMapping";
 import styles from "./InsightsPanel.module.scss";
 
 interface InsightsPanelProps {
@@ -83,7 +84,7 @@ export const InsightsPanel: React.FC<InsightsPanelProps> = ({ match }) => {
     insights.push({
       type: "info",
       title: "📊 Match Result",
-      description: `Final Score: ${match.homeTeam.code} ${displayMatch.score.home} - ${displayMatch.score.away} ${match.awayTeam.code}. Winner: ${winner}`,
+      description: `Final Score: ${countryToFifa(match.homeTeam.countryCode)} ${displayMatch.score.home} - ${displayMatch.score.away} ${countryToFifa(match.awayTeam.countryCode)}. Winner: ${winner}`,
     });
   }
 

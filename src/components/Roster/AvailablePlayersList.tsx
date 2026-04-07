@@ -6,6 +6,7 @@ import {
   selectActiveAvailablePlayers,
   selectEliminatedAvailablePlayers,
 } from "../../store/selectors/rosterSelectors";
+import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
 import type { RosterPlayer } from "../../types/match";
 import styles from "./AvailablePlayersList.module.scss";
@@ -54,7 +55,7 @@ const playerMatchesSearch = (player: RosterPlayer, searchQuery: string): boolean
 
   // Prepare player fields for matching
   const playerName = normalizeAccents(player.name);
-  const playerCode = player.code.toUpperCase();
+  const playerCode = player.countryCode.toUpperCase();
   const playerNumber = String(player.number || "").padStart(2, "0");
   const fields = [playerName, playerCode, playerNumber];
 
@@ -97,18 +98,18 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
     })
     .sort((a, b) => {
       // Sort by country code first
-      if (a.code !== b.code) {
-        return a.code.localeCompare(b.code);
+      if (a.countryCode !== b.countryCode) {
+        return a.countryCode.localeCompare(b.countryCode);
       }
       // Then sort by jersey number
       return (a.number || 0) - (b.number || 0);
     });
 
-  const handlePlayerClick = (player: RosterPlayer) => {
+  const handleShowPlayerCard = (player: RosterPlayer) => {
     dispatch(openPlayerModal(player));
   };
 
-  const handleAddPlayer = (player: RosterPlayer) => {
+  const handleMoveToUnsigned = (player: RosterPlayer) => {
     dispatch(movePlayerToUnsigned(player));
   };
 
@@ -139,8 +140,8 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
           <PlayerListItem
             key={player.playerId}
             player={player}
-            onClick={() => handlePlayerClick(player)}
-            onAdd={() => handleAddPlayer(player)}
+            onCardClick={() => handleMoveToUnsigned(player)}
+            onShowCard={() => handleShowPlayerCard(player)}
           />
         ))}
       </div>
@@ -157,35 +158,48 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
  */
 interface PlayerListItemProps {
   player: RosterPlayer;
-  onClick: () => void;
-  onAdd: () => void;
+  onCardClick: () => void;
+  onShowCard: () => void;
 }
 
 const PlayerListItem: React.FC<PlayerListItemProps> = ({
   player,
-  onClick,
-  onAdd,
+  onCardClick,
+  onShowCard,
 }) => {
   const isEliminated = player.isEliminated;
+  const isRosterLocked = useAppSelector(selectIsRosterLocked);
+  const [isDragging, setIsDragging] = React.useState(false);
 
+  // Insights button styling
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only open modal if clicking on the card itself, not the button
-    if ((e.target as HTMLElement).closest(`.${styles.addPlayerButton}`)) {
+    // Only move to unsigned if clicking on the card itself, not the button
+    if ((e.target as HTMLElement).closest(`.${styles.showPlayerCard}`)) {
       return;
     }
-    if (!isEliminated) {
-      onClick();
+    if (!isEliminated && !isRosterLocked) {
+      onCardClick();
     }
   };
 
   const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if ((e.key === "Enter" || e.key === " ") && !isEliminated) {
-      // Don't trigger if focus is on the + button
+    if ((e.key === "Enter" || e.key === " ") && !isEliminated && !isRosterLocked) {
+      // Don't trigger if focus is on the card details button
       if ((e.target as HTMLElement) === e.currentTarget) {
         e.preventDefault();
-        onClick();
+        onCardClick();
       }
     }
+  };
+
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    if (isEliminated || isRosterLocked) {
+      e.preventDefault();
+      return;
+    }
+    const data = JSON.stringify({ type: "unsigned-player", player });
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("application/json", data);
   };
 
   return (
@@ -195,40 +209,44 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
       tabIndex={isEliminated ? -1 : 0}
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
-      aria-label={`${player.name} - ${player.position}. Click to view details${!isEliminated ? ", or press Tab to add to bench" : ""}`}
-      style={{ cursor: isEliminated ? "not-allowed" : "pointer" }}
+      onDragStart={handleDragStart}
+      draggable={!isEliminated && !isRosterLocked}
+      aria-label={`${player.name} - ${player.position}. Click to add to roster${!isEliminated ? ", or press + button to view details" : ""}`}
+      style={{ cursor: isEliminated ? "not-allowed" : isRosterLocked ? "default" : "grab" }}
     >
       <div className={styles.flag}>{player.flag}</div>
 
-      <div className={styles.cardHeader}>
-        <div className={styles.number}>{player.number || "—"}</div>
-      </div>
-
       <div className={styles.cardContent}>
         <div className={styles.playerName}>{player.name}</div>
-        <div className={styles.playerPosition}>{positionToFifa(player.position)}</div>
-        <div className={styles.playerCode}>{player.code}</div>
+        <div className={styles.playerMetaRow}>
+          <div className={styles.playerCode}>{player.countryCode}</div>
+          <div className={styles.number}>{player.number || "—"}</div>
+          <div className={styles.playerPosition}>{positionToFifa(player.position)}</div>
+        </div>
       </div>
 
       {!isEliminated && (
         <button
           type="button"
-          className={styles.addPlayerButton}
+          className={styles.showPlayerCard}
+          disabled={isRosterLocked}
           onClick={(e) => {
             e.stopPropagation();
-            onAdd();
+            onShowCard();
           }}
-          title="Add to Bench"
-          aria-label={`Add ${player.name} to bench`}
+          title={isRosterLocked ? "Roster locked (Quarterfinals+)" : `View ${player.name} details`}
+          aria-label={`View ${player.name} details${isRosterLocked ? " (locked during Quarterfinals+)" : ""}`}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
-              e.stopPropagation();
-              e.preventDefault();
-              onAdd();
+              if (!isRosterLocked) {
+                e.stopPropagation();
+                e.preventDefault();
+                onShowCard();
+              }
             }
           }}
         >
-          +
+          Insights
         </button>
       )}
     </div>

@@ -2,8 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RosterSquad } from "../../types/match";
 
-//CONFIRM this filters to both Players and Squads. Keep. #TODO
-
 /**
  * National Teams Slice
  *
@@ -17,6 +15,17 @@ import type { RosterSquad } from "../../types/match";
  *
  * The roster system compares against this data to determine what
  * needs to be updated when a team's tournament status changes.
+ *
+ * NOTE: Team colors are NOT stored in Redux. Use lib/teamColors.ts getTeamColors() utility instead.
+ * Colors are single source of truth in src/data/APItoFIFAmaps.json (teamColors section).
+ *
+ * TODO: INCOMPLETE REFACTOR (Phase 3.4 - to be completed)
+ * Currently only stores squads array. Should expand to include:
+ * - Full team metadata (teamId, teamName, countryCode, flag, confederation, group, coaches)
+ * - All ~650 players from all 32 teams (national rosters, not user selections)
+ * - This is the 32-team tournament source of truth (distinct from rosterSlice user selections)
+ * See: docs/logic-notes.md Section 6 (App.tsx Initialization) for architecture details
+ *
  */
 
 export interface NationTeamsState {
