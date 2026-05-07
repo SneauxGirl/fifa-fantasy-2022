@@ -65,8 +65,8 @@ const MidNav = () => {
               Match Play
             </Link>
             <Link
-              to="/"
-              className={`${styles.navLink} ${isActive("/") ? styles.active : ""}`}
+              to="/schedule"
+              className={`${styles.navLink} ${isActive("/schedule") ? styles.active : ""}`}
             >
               Schedule
             </Link>
@@ -110,8 +110,8 @@ const MidNav = () => {
               Match Play
             </Link>
             <Link
-              to="/"
-              className={`${styles.mobileLink} ${isActive("/") ? styles.active : ""}`}
+              to="/schedule"
+              className={`${styles.mobileLink} ${isActive("/schedule") ? styles.active : ""}`}
               onClick={handleNavClick}
             >
               Schedule

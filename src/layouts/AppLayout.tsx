@@ -17,7 +17,7 @@ const AppLayout = () => {
   const dispatch = useAppDispatch();
   const teamName = useAppSelector((state) => state.ui.teamName);
 
-  const isDashboard = location.pathname === "/" || location.pathname === "/dashboard";
+  const isDashboard = location.pathname === "/schedule" || location.pathname === "/dashboard";
   const isRoster = location.pathname === "/roster";
 
   const [isEditing, setIsEditing] = useState(false);

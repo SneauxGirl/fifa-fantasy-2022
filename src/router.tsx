@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Navigate, createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
 
 // Lazy load pages for better code splitting
@@ -23,6 +23,10 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/",
+        element: <Navigate to="/roster" replace />,
+      },
+      {
+        path: "/schedule",
         element: (
           <Suspense fallback={<PageLoader />}>
             <DashboardPage />

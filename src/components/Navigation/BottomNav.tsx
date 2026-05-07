@@ -29,7 +29,7 @@ const BottomNav = () => {
         </NavLink>
 
         <NavLink
-          to="/"
+          to="/schedule"
           className={({ isActive }: { isActive: boolean }) =>
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }
