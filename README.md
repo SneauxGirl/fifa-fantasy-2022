@@ -2,7 +2,7 @@
 
 FF22 is a work-in-progress turn-based futbol fantasy game.
 
-![Phase 3 Roster](/docs/photos/FF22_Phase3-refactor.png)
+![Current Roster Screen](/docs/photos/FF22_Current-Roster-View-May2026.png)
 
 This is a portfolio piece to practice working with real-world APIs, modern frontend tooling, brand matching, and data-driven UI.
 
@@ -10,12 +10,14 @@ API paywall constraints shifted this from a 2026 live game to a turn-based forma
 
 UI maintains the more modern FIFA World Cup 2026 styling throughout.
 
+Live deployment: [fifa-fantasy-2022.vercel.app](https://fifa-fantasy-2022.vercel.app)
+
 ## Tech Stack
 - Vite
 - React
 - TypeScript
 - Claude Code
-- REST API: API-Football for player, team, and match data 
+- REST API: API-Football for player, team, and match data
 
 ## Planned
 - Auth/OAuth: Firebase Authentication for user login
@@ -29,9 +31,29 @@ To run this project locally:
 3. Start the development server:
    npm run dev
 
-- No additional configuration is required for the current state.
+Build check:
+- `npx tsc -p tsconfig.app.json --noEmit`
+- `npm run build`
 
-Current commit is generally functional and lightly styled with full docs re: refactor in progress and TODOs throughout as markers. Not all necessary revisions are marked.
+## Current Status (May 2026)
+
+- App navigation is now `Roster | Match Play | Schedule`.
+- Default load route redirects to `Roster`.
+- Turn-based Match Play UI is active, including:
+  - staged expansion/locking behavior,
+  - current-turn `Play` handling with confirmation for incomplete roster,
+  - simulated in-progress display and turn progression visuals,
+  - score summaries in the Match Play header and stage bars.
+- Squad/Player conflict panels are wired for:
+  - same-group conflicts,
+  - current-turn head-to-head conflicts,
+  - signed roster overlap display.
+
+## Known Limitation (Important)
+
+- **Scoring + elimination playthrough do not currently work end-to-end on mock-data alone.**
+- In the current branch, full turn scoring/elimination progression depends on API-backed result flow and is not fully reliable with `matches.json` only.
+- Treat mock-only mode as a UI/flow preview, not a final scoring authority.
 
 ## React Compiler
 The React Compiler is not enabled on this project because of its impact on dev & build performance.

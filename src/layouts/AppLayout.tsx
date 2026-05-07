@@ -16,9 +16,12 @@ const AppLayout = () => {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const teamName = useAppSelector((state) => state.ui.teamName);
+  const cumulativeTotal = useAppSelector((state) => state.turnScores.cumulativeTotal);
+  const turnScoresByTurn = useAppSelector((state) => state.turnScores.byTurn);
 
   const isDashboard = location.pathname === "/schedule" || location.pathname === "/dashboard";
   const isRoster = location.pathname === "/roster";
+  const isMatchPlay = location.pathname === "/future-matches";
 
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(teamName);
@@ -36,11 +39,29 @@ const AppLayout = () => {
   };
 
   const getHeaderTitle = () => {
-    
     if (isRoster) {
       return undefined; // Roster uses getRosterHeaderContent instead
     }
     return undefined;
+  };
+
+  const cumulativeSquadPoints = Object.values(turnScoresByTurn).reduce(
+    (sum, turnData) => sum + turnData.turnScore.squadPoints,
+    0
+  );
+  const cumulativeStarterPoints = Object.values(turnScoresByTurn).reduce(
+    (sum, turnData) => sum + turnData.turnScore.playerPoints,
+    0
+  );
+
+  const getMatchPlayTicker = () => {
+    if (!isMatchPlay) return undefined;
+
+    return (
+      <div className={styles.matchPlayScoreTicker}>
+        {`Squads: ${cumulativeSquadPoints}  Starters: ${cumulativeStarterPoints}  Total: ${cumulativeTotal}`}
+      </div>
+    );
   };
 
   const getRosterHeaderContent = () => {
@@ -133,7 +154,7 @@ const AppLayout = () => {
       {/* Page Header (with optional ticker on Schedule page) */}
       <Header
         title={getHeaderTitle()}
-        ticker={isDashboard ? <SummaryTicker /> : undefined}
+        ticker={isDashboard ? <SummaryTicker /> : getMatchPlayTicker()}
       >
         {getRosterHeaderContent()}
       </Header>

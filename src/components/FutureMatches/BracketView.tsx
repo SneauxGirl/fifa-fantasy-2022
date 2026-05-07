@@ -17,6 +17,16 @@ import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./BracketView.module.scss";
 import type { MatchDisplayStatus, TurnId } from "../../lib/turnSimulation";
 
+const TURN_NUMBER_BY_ID: Record<TurnId, number> = {
+  Group_Stage_1: 1,
+  Group_Stage_2: 2,
+  Group_Stage_Final: 3,
+  R16: 4,
+  Quarterfinals: 5,
+  Semifinals: 6,
+  Final: 7,
+};
+
 /**
  * BracketView Component
  * Desktop tournament bracket view showing groups and knockout stages.
@@ -36,6 +46,8 @@ export const BracketView: React.FC = () => {
   const rosterPlayers = useAppSelector((state) => state.roster.players);
   const rosterSquads = useAppSelector((state) => state.roster.squads);
   const loading = useAppSelector((state) => state.matches.isLoading);
+  const turnScoresByTurn = useAppSelector((state) => state.turnScores.byTurn);
+  const [isPlayPending, setIsPlayPending] = useState(false);
 
   const groupByCountryCode = useMemo(() => {
     const map: Record<string, string> = {};
@@ -100,17 +112,12 @@ export const BracketView: React.FC = () => {
     );
   };
 
-  const handlePlayTurn = (stageId: TurnId) => {
-    const turnNumberMap: Record<TurnId, number> = {
-      Group_Stage_1: 1,
-      Group_Stage_2: 2,
-      Group_Stage_Final: 3,
-      R16: 4,
-      Quarterfinals: 5,
-      Semifinals: 6,
-      Final: 7,
-    };
-    const turnNumber = turnNumberMap[stageId];
+  const handlePlayTurn = async (stageId: TurnId) => {
+    // Guard against duplicate click/keyboard events causing repeated confirm loops.
+    if (isPlayPending || loading) return;
+    setIsPlayPending(true);
+
+    const turnNumber = TURN_NUMBER_BY_ID[stageId];
     const isPreQuarterfinals = turnNumber < 5;
 
     const signedPlayers = rosterPlayers.filter((p) => p.pool === "signed");
@@ -125,10 +132,17 @@ export const BracketView: React.FC = () => {
       const confirmed = window.confirm(
         "Your roster is not at full pre-Quarterfinals setup yet (4 squads, 11 starters, 11+ signed players). Continue anyway?"
       );
-      if (!confirmed) return;
+      if (!confirmed) {
+        setIsPlayPending(false);
+        return;
+      }
     }
 
-    dispatch(playTurn(stageId) as any);
+    try {
+      await dispatch(playTurn(stageId) as any);
+    } finally {
+      setIsPlayPending(false);
+    }
   };
 
   return (
@@ -141,6 +155,8 @@ export const BracketView: React.FC = () => {
           const isAccessible = isCompleted || isCurrent || isUpcoming;
           const isLocked = !isAccessible;
           const isExpanded = expandedStage === stage.id;
+          const turnNumber = TURN_NUMBER_BY_ID[stage.id];
+          const stageScore = turnScoresByTurn[turnNumber]?.turnScore;
           return (
             <div key={stage.id} className={`${styles.stage} ${isCompleted ? styles.completed : ""} ${isCurrent ? styles.current : ""} ${isUpcoming ? styles.upcoming : ""} ${isLocked ? styles.locked : ""} ${isExpanded ? styles.expanded : ""}`}>
             <div className={styles.stageHeaderContainer}>
@@ -156,8 +172,12 @@ export const BracketView: React.FC = () => {
                 aria-label={`${stage.name}, ${stage.count} matches${isLocked ? " (not playable yet)" : ""}`}
                 aria-expanded={expandedStage === stage.id}
               >
-                <span className={styles.stageName}>{stage.name}</span>
-                <span className={styles.stageCount}>{stage.count} matches</span>
+                <span className={styles.stageMeta}>
+                  <span className={styles.stageName}>{stage.name}</span>
+                  <span className={styles.stageCount}>
+                    {`Squads: ${stageScore?.squadPoints ?? 0}  Starters: ${stageScore?.playerPoints ?? 0}  Total: ${stageScore?.totalPoints ?? 0}`}
+                  </span>
+                </span>
                 <span className={styles.toggle}>
                   {isLocked ? "🔒" : expandedStage === stage.id ? "▼" : "▶"}
                 </span>
@@ -168,10 +188,10 @@ export const BracketView: React.FC = () => {
                   type="button"
                   className={styles.playButton}
                   onClick={() => handlePlayTurn(stage.id)}
-                  disabled={loading}
+                  disabled={loading || isPlayPending}
                   aria-label={`Play ${stage.name}`}
                 >
-                  {loading ? "Playing..." : "Play"}
+                  {loading || isPlayPending ? "Playing..." : "Play"}
                 </button>
               )}
             </div>

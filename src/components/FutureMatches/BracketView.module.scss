@@ -163,16 +163,26 @@
   }
 }
 
-.stageName {
+.stageMeta {
+  display: flex;
+  flex-direction: column;
   flex: 1;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-4;
+  min-width: 0;
+}
+
+.stageName {
+  text-align: center;
 }
 
 .stageCount {
   font-size: $font-size-12;
   font-weight: $font-weight-regular;
   color: $color-text-medium;
-  margin: 0 $spacing-12;
+  margin: 0;
+  text-align: center;
 
   .expanded & {
     color: $color-text-inverse;

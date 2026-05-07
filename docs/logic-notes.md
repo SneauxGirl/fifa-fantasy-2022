@@ -641,6 +641,10 @@ applySubstituteMultiplier = (points: number, substitute: boolean): number =>
 
 **File**: `/src/store/thunks/rosterThunks.ts` (new) or `/src/store/slices/rosterSlice.ts`
 
+> **Current branch note (May 2026):**
+> Scoring totals and elimination cascade are not fully reliable in **mock-data-only** playthrough.
+> The turn UI flow is active, but treat mock-only scoring/elimination as provisional until the API/result path is finalized.
+
 **Purpose**: When user clicks "Play", execute turn completion sequence in strict order:
 1. Fetch match results from API
 2. Update all scores (Scoring Record displayed first)

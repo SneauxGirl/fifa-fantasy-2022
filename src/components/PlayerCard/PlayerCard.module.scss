@@ -137,6 +137,21 @@
   margin-bottom: $spacing-8;
 }
 
+.conflictsSubheading {
+  display: block;
+  font-size: $font-size-10;
+  font-weight: $font-weight-semibold;
+  color: $color-text-medium;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: $spacing-6;
+  margin-top: $spacing-4;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
 .conflictsList {
   display: flex;
   flex-direction: column;

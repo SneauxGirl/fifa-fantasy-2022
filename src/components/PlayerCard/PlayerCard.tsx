@@ -3,9 +3,14 @@ import React from "react";
 import type { Player } from "../../types/player";
 import type { RosterPlayer, RosterSquad } from "../../types/match";
 import { useAppSelector } from "../../store";
-import { selectSignedSquads } from "../../store/selectors/rosterSelectors";
+import { selectSignedSquads, selectSignedPlayers } from "../../store/selectors/rosterSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
 import { getTeamColors } from "../../lib/teamColors";
+import {
+  describeRosterConflictNote,
+  rosterConflictsForPlayerView,
+} from "../../lib/rosterConflicts";
+import type { TurnId } from "../../lib/turnSimulation";
 import styles from "./PlayerCard.module.scss";
 
 //ADD Name, number, and style. Photos??? Replace with Insight?? Go through this whole thing top to bottom. #TODO
@@ -17,6 +22,12 @@ interface PlayerCardProps {
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus }) => {
   const signedSquads = useAppSelector(selectSignedSquads);
+  const signedPlayers = useAppSelector(selectSignedPlayers);
+  const nationTeams = useAppSelector((state) => state.nationTeams.teams);
+  const allMatches = useAppSelector((state) => state.matches.allMatches);
+  const currentTurnId = useAppSelector(
+    (state) => (state.matches.turnSimulation?.currentTurnId ?? null) as TurnId | null
+  );
 
   const isRosterPlayer = (p: Player | RosterPlayer): p is RosterPlayer => "type" in p && p.type === "player";
 
@@ -28,31 +39,34 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus })
   const tournamentPerformance = !isRosterPlayer(player) ? player.tournamentPerformance : undefined;
   const isMvp = !isRosterPlayer(player) ? player.isMvp : false;
 
-  // Find conflicts with signed squads in opponent teams
-  const squadConflicts = React.useMemo(() => {
-    if (!isRosterPlayer(player)) return [];
+  // Conflicts with signed squads/players (same group + current-turn H2H)
+  const conflictBuckets = React.useMemo(() => {
+    if (!isRosterPlayer(player)) {
+      return {
+        conflictingSquads: [] as RosterSquad[],
+        conflictingPlayers: [] as RosterPlayer[],
+        hasSameGroupOverlap: false,
+        hasThisTurnFixtureOverlap: false,
+      };
+    }
+    return rosterConflictsForPlayerView(
+      player,
+      signedSquads,
+      signedPlayers,
+      nationTeams,
+      allMatches,
+      currentTurnId
+    );
+  }, [player, signedSquads, signedPlayers, nationTeams, allMatches, currentTurnId]);
 
-    const rosterPlayer = player as RosterPlayer;
-    if (!rosterPlayer.playerGames) return [];
+  const hasConflicts =
+    conflictBuckets.conflictingSquads.length > 0 || conflictBuckets.conflictingPlayers.length > 0;
 
-    const upcomingGames = rosterPlayer.playerGames.filter((game) => !game.isComplete);
-    const conflictSquads: RosterSquad[] = [];
-
-    upcomingGames.forEach((game) => {
-      // Determine opponent
-      const opponent = game.homeTeam === rosterPlayer.countryCode ? game.awayTeam : game.homeTeam;
-
-      // Find signed squads from opponent team
-      const squadsFromOpponent = signedSquads.filter(
-        (squad: RosterSquad) => squad.countryCode === opponent && squad.pool !== "eliminated"
-      );
-
-      conflictSquads.push(...squadsFromOpponent);
-    });
-
-    // Remove duplicates
-    return Array.from(new Map(conflictSquads.map((s: RosterSquad) => [s.teamId, s])).values());
-  }, [player, signedSquads]);
+  const conflictsNote = describeRosterConflictNote(
+    countryCode,
+    conflictBuckets.hasSameGroupOverlap,
+    conflictBuckets.hasThisTurnFixtureOverlap
+  );
 
   // Get team colors from APItoFIFAmaps.json via utility function
   const colors = getTeamColors(countryCode);
@@ -111,30 +125,53 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({ player, fantasyStatus })
       {/* Roster Conflicts + Body — stacked on mobile, side-by-side at tablet+ */}
       <div className={styles.playerCardLayout}>
         {/* Squad Conflicts Section (replaces photo) */}
-        {isRosterPlayer(player) && squadConflicts.length > 0 && (
+        {isRosterPlayer(player) && hasConflicts && (
           <div className={styles.playerCardSideSection}>
             <div className={styles.squadConflicts}>
-              <span className={styles.conflictsLabel} aria-label="Squad Conflicts">⚠️ Squad Conflicts</span>
-              <div className={styles.conflictsList}>
-                {squadConflicts.map((squad) => (
-                  <div key={squad.teamId} className={styles.conflictItem}>
-                    <span className={styles.squadFlag}>{squad.flag}</span>
-                    <span className={styles.squadName}>{squad.name}</span>
+              <span className={styles.conflictsLabel} aria-label="Roster Conflicts">
+                ⚠️ Roster Conflicts
+              </span>
+              {conflictBuckets.conflictingSquads.length > 0 && (
+                <>
+                  <span className={styles.conflictsSubheading}>Signed squads</span>
+                  <div className={styles.conflictsList}>
+                    {conflictBuckets.conflictingSquads.map((squad) => (
+                      <div key={squad.teamId} className={styles.conflictItem}>
+                        <span className={styles.squadFlag}>{squad.flag}</span>
+                        <span className={styles.squadName}>{squad.name}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <p className={styles.conflictsNote}>
-                These squads face {countryCode} in upcoming matches
-              </p>
+                </>
+              )}
+              {conflictBuckets.conflictingPlayers.length > 0 && (
+                <>
+                  <span className={styles.conflictsSubheading}>Signed players</span>
+                  <div className={styles.conflictsList}>
+                    {conflictBuckets.conflictingPlayers.map((p) => (
+                      <div key={String(p.playerId)} className={styles.conflictItem}>
+                        <span className={styles.squadFlag}>{p.flag}</span>
+                        <span className={styles.squadName}>{p.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              <p className={styles.conflictsNote}>{conflictsNote}</p>
             </div>
           </div>
         )}
 
-        {isRosterPlayer(player) && squadConflicts.length === 0 && (
+        {isRosterPlayer(player) && !hasConflicts && (
           <div className={styles.playerCardSideSection}>
             <div className={styles.noConflicts}>
-              <span className={styles.noConflictsLabel} aria-label="Roster Conflicts">⚠️ Roster Conflicts</span>
-              <p className={styles.noConflictsNote}>None of your signed squads oppose this player's team</p>
+              <span className={styles.noConflictsLabel} aria-label="Roster Conflicts">
+                ⚠️ Roster Conflicts
+              </span>
+              <p className={styles.noConflictsNote}>
+                No overlap with your signed squads and players (same World Cup group or current-turn
+                fixture).
+              </p>
             </div>
           </div>
         )}

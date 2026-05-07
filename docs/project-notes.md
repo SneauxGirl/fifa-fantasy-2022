@@ -23,6 +23,21 @@ _________________________________________________________
 
 ---
 
+### Current Snapshot (May 2026)
+
+- Core app shell, roster flow, and Match Play UI are functional.
+- Navigation/order updated to `Roster | Match Play | Schedule`.
+- Match Play now includes cumulative score display in the blue header and per-stage score breakdown labels.
+- Roster conflict surfaces are active in Squad/Player cards (same-group + current-turn opponent detection).
+- Confirm-on-play behavior is active for incomplete pre-Quarterfinal setups (warns, does not hard-block).
+
+### Known Limitation (Current Branch)
+
+- **Scoring and elimination playthrough are not yet reliable in mock-data-only mode.**
+- This means local/mock-only runs may show correct UI flow while scoring totals and elimination cascade are incomplete or inconsistent without API-backed result flow.
+
+---
+
 ### COMPLETED WORK
 
 #### ✅ 3.1 — Remove API-Live-Action Logic
