@@ -1,10 +1,15 @@
 import { useEffect } from 'react'
 import { useAppDispatch } from './store'
-import { setMatches } from './store/slices/matchesSlice'
+import { setMatches, setTurnSimulation } from './store/slices/matchesSlice'
 import { initializeRoster } from './store/slices/rosterSlice'
 import { initializeNationTeams } from './store/slices/nationTeamsSlice'
 import { useTestUtils } from './hooks/useTestUtils'
 import type { RosterPlayer, RosterSquad, Match, NationalTeam } from './types/match'
+import {
+  createInitialTurnSimulation,
+  loadTurnSimulationFromStorage,
+  persistTurnSimulationToStorage,
+} from './lib/turnSimulation'
 import { Router } from './router'
 import mockMatches from './data/matches.json'
 import mockSquadsData from './data/squads.json'
@@ -69,9 +74,18 @@ function App() {
       }))
     );
 
-    // Load match data and initialize national teams (source of truth for elimination cascade)
+    // Load match data and initialize turn simulation for UI-only "IN PROGRESS" preview.
+    const initialMatches = mockMatches as Match[]
+    dispatch(setMatches(initialMatches))
+    const persistedTurnSimulation = loadTurnSimulationFromStorage(initialMatches)
+    const turnSimulation = persistedTurnSimulation ?? createInitialTurnSimulation(initialMatches)
+    dispatch(setTurnSimulation(turnSimulation))
+    if (!persistedTurnSimulation) {
+      persistTurnSimulationToStorage(turnSimulation)
+    }
+
+    // Initialize national teams (source of truth for elimination cascade)
     // Pass full NationalTeam objects with nested squads and players
-    dispatch(setMatches(mockMatches as Match[]))
     dispatch(initializeNationTeams(allNationalTeams))
 
     // Initialize roster with available players and squads extracted from national teams

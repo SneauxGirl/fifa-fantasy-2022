@@ -31,9 +31,8 @@
  * @see `/src/types/match.ts` — Match and MatchEvent interfaces
  */
 
-import type { Match, MatchEvent } from "../../types/match";
+import type { Match } from "../../types/match";
 import type { Player, PlayerMatchStats } from "../../types/player";
-import { SUBSTITUTION_OPEN_ROUNDS } from "../../types/fantasyScore";
 
 /**
  * Build a map of all players who participated in a match
@@ -71,7 +70,6 @@ export function extractPlayerMatchStats(
   }
 
   const playerTeamCode = isHomeTeam ? match.homeTeam.countryCode : match.awayTeam.countryCode;
-  const opposingTeamCode = isHomeTeam ? match.awayTeam.countryCode : match.homeTeam.countryCode;
 
   // Initialize counters
   let goals = 0;

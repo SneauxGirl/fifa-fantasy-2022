@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { openMatchModal } from "../../store/slices/uiSlice";
 import {
   selectAllMatches,
+  selectInProgressHalftimeScores,
+  selectMatchDisplayStatusById,
   selectSignedSquadIds,
   selectSignedPlayerTeamIds,
 } from "../../store/selectors/scoringSelectors";
 import type { Match } from "../../types/match";
-import { transformMatch } from "../../lib/dataTransform";
+import { formatMatchDate, transformMatch } from "../../lib/dataTransform";
 import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./MatchList.module.scss";
 
@@ -24,18 +26,32 @@ export const MatchList: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
 
   const matches = useAppSelector(selectAllMatches);
+  const matchStatusById = useAppSelector(selectMatchDisplayStatusById);
+  const inProgressHalftimeScores = useAppSelector(selectInProgressHalftimeScores);
+  const nationalTeams = useAppSelector((state) => state.nationTeams.teams);
   const rosterSquads = useAppSelector(selectSignedSquadIds);
   const rosterPlayers = useAppSelector(selectSignedPlayerTeamIds);
   const isLoading = useAppSelector((state) => state.matches.isLoading);
   const error = useAppSelector((state) => state.matches.error);
 
+  const groupByCountryCode = useMemo(() => {
+    const map: Record<string, string> = {};
+    nationalTeams.forEach((team) => {
+      if (team.countryCode) {
+        map[team.countryCode] = team.group || "";
+      }
+    });
+    return map;
+  }, [nationalTeams]);
+
   // Filter matches by status
   const filteredMatches = matches.filter((match) => {
+    const displayStatus = matchStatusById[match.id] || "Upcoming";
     if (filterStatus === "upcoming") {
-      return match.status.short === "NS";
+      return displayStatus !== "Final";
     }
     if (filterStatus === "finished") {
-      return match.status.short === "FT" || match.status.short === "AET" || match.status.short === "PEN";
+      return displayStatus === "Final";
     }
     return true; // "all"
   });
@@ -51,16 +67,7 @@ export const MatchList: React.FC = () => {
 
   // Get match status display
   const getStatusDisplay = (match: Match) => {
-    switch (match.status.short) {
-      case "NS":
-        return "Upcoming";
-      case "FT":
-      case "AET":
-      case "PEN":
-        return "Final";
-      default:
-        return match.status.short;
-    }
+    return matchStatusById[match.id] || "Upcoming";
   };
 
   const handleMatchClick = (match: Match) => {
@@ -143,14 +150,19 @@ export const MatchList: React.FC = () => {
               <div className={styles.matchGroup}>
                 {matches.map((match) => {
                   const isRoster = isRosterMatch(match);
-                  const isLive = ["1H", "2H", "ET", "HT", "P"].includes(match.status.short);
+                  const displayStatus = getStatusDisplay(match);
+                  const isInProgress = displayStatus === "IN PROGRESS";
+                  const isFinal = displayStatus === "Final";
+                  const inProgressScore = inProgressHalftimeScores[match.id];
+                  const homeGroup = groupByCountryCode[match.homeTeam.countryCode] || "";
+                  const awayGroup = groupByCountryCode[match.awayTeam.countryCode] || "";
 
                   return (
                     <button
                       key={match.id}
                       type="button"
                       className={`${styles.matchItem} ${isRoster ? styles.rosterMatch : ""} ${
-                        isLive ? styles.liveMatch : ""
+                        isInProgress ? styles.liveMatch : ""
                       }`}
                       onClick={() => handleMatchClick(match)}
                       onKeyDown={(e) => {
@@ -161,7 +173,7 @@ export const MatchList: React.FC = () => {
                       aria-label={`${match.homeTeam.name} vs ${match.awayTeam.name}, ${getStatusDisplay(match)}`}
                     >
                       {isRoster && <div className={styles.rosterBadge}>📊</div>}
-                      {isLive && <div className={styles.liveBadge}>🔴 LIVE</div>}
+                      {isInProgress && <div className={styles.liveBadge}>🔴 LIVE</div>}
 
                       <div className={styles.matchContent}>
                         <div className={styles.matchHeader}>
@@ -171,22 +183,20 @@ export const MatchList: React.FC = () => {
                             <span className={styles.score}>
                               {(() => {
                                 const displayMatch = transformMatch(match);
-                                return match.status.short === "FT" || match.status.short === "AET"
-                                  ? displayMatch.score.home
-                                  : match.status.short === "NS"
-                                  ? "--"
-                                  : displayMatch.score.home;
+                                if (isFinal) return displayMatch.score.home;
+                                if (isInProgress && inProgressScore)
+                                  return inProgressScore.home;
+                                return "--";
                               })()}
                             </span>
-                            <span className={styles.status}>{getStatusDisplay(match)}</span>
+                            <span className={styles.status}>{displayStatus}</span>
                             <span className={styles.score}>
                               {(() => {
                                 const displayMatch = transformMatch(match);
-                                return match.status.short === "FT" || match.status.short === "AET"
-                                  ? displayMatch.score.away
-                                  : match.status.short === "NS"
-                                  ? "--"
-                                  : displayMatch.score.away;
+                                if (isFinal) return displayMatch.score.away;
+                                if (isInProgress && inProgressScore)
+                                  return inProgressScore.away;
+                                return "--";
                               })()}
                             </span>
                             <span className={styles.flag}>{getTeamFlag(match.awayTeam.countryCode)}</span>
@@ -195,7 +205,10 @@ export const MatchList: React.FC = () => {
                         </div>
 
                         <div className={styles.matchDetails}>
+                          <span className={`${styles.groupTag} ${styles.groupTagLeft}`}>({homeGroup || "--"})</span>
                           {match.venue && <span className={styles.venue}>{match.venue.name}</span>}
+                          <span className={styles.date}>{formatMatchDate(match.date)}</span>
+                          <span className={`${styles.groupTag} ${styles.groupTagRight}`}>({awayGroup || "--"})</span>
                         </div>
                       </div>
                     </button>

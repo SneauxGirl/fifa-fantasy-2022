@@ -11,15 +11,6 @@ const BottomNav = () => {
     <nav className={styles.bottomNav} aria-label="Bottom navigation">
       <div className={styles.navLinks}>
         <NavLink
-          to="/"
-          className={({ isActive }: { isActive: boolean }) =>
-            `${styles.navItem} ${isActive ? styles.active : ""}`
-          }
-        >
-          Schedule
-        </NavLink>
-
-        <NavLink
           to="/roster"
           className={({ isActive }: { isActive: boolean }) =>
             `${styles.navItem} ${isActive ? styles.active : ""}`
@@ -35,6 +26,15 @@ const BottomNav = () => {
           }
         >
           Match Play
+        </NavLink>
+
+        <NavLink
+          to="/"
+          className={({ isActive }: { isActive: boolean }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
+          Schedule
         </NavLink>
       </div>
 

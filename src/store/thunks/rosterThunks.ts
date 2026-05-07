@@ -14,6 +14,7 @@ import {
   setMatches,
   setLoading,
   setError,
+  setTurnSimulation,
 } from "../slices/matchesSlice";
 import { storeTurnScores } from "../slices/turnScoresSlice";
 import { getMatchResults } from "../../services/apiFootball";
@@ -26,6 +27,12 @@ import {
   calculateTurnScore,
 } from "../../lib/scoring";
 import type { Player } from "../../types/player";
+import type { PlayerScore, SquadScore } from "../../types/fantasyScore";
+import {
+  advanceTurnSimulation,
+  persistTurnSimulationToStorage,
+  type TurnId,
+} from "../../lib/turnSimulation";
 
 /**
  * Play Turn Async Thunk — Turn Completion Orchestrator
@@ -126,10 +133,26 @@ export const playTurn = createAsyncThunk<
 
       // ─── STEP 1: Calculate scores (for Scoring Record display) ───────
       const state = getState();
+      const turnSimulation = state.matches.turnSimulation;
+      if (turnSimulation && turnSimulation.currentTurnId !== turnId) {
+        return rejectWithValue({
+          message: `Turn ${turnId} is not currently playable.`,
+        });
+      }
       const { players: rosterPlayers, squads: rosterSquads } = state.roster;
+      const turnNumberMap: Record<string, number> = {
+        Group_Stage_1: 1,
+        Group_Stage_2: 2,
+        Group_Stage_Final: 3,
+        R16: 4,
+        Quarterfinals: 5,
+        Semifinals: 6,
+        Final: 7,
+      };
+      const turnNumber = turnNumberMap[turnId] || 0;
 
       // Calculate player scores (STARTERS ONLY)
-      const starterPlayerScores = [];
+      const starterPlayerScores: PlayerScore[] = [];
 
       rosterPlayers
         .filter((rp) => rp.role === "starter") // Only starters score
@@ -171,7 +194,7 @@ export const playTurn = createAsyncThunk<
       );
 
       // Calculate squad scores
-      const squadScores = [];
+      const squadScores: SquadScore[] = [];
 
       rosterSquads.forEach((rosterSquad) => {
         // Find the squad's match in this turn (squads only play once per turn)
@@ -213,17 +236,6 @@ export const playTurn = createAsyncThunk<
 
       // Aggregate into turn total
       // Turn ID mapping: Group_Stage_1=1, Group_Stage_2=2, Group_Stage_Final=3, etc.
-      const turnNumberMap: Record<string, number> = {
-        Group_Stage_1: 1,
-        Group_Stage_2: 2,
-        Group_Stage_Final: 3,
-        R16: 4,
-        Quarterfinals: 5,
-        Semifinals: 6,
-        Final: 7,
-      };
-
-      const turnNumber = turnNumberMap[turnId] || 0;
       const turnScore = calculateTurnScore(turnNumber, starterPlayerScores, squadScores);
 
       console.log(
@@ -293,14 +305,29 @@ export const playTurn = createAsyncThunk<
       console.log("[playTurn] Step 5: Eliminated members moved to pool");
 
       // ─── STEP 6: Store match data for future reference ──────────────
-      dispatch(setMatches(matchResults));
+      const existingMatches = getState().matches.allMatches;
+      const resultById = new Map(matchResults.map((m) => [m.id, m]));
+      const mergedMatches = existingMatches.map((match) => resultById.get(match.id) ?? match);
+      dispatch(setMatches(mergedMatches));
+
+      const currentTurnSimulation = getState().matches.turnSimulation;
+      if (currentTurnSimulation) {
+        const nextTurnSimulation = advanceTurnSimulation(
+          currentTurnSimulation,
+          mergedMatches,
+          turnId as TurnId
+        );
+        dispatch(setTurnSimulation(nextTurnSimulation));
+        persistTurnSimulationToStorage(nextTurnSimulation);
+      }
+
       dispatch(setLoading(false));
 
       console.log("[playTurn] Step 6: Match data stored");
 
       // ─── STEP 7: Return result ──────────────────────────────────────
       return {
-        matches: matchResults,
+        matches: mergedMatches,
         eliminations,
       };
     } catch (error) {
@@ -334,6 +361,7 @@ function detectEliminatedTeams(matches: Match[], turnId: string): string[] {
     .forEach((match) => {
       const score = match.score.fulltime;
       if (!score) return;
+      if (score.home == null || score.away == null) return;
 
       // Determine loser (eliminated)
       if (score.home > score.away) {

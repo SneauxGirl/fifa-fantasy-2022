@@ -31,15 +31,11 @@
   }
 
   &.upcoming {
-    background: $color-neutral-black;
-
-    &.expanded {
-      background: $color-neutral-white;
-    }
+    background: $color-bg-primary;
   }
 
   &.locked {
-    background: $color-bg-primary;
+    background: $color-neutral-black;
   }
 }
 
@@ -55,12 +51,18 @@
   }
 
   .upcoming & {
-    background: $color-neutral-black;
+    background: $color-bg-tertiary;
   }
 
   .expanded & {
-    background: $color-neutral-black;
+    background: $color-bg-tertiary;
     border-bottom-color: $color-bg-tertiary;
+  }
+
+  // Keep the active/current stage visually light when opened.
+  .current.expanded & {
+    background: linear-gradient(90deg, $color-bg-primary-alt 0%, $color-bg-primary-alt 100%);
+    border-bottom-color: $color-border-low;
   }
 
   .upcoming &.expanded {
@@ -72,7 +74,7 @@
   }
 
   .locked & {
-    background: $color-bg-tertiary;
+    background: $color-neutral-black;
   }
 }
 
@@ -106,8 +108,13 @@
     color: $color-text-inverse;
   }
 
+  .current &.expanded {
+    color: $color-text-default;
+  }
+
   .locked & {
     cursor: not-allowed;
+    color: $color-text-inverse;
   }
 
   &:focus-visible {
@@ -169,6 +176,10 @@
 
   .expanded & {
     color: $color-text-inverse;
+  }
+
+  .current.expanded & {
+    color: $color-text-medium;
   }
 
   .locked & {
@@ -314,6 +325,16 @@
   gap: $spacing-16;
   font-size: $font-size-12;
   color: $color-text-medium;
+  flex-wrap: nowrap;
+}
+
+.groupTag {
+  font-size: $font-size-12;
+  font-weight: $font-weight-semibold;
+  color: $color-text-medium;
+  flex-shrink: 0;
+  min-width: 28px;
+  text-align: center;
 }
 
 .venue {

@@ -5,7 +5,6 @@ import { openSquadModal } from "../../store/slices/uiSlice";
 import {
   selectActiveAvailableSquads,
   selectEliminatedAvailableSquads,
-  selectUnsignedSquads,
   selectSignedSquads,
 } from "../../store/selectors/rosterSelectors";
 import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
@@ -27,7 +26,6 @@ export const AvailableSquadsList: React.FC = () => {
   const allAvailableSquads = [...activeAvailableSquads, ...eliminatedAvailableSquads].sort((a, b) =>
     a.name.localeCompare(b.name)
   );
-  const unsignedSquads = useAppSelector(selectUnsignedSquads); //CHECK INTO THIS #TODO
   const signedSquads = useAppSelector(selectSignedSquads);
   const isRosterLocked = useAppSelector(selectIsRosterLocked);
 

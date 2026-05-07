@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { NationalTeam, NationalPlayer } from "../../types/match";
+import type { NationalTeam } from "../../types/match";
 
 /**
  * National Teams Slice

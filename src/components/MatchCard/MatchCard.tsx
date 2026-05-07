@@ -62,7 +62,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
       // Only show events from roster members
       return rosterMembersInMatch.some(m => {
         if (m.type === "player") {
-          return m.id === event.player.playerId;
+          return m.playerId === event.player.id;
         }
         return false; // squad events not directly tracked yet
       });
@@ -132,7 +132,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
             {/* Starter Players Section */}
             {starterPlayers.map(member => (
               <div
-                key={`${member.type}-${member.id}`}
+                key={`${member.type}-${member.playerId}`}
                 className={`${styles.matchCardImpactRow} ${styles.matchCardImpactRowStarter}`}
                 onClick={() => handleMemberClick(member)}
                 role="button"
@@ -169,7 +169,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
             {/* Inactive Players Section */}
             {inactivePlayers.map(member => (
               <div
-                key={`${member.type}-${member.id}`}
+                key={`${member.type}-${member.playerId}`}
                 className={`${styles.matchCardImpactRow} ${styles.matchCardImpactRowInactive}`}
                 onClick={() => handleMemberClick(member)}
                 role="button"

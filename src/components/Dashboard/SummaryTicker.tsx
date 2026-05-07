@@ -2,6 +2,7 @@ import React from "react";
 import { useAppSelector } from "../../store";
 import {
   selectFinishedMatches,
+  selectMatchDisplayStatusById,
   selectUpcomingMatches,
 } from "../../store/selectors/scoringSelectors";
 import type { Match } from "../../types/match";
@@ -18,6 +19,7 @@ import styles from "./SummaryTicker.module.scss";
 export const SummaryTicker: React.FC = () => {
   const finishedMatches = useAppSelector(selectFinishedMatches);
   const upcomingMatches = useAppSelector(selectUpcomingMatches);
+  const matchStatusById = useAppSelector(selectMatchDisplayStatusById);
 
   const renderFinishedTickerItem = (match: Match, uniqueKey: string): React.ReactElement => {
     const displayMatch = transformMatch(match);
@@ -33,15 +35,21 @@ export const SummaryTicker: React.FC = () => {
   const renderUpcomingTickerItem = (match: Match, uniqueKey: string): React.ReactElement => {
     const matchDate = new Date(match.date);
     const timeStr = matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const displayStatus = matchStatusById[match.id] || "Upcoming";
+    const isInProgress = displayStatus === "IN PROGRESS";
 
     return (
       <div key={uniqueKey} className={styles.tickerItem}>
         <span className={styles.matchScore}>
           {match.homeTeam.name} vs {match.awayTeam.name}
         </span>
-        <span className={styles.details}>
-          {matchDate.toLocaleDateString()} · {timeStr}
-        </span>
+        {isInProgress ? (
+          <span className={styles.inProgressBadge}>🔴 LIVE</span>
+        ) : (
+          <span className={styles.details}>
+            Upcoming · {matchDate.toLocaleDateString()} · {timeStr}
+          </span>
+        )}
       </div>
     );
   };

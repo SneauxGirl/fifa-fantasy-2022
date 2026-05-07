@@ -169,7 +169,6 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
 }) => {
   const isEliminated = player.isEliminated;
   const isRosterLocked = useAppSelector(selectIsRosterLocked);
-  const [isDragging, setIsDragging] = React.useState(false);
 
   // Insights button styling
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {

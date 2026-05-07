@@ -57,7 +57,6 @@ const AppLayout = () => {
               if (e.key === "Enter") handleSaveTeamName();
               if (e.key === "Escape") setIsEditing(false);
             }}
-            type="text"
             placeholder="Name Your Team"
             aria-label="Team name input"
             className={styles.teamNameInput}

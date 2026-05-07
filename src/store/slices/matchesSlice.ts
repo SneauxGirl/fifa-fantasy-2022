@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Match } from "../../types/match";
+import type { TurnSimulationState } from "../../lib/turnSimulation";
 
 export interface MatchesState {
   allMatches: Match[];
@@ -8,6 +9,7 @@ export interface MatchesState {
   lastUpdated: number | null;
   isLoading: boolean;
   error: string | null;
+  turnSimulation: TurnSimulationState | null;
 }
 
 const initialState: MatchesState = {
@@ -16,6 +18,7 @@ const initialState: MatchesState = {
   lastUpdated: null,
   isLoading: false,
   error: null,
+  turnSimulation: null,
 };
 
 const matchesSlice = createSlice({
@@ -94,6 +97,10 @@ const matchesSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+
+    setTurnSimulation: (state, action: PayloadAction<TurnSimulationState>) => {
+      state.turnSimulation = action.payload;
+    },
   },
 });
 
@@ -105,6 +112,7 @@ export const {
   updateMatchStatus,
   setLoading,
   setError,
+  setTurnSimulation,
 } = matchesSlice.actions;
 
 export default matchesSlice.reducer;

@@ -16,12 +16,14 @@ import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../index";
 import type { Match, RosterPlayer, RosterSquad } from "../../types/match";
 import {
+  buildTurnMatchIds,
+  type MatchDisplayStatus,
+} from "../../lib/turnSimulation";
+import {
   selectScoringPlayers,
   selectScoringSquads,
   selectActiveSignedPlayers,
   selectActiveSignedSquads,
-  selectSubstitutePlayers,
-  selectSubstituteSquads,
 } from "./rosterSelectors";
 
 // ─── Roster-derived selectors (focus on scoring) ──────────────────────────────────
@@ -86,21 +88,95 @@ export const selectAllMatches = createSelector(
   (matches: Match[]): Match[] => matches
 );
 
+export const selectTurnSimulation = (state: RootState) =>
+  state.matches.turnSimulation;
+
+export const selectCurrentTurnId = createSelector(
+  selectTurnSimulation,
+  (simulation) => simulation?.currentTurnId ?? null
+);
+
+export const selectNextTurnId = createSelector(
+  selectTurnSimulation,
+  (simulation) => simulation?.nextTurnId ?? null
+);
+
+export const selectCompletedTurnIds = createSelector(
+  selectTurnSimulation,
+  (simulation) => simulation?.completedTurnIds ?? []
+);
+
+export const selectInProgressMatchIds = createSelector(
+  selectTurnSimulation,
+  (simulation) => simulation?.inProgressMatchIds ?? []
+);
+
+export const selectInProgressHalftimeScores = createSelector(
+  selectTurnSimulation,
+  (simulation) => simulation?.inProgressHalftimeScores ?? {}
+);
+
+export const selectTurnMatchIds = createSelector(
+  selectAllMatches,
+  (matches) => buildTurnMatchIds(matches)
+);
+
+export const selectMatchDisplayStatusById = createSelector(
+  selectAllMatches,
+  selectTurnMatchIds,
+  selectTurnSimulation,
+  (matches, turnMatchIds, simulation): Record<number, MatchDisplayStatus> => {
+    const statusById: Record<number, MatchDisplayStatus> = {};
+
+    if (!simulation) {
+      matches.forEach((match) => {
+        statusById[match.id] = "Upcoming";
+      });
+      return statusById;
+    }
+
+    const turnIdByMatchId: Record<number, string> = {};
+    Object.entries(turnMatchIds).forEach(([turnId, matchIds]) => {
+      matchIds.forEach((matchId) => {
+        turnIdByMatchId[matchId] = turnId;
+      });
+    });
+
+    const completedTurnSet = new Set<string>(simulation.completedTurnIds);
+    const inProgressSet = new Set(simulation.inProgressMatchIds);
+
+    matches.forEach((match) => {
+      const turnId = turnIdByMatchId[match.id];
+      if (turnId && completedTurnSet.has(turnId)) {
+        statusById[match.id] = "Final";
+      } else if (turnId === simulation.currentTurnId) {
+        statusById[match.id] = inProgressSet.has(match.id)
+          ? "IN PROGRESS"
+          : "Upcoming";
+      } else {
+        statusById[match.id] = "Upcoming";
+      }
+    });
+
+    return statusById;
+  }
+);
+
 export const selectRosterMatches = (state: RootState) =>
   state.matches.rosterMatches;
 
 export const selectUpcomingMatches = createSelector(
   selectAllMatches,
-  (matches: Match[]): Match[] =>
-    matches.filter((m: Match) => m.status.short === "NS")
+  selectMatchDisplayStatusById,
+  (matches: Match[], statusById): Match[] =>
+    matches.filter((m: Match) => statusById[m.id] !== "Final")
 );
 
 export const selectFinishedMatches = createSelector(
   selectAllMatches,
-  (matches: Match[]): Match[] =>
-    matches.filter((m: Match) =>
-      ["FT", "AET", "PEN"].includes(m.status.short)
-    )
+  selectMatchDisplayStatusById,
+  (matches: Match[], statusById): Match[] =>
+    matches.filter((m: Match) => statusById[m.id] === "Final")
 );
 
 /**
