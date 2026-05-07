@@ -5,7 +5,7 @@ import styles from "./FutureMatches.module.scss";
 import appLayoutStyles from "../layouts/AppLayout.module.scss";
 
 /**
- * Future Matches Page
+ * Match Play Page
  * Tournament brackets
  * Groups, knockout stages
  */

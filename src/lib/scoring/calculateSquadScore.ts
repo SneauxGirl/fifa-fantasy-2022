@@ -45,7 +45,7 @@ export function calculateSquadScore(
   isSubstitute:     boolean,
   advancementBonus  = 0
 ): SquadScore {
-  const isHome = match.homeTeam.code === team.code;
+  const isHome = match.homeTeam.countryCode === team.code;
   const status = match.status.short;
 
   // No-score statuses: return zeroed breakdown immediately

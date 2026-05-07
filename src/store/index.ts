@@ -13,6 +13,7 @@ import nationTeamsReducer from "./slices/nationTeamsSlice";
 import lineupReducer from "./slices/lineupSlice";
 import dataSourceReducer from "./slices/dataSourceSlice";
 import liveScoresReducer from "./slices/liveScoresSlice";
+import turnScoresReducer from "./slices/turnScoresSlice";
 import type { RootState } from "./types";
 
 // Re-export async thunks for use in components
@@ -27,6 +28,7 @@ export const store = configureStore({
     lineup: lineupReducer,
     dataSource: dataSourceReducer,
     liveScores: liveScoresReducer,
+    turnScores: turnScoresReducer,
   },
 });
 

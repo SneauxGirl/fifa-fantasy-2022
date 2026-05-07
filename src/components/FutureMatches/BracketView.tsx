@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { openMatchModal } from "../../store/slices/uiSlice";
 import { selectMatchesByStage, selectSignedSquadIds } from "../../store/selectors/scoringSelectors";
+import { playTurn } from "../../store/thunks/rosterThunks";
 import type { Match } from "../../types/match";
 import { transformMatch, formatMatchDate } from "../../lib/dataTransform";
-import { countryToFifa } from "../../lib/formatMapping";
 import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./BracketView.module.scss";
 
@@ -18,6 +18,7 @@ export const BracketView: React.FC = () => {
 
   const matchesByStage = useAppSelector(selectMatchesByStage);
   const rosterSquads = useAppSelector(selectSignedSquadIds);
+  const loading = useAppSelector((state) => state.matches.isLoading);
 
   // Split Group Stage matches into 3 phases
   const groupMatches = matchesByStage["Group Stage"] || [];
@@ -27,13 +28,13 @@ export const BracketView: React.FC = () => {
   const groupStage3 = groupMatches.slice(matchesPerPhase * 2);
 
   const stages = [
-    { id: "gs1", name: "Group Stage 1", matches: groupStage1, count: groupStage1.length },
-    { id: "gs2", name: "Group Stage 2", matches: groupStage2, count: groupStage2.length },
-    { id: "gs3", name: "Group Stage 3", matches: groupStage3, count: groupStage3.length },
-    { id: "round16", name: "Round of 16", matches: matchesByStage["Round of 16"], count: matchesByStage["Round of 16"].length },
-    { id: "quarters", name: "Quarterfinals", matches: matchesByStage["Quarterfinals"], count: matchesByStage["Quarterfinals"].length },
-    { id: "semis", name: "Semifinals", matches: matchesByStage["Semifinals"], count: matchesByStage["Semifinals"].length },
-    { id: "final", name: "Final", matches: matchesByStage["Final"], count: matchesByStage["Final"].length },
+    { id: "Group_Stage_1", name: "Group Stage 1", matches: groupStage1, count: groupStage1.length },
+    { id: "Group_Stage_2", name: "Group Stage 2", matches: groupStage2, count: groupStage2.length },
+    { id: "Group_Stage_Final", name: "Group Stage 3", matches: groupStage3, count: groupStage3.length },
+    { id: "R16", name: "Round of 16", matches: matchesByStage["Round of 16"], count: matchesByStage["Round of 16"].length },
+    { id: "Quarterfinals", name: "Quarterfinals", matches: matchesByStage["Quarterfinals"], count: matchesByStage["Quarterfinals"].length },
+    { id: "Semifinals", name: "Semifinals", matches: matchesByStage["Semifinals"], count: matchesByStage["Semifinals"].length },
+    { id: "Final", name: "Final", matches: matchesByStage["Final"], count: matchesByStage["Final"].length },
   ];
 
   const handleMatchClick = (match: Match) => {
@@ -57,22 +58,36 @@ export const BracketView: React.FC = () => {
           const isExpanded = expandedStage === stage.id;
           return (
             <div key={stage.id} className={`${styles.stage} ${isCompleted ? styles.completed : ""} ${isCurrent ? styles.current : ""} ${isUpcoming ? styles.upcoming : ""} ${isLocked ? styles.locked : ""} ${isExpanded ? styles.expanded : ""}`}>
-            <button
-              type="button"
-              className={`${styles.stageHeader} ${
-                expandedStage === stage.id ? styles.expanded : ""
-              }`}
-              onClick={() => !isLocked && setExpandedStage(expandedStage === stage.id ? null : stage.id)}
-              disabled={isLocked}
-              aria-label={`${stage.name}, ${stage.count} matches${isLocked ? " (locked)" : ""}`}
-              aria-expanded={expandedStage === stage.id}
-            >
-              <span className={styles.stageName}>{stage.name}</span>
-              <span className={styles.stageCount}>{stage.count} matches</span>
-              <span className={styles.toggle}>
-                {isLocked ? "🔒" : expandedStage === stage.id ? "▼" : "▶"}
-              </span>
-            </button>
+            <div className={styles.stageHeaderContainer}>
+              <button
+                type="button"
+                className={`${styles.stageHeader} ${
+                  expandedStage === stage.id ? styles.expanded : ""
+                }`}
+                onClick={() => !isLocked && setExpandedStage(expandedStage === stage.id ? null : stage.id)}
+                disabled={isLocked}
+                aria-label={`${stage.name}, ${stage.count} matches${isLocked ? " (locked)" : ""}`}
+                aria-expanded={expandedStage === stage.id}
+              >
+                <span className={styles.stageName}>{stage.name}</span>
+                <span className={styles.stageCount}>{stage.count} matches</span>
+                <span className={styles.toggle}>
+                  {isLocked ? "🔒" : expandedStage === stage.id ? "▼" : "▶"}
+                </span>
+              </button>
+
+              {!isLocked && (
+                <button
+                  type="button"
+                  className={styles.playButton}
+                  onClick={() => dispatch(playTurn(stage.id) as any)}
+                  disabled={loading}
+                  aria-label={`Play ${stage.name}`}
+                >
+                  {loading ? "Playing..." : "Play"}
+                </button>
+              )}
+            </div>
 
             {expandedStage === stage.id && stage.matches.length > 0 && (
               <div className={styles.stageMatches}>
@@ -119,11 +134,9 @@ const MatchBracketItem: React.FC<MatchBracketItemProps> = ({
   onClick,
 }) => {
   const displayMatch = transformMatch(match);
-  const isFinished = match.status.short === "FT" || match.status.short === "AET";
-  const isLive = ["1H", "2H", "ET", "HT", "P"].includes(match.status.short);
+  const isFinished = match.status.short === "FT" || match.status.short === "AET" || match.status.short === "PEN";
 
   const getStatusDisplay = () => {
-    if (isLive) return `${match.status.elapsed}'`;
     if (isFinished) return "Final";
     if (match.status.short === "NS") return "Upcoming";
     return match.status.short;
@@ -132,9 +145,7 @@ const MatchBracketItem: React.FC<MatchBracketItemProps> = ({
   return (
     <button
       type="button"
-      className={`${styles.matchItem} ${isRoster ? styles.rosterMatch : ""} ${
-        isLive ? styles.liveMatch : ""
-      }`}
+      className={`${styles.matchItem} ${isRoster ? styles.rosterMatch : ""}`}
       onClick={onClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {

@@ -1,6 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
+//Creates randomized partial game scores for more entertaining play
+
 export interface LiveScore {
   matchId: number;
   home: number;

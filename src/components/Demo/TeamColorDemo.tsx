@@ -17,7 +17,6 @@ export const TeamColorDemo: React.FC = () => {
       <div className={styles.grid}>
         {teamCodes.map((code) => {
           const colors = getTeamColors(code);
-          const fifaName = (mapsData as any).countryCodeToFifa?.[code] || code;
 
           return (
             <div key={code} className={styles.teamCard}>

@@ -11,6 +11,7 @@ import type { UIState } from "./slices/uiSlice";
 import type { NationTeamsState } from "./slices/nationTeamsSlice";
 import type { LineupState } from "./slices/lineupSlice";
 import type { DataSourceState } from "./slices/dataSourceSlice";
+import type { TurnScoresState } from "./slices/turnScoresSlice";
 
 /**
  * Complete Redux state shape
@@ -23,6 +24,7 @@ export interface RootState {
   nationTeams: NationTeamsState;
   lineup: LineupState;
   dataSource: DataSourceState;
+  turnScores: TurnScoresState;
 }
 
 // These will be properly typed in store/index.ts after store creation

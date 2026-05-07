@@ -18,7 +18,7 @@ export {
 
 export { calculatePlayerScore }                from "./calculatePlayerScore";
 export { calculateSquadScore }                 from "./calculateSquadScore";
-export { calculateWeeklyScore }                from "./calculateWeeklyScore";
+export { calculateTurnScore }                  from "./calculateTurnScore";
 export { calculateTieBreaker }                 from "./calculateTieBreaker";
 
 export {

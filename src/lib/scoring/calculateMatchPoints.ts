@@ -14,18 +14,18 @@ import type { Position } from "../../types/player";
 
 /** Goal points by registered position (most forward role applies). */
 export const GOAL_POINTS: Record<Position, number> = {
-  GK:  7,
-  DEF: 5,
-  MID: 4,
-  FWD: 3,
+  Goalkeeper: 7,
+  Defender: 5,
+  Midfielder: 4,
+  Attacker: 3,
 };
 
 /** Clean sheet bonus points by position. */
 export const CLEAN_SHEET_POINTS: Record<Position, number> = {
-  GK:  7,
-  DEF: 4,
-  MID: 1,
-  FWD: 0,  // FWD is never eligible for clean sheet bonus
+  Goalkeeper: 7,
+  Defender: 4,
+  Midfielder: 1,
+  Attacker: 0, // Attackers are never eligible for clean sheet bonus
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

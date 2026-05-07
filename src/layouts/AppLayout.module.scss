@@ -68,18 +68,20 @@
   border: none;
   background: #ffffff;
   font-family: inherit;
+  color: #000000;
 
   &::placeholder {
-    color: $color-bg-tertiary;
+    color: #888888;
   }
 
   &:focus {
     outline: none;
     box-shadow: inset 0 0 0 2px #000000;
   }
-      @media (max-width: 767px) {
-      max-width: 280px;
-      padding: $spacing-4 $spacing-6;
+
+  @media (max-width: 767px) {
+    max-width: 280px;
+    padding: $spacing-4 $spacing-6;
   }
 }
 
@@ -95,13 +97,10 @@
   outline: 2px solid transparent;
   outline-offset: 2px;
   transition: outline-color 0.2s;
+  font-family: inherit;
 
   &:focus {
     outline-color: #000000;
-  }
-
-  &:blur {
-    outline-color: transparent;
   }
 }
 
@@ -112,7 +111,7 @@
   padding: $spacing-8;
   cursor: pointer;
   font-size: $font-size-28;
-  font-weight: $font-weight-bold;
+  font-weight: 400;
   color: inherit;
   font-family: inherit;
   outline: 2px solid transparent;
@@ -121,9 +120,5 @@
 
   &:focus {
     outline-color: #000000;
-  }
-
-  &:blur {
-    outline-color: transparent;
   }
 }

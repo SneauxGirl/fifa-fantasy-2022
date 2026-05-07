@@ -57,31 +57,23 @@ const AppLayout = () => {
               if (e.key === "Enter") handleSaveTeamName();
               if (e.key === "Escape") setIsEditing(false);
             }}
+            type="text"
             placeholder="Name Your Team"
             aria-label="Team name input"
             className={styles.teamNameInput}
-            style={{
-              color: inputValue ? "#000000" : "#304ffe",
-            }}
             autoFocus={isEditing}
           />
           <button
             type="button"
             onClick={handleSaveTeamName}
             onKeyDown={(e) => {
-              if (e.key === " ") {
+              if (e.key === " " || e.key === "Enter") {
                 e.preventDefault();
                 handleSaveTeamName();
               }
             }}
             aria-label="Confirm team name"
             className={styles.teamNameConfirmBtn}
-            onFocus={(e) => {
-              e.currentTarget.style.outlineColor = "#000000";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.outlineColor = "transparent";
-            }}
           >
             Confirm
           </button>
@@ -107,7 +99,7 @@ const AppLayout = () => {
           padding: "8px",
           cursor: "pointer",
           fontSize: "1.5rem",
-          fontWeight: 600,
+          fontWeight: 400,
           color: "inherit",
           fontFamily: "inherit",
           outline: "2px solid transparent",
@@ -139,7 +131,7 @@ const AppLayout = () => {
       {/* App Navigation (all pages) */}
       <MidNav />
 
-      {/* Page Header (with optional ticker on Dashboard) */}
+      {/* Page Header (with optional ticker on Schedule page) */}
       <Header
         title={getHeaderTitle()}
         ticker={isDashboard ? <SummaryTicker /> : undefined}

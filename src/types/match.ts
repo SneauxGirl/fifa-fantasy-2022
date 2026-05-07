@@ -2,19 +2,13 @@
 // Matches
 // ==============================
 
-// API-Football fixture status short codes (all 16 possible values)
+// API-Football fixture status short codes (turn-based gameplay only)
+// Only statuses that affect turn completion and scoring
 export type MatchStatusShort =
   | "NS"    // Not Started
-  | "HT"    // Half Time (live)
-  | "SUSP"  // Suspended
-  | "INT"   // Interrupted
-  | "FT"    // Full Time
-  | "AET"   // After Extra Time
-  | "PEN"   // After Penalties (decided by shootout)
-  | "PST"   // Postponed
-  | "CANC"  // Cancelled
-  | "ABD"   // Abandoned
-  | "TBD";  // Time To Be Defined
+  | "FT"    // Full Time (match finished)
+  | "AET"   // After Extra Time (match finished)
+  | "PEN";  // After Penalties (match finished via shootout)
 
 // API-Football fixture event type values
 export type MatchEventType = "Goal" | "Card" | "subst" | "Var";
@@ -233,4 +227,63 @@ export interface MatchRosterImpact {
     pointsThisMatch: number;
     events: MatchEvent[]; // events that affected this member
   }>;
+}
+
+// ─── National Teams (Tournament Source of Truth) ──────────────────────────────
+
+/**
+ * Coach information for a national team
+ */
+export interface Coach {
+  name: string;
+  role: string;
+}
+
+/**
+ * A player in a national team roster (NOT a user selection).
+ * Distinct from RosterPlayer — this is the tournament roster data.
+ * Pulled from squads.json and stored in nationTeamsSlice.
+ */
+export interface NationalPlayer {
+  playerId: number | string | null;  // API ID or custom identifier
+  playerName: string;
+  firstName: string;
+  lastName: string;
+  type: "player";
+  position: "Goalkeeper" | "Defender" | "Midfielder" | "Attacker";
+  number: number;
+  countryCode: string;
+  born: number;
+  club: string;
+  captain: boolean;                  // Team captain designation
+
+  // Fantasy-related (mirrors RosterPlayer for consistency)
+  matchPoints: Record<string, number>;
+  totalPoints: number;
+  pool: RosterPool;
+  role: RosterRole;
+  isEliminated: boolean;
+  rosterElimination: null | "new" | "resolved";
+  substitute: boolean;
+  playerGames?: Game[];
+}
+
+/**
+ * A national team with full tournament data.
+ * Source of truth for team elimination cascade and player availability.
+ * Loaded from squads.json and stored in nationTeamsSlice.
+ */
+export interface NationalTeam {
+  teamId: number;
+  teamName: string;
+  countryCode: string;
+  flag: string;
+  confederation: string;
+  group: string;
+  coaches: Coach[];
+  isEliminated: boolean;              // Tournament elimination status
+
+  // Nested squad & player rosters
+  squads: RosterSquad[];              // Team's squad record(s) for fantasy
+  players: NationalPlayer[];          // All ~25 players in national team
 }

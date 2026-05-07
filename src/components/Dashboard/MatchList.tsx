@@ -11,7 +11,7 @@ import { transformMatch } from "../../lib/dataTransform";
 import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./MatchList.module.scss";
 
-type FilterStatus = "all" | "upcoming" | "live" | "finished";
+type FilterStatus = "all" | "upcoming" | "finished";
 
 /**
  * MatchList Component
@@ -34,11 +34,8 @@ export const MatchList: React.FC = () => {
     if (filterStatus === "upcoming") {
       return match.status.short === "NS";
     }
-    if (filterStatus === "live") {
-      return ["1H", "2H", "ET", "HT", "P"].includes(match.status.short);
-    }
     if (filterStatus === "finished") {
-      return match.status.short === "FT" || match.status.short === "AET";
+      return match.status.short === "FT" || match.status.short === "AET" || match.status.short === "PEN";
     }
     return true; // "all"
   });
@@ -57,16 +54,9 @@ export const MatchList: React.FC = () => {
     switch (match.status.short) {
       case "NS":
         return "Upcoming";
-      case "1H":
-      case "2H":
-      case "ET":
-        return `${match.status.elapsed}'`;
-      case "HT":
-        return "HT";
-      case "P":
-        return "Penalties";
       case "FT":
       case "AET":
+      case "PEN":
         return "Final";
       default:
         return match.status.short;
@@ -100,16 +90,6 @@ export const MatchList: React.FC = () => {
           aria-current={filterStatus === "upcoming" ? "page" : undefined}
         >
           Upcoming
-        </button>
-        <button
-          type="button"
-          className={`${styles.tab} ${filterStatus === "live" ? styles.active : ""}`}
-          onClick={() => setFilterStatus("live")}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFilterStatus("live"); }}
-          aria-label="Filter matches by Live"
-          aria-current={filterStatus === "live" ? "page" : undefined}
-        >
-          Live
         </button>
         <button
           type="button"

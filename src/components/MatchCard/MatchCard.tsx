@@ -40,12 +40,6 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
     switch (match.status.short) {
       case "NS":
         return { text: "Upcoming", className: styles.matchStatusUpcoming };
-      case "1H":
-      case "2H":
-      case "ET":
-      case "HT":
-      case "P":
-        return { text: `⏱ ${match.status.elapsed}'`, className: styles.matchStatusLive };
       case "FT":
       case "AET":
       case "PEN":

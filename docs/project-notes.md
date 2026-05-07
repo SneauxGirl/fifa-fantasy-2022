@@ -9,7 +9,7 @@ ______________________________
 
 ## Phase 2 — Basic UI Components
 
-## Phase 2.5 — Architecture & Implementation Plan for Dashboard/Roster/FutureMatches
+## Phase 2.5 — Architecture & Implementation Plan for Schedule/Roster/Match Play
 
 ---------------------------------------------------------
 ### COMPLETE TO THIS POINT (3/27/26) - REFACTOR FOR TURN BASED PLAY
@@ -25,7 +25,7 @@ _________________________________________________________
 
 ### COMPLETED WORK
 
-#### ✅ 3.1 — Remove Live-Action Logic
+#### ✅ 3.1 — Remove API-Live-Action Logic
 - Removed `gamesComplete` property from all types and state
 - Removed live polling infrastructure
 - Removed AI slice (Claude/OpenAI integration — deferred to Phase 5+)
@@ -45,9 +45,7 @@ _________________________________________________________
 
 ---
 
-### IN PROGRESS
-
-#### 🔄 3.4 — Component Lock Enforcement (COMPLETE)
+#### ✅ 3.4 — Component Lock Enforcement (COMPLETE)
 
 **Goal:** Wire 5 components to enforce lock state when `isRosterLocked === true`
 
@@ -70,15 +68,23 @@ _________________________________________________________
 - [x] RosterDragZone — Started (import added)
 - [x] SquadsSection — Pending
 - [x] StartersLineup — Pending
-- [x] Dev server verification — Pending
+- [x] Dev server verification
 
-- ADDITION: Edit Roster UI components for consistency and natural use, specifically onClink, DnD and button behaviors
+### IN PROGRESS
+
+#### 3.5 ADDITION
+
+ - Update all components to work with the new data and play flow
+ - Modify page formats as needed and style
+ - Check for responsiveness
+ - Update to variable styling from Tokens as possible
+ - Confirm and update for accessiblity as part of refactor
 
 ---
 
 ### UPCOMING PHASES
 
-#### 3.5 — Turn Completion Flow (Async Thunk & UI)
+#### 3.6 — Turn Completion Flow (Async Thunk & UI)
 
 **File:** `/src/store/thunks/rosterThunks.ts`
 

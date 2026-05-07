@@ -43,15 +43,47 @@
   }
 }
 
+.stageHeaderContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: linear-gradient(90deg, $color-bg-primary-alt 0%, $color-bg-primary-alt 100%);
+  border-bottom: $border-width-1 solid $color-border-low;
+
+  .completed & {
+    background: $color-success-primary;
+  }
+
+  .upcoming & {
+    background: $color-neutral-black;
+  }
+
+  .expanded & {
+    background: $color-neutral-black;
+    border-bottom-color: $color-bg-tertiary;
+  }
+
+  .upcoming &.expanded {
+    background: $color-bg-tertiary;
+  }
+
+  .completed &.expanded {
+    background: $color-success-primary;
+  }
+
+  .locked & {
+    background: $color-bg-tertiary;
+  }
+}
+
 .stageHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  flex: 1;
   padding: $spacing-16;
-  background: linear-gradient(90deg, $color-bg-primary-alt 0%, $color-bg-primary-alt 100%);
+  background: none;
   border: none;
-  border-bottom: $border-width-1 solid $color-border-low;
   cursor: pointer;
   transition: $transition-all;
   font-size: $font-size-14;
@@ -59,42 +91,22 @@
   color: $color-text-default;
 
   &:hover {
-    background: linear-gradient(90deg, #f0f0f0 0%, #e8e8e8 100%);
+    background: rgba(0, 0, 0, 0.05);
   }
 
   .completed & {
-    background: $color-success-primary;
     color: $color-text-inverse;
-    border: $border-width-2 solid $color-success-primary;
   }
 
   .upcoming & {
-    background: $color-neutral-black;
     color: $color-text-inverse;
-    border: $border-width-2 solid $color-neutral-black;
   }
 
   &.expanded {
-    background: $color-neutral-black;
     color: $color-text-inverse;
-    border-bottom-color: $color-bg-tertiary;
-  }
-
-  .upcoming &.expanded {
-    background: $color-bg-tertiary;
-    color: $color-text-inverse;
-    border: none;
-  }
-
-  .completed &.expanded {
-    background: $color-success-primary;
-    border-bottom: $border-width-1 solid $color-border-low;
   }
 
   .locked & {
-    background: $color-bg-tertiary;
-    color: $color-text-inverse;
-    border: none;
     cursor: not-allowed;
   }
 
@@ -105,6 +117,42 @@
 
   &:disabled {
     opacity: 0.9;
+  }
+}
+
+.playButton {
+  padding: $spacing-8 $spacing-16;
+  margin-right: $spacing-12;
+  background: $color-bg-tertiary;
+  color: $color-text-inverse;
+  border: none;
+  border-radius: $border-radius-4;
+  font-size: $font-size-12;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  transition: $transition-all;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .completed & {
+    background: $color-success-primary;
+  }
+
+  .upcoming & {
+    background: $color-neutral-black;
   }
 }
 

@@ -56,7 +56,7 @@ const MidNav = () => {
               to="/"
               className={`${styles.navLink} ${isActive("/") ? styles.active : ""}`}
             >
-              Dashboard
+              Schedule
             </Link>
             <Link
               to="/roster"
@@ -68,7 +68,7 @@ const MidNav = () => {
               to="/future-matches"
               className={`${styles.navLink} ${isActive("/future-matches") ? styles.active : ""}`}
             >
-              Matches
+              Match Play
             </Link>
           </div>
         </div>
@@ -100,7 +100,7 @@ const MidNav = () => {
               className={`${styles.mobileLink} ${isActive("/") ? styles.active : ""}`}
               onClick={handleNavClick}
             >
-              Dashboard
+              Schedule
             </Link>
             <Link
               to="/roster"
@@ -114,7 +114,7 @@ const MidNav = () => {
               className={`${styles.mobileLink} ${isActive("/future-matches") ? styles.active : ""}`}
               onClick={handleNavClick}
             >
-              Matches
+              Match Play
             </Link>
           </nav>
         </div>

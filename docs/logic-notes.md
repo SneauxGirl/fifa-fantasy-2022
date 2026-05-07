@@ -696,6 +696,32 @@ export const playTurn = (turnId: string) => async (dispatch, getState) => {
 6. Elimination status calculated (Step 3)
 7. Popup shows who was eliminated (Step 4 - user must acknowledge)
 8. Eliminated members moved out of roster (Step 5)
+
+---
+
+## 12. Scoring Calculation (Phase 3.6)
+
+**⚠️ Single Source of Truth**: Detailed scoring rules, formulas, and calculation logic documented in:
+- `/docs/rules/rules.md` — Complete scoring formulas (Section 7-8)
+- `/src/lib/scoring/` — Implementation with JSDoc (see individual scoring function files)
+- `/src/store/thunks/rosterThunks.ts` — Integration into turn completion flow
+
+**Architecture Overview**:
+- Stats extracted from match events → Position-based point formulas → Turn aggregation → Redux persistence
+- **Stateless & Deterministic**: Calculated on-demand per "Play" click, not continuous
+- **Substitution Rule**: 50% multiplier for R16+ signups, persists through tournament
+
+**High-Level Flow**:
+```
+playTurn() thunk → getMatchResults(turnId)
+  → extractPlayerMatchStats() from events
+  → calculatePlayerScore() & calculateSquadScore()
+  → calculateTurnScore() aggregation
+  → storeTurnScores() to Redux
+```
+
+For complete details on point values, card penalties, clean sheet bonuses, and MVP determination:
+→ See `/docs/rules/rules.md` Section 7 (Squad) & Section 8 (Player)
 9. Turn advances, user can now edit roster for next turn
 
 **Critical Ordering Notes**:
@@ -735,7 +761,7 @@ When a user saves/closes a game, the following must be stored in the database:
 
 **UI State** (optional but helpful):
 - Sidebar visibility toggle state
-- Current page/view (Dashboard, Roster, FutureMatches)
+- Current page/view (Schedule, Roster, Match Play)
 - Modal state if interrupted mid-action
 
 ### Initialization on Reload (Future)
@@ -747,7 +773,7 @@ When a user returns to a saved game:
 3. **Restore elimination status** (`isEliminated` for squads/players/individuals)
 4. **Restore scoring** (all `matchPoints`, `totalPoints`, `substitute` flags)
 5. **Restore lock state** (`isRosterLocked` flag)
-6. **Resume from last turn** (show Dashboard for current turn, not Group Stage 1)
+6. **Resume from last turn** (show Schedule for current turn, not Group Stage 1)
 7. **Preserve match history** (Finished matches remain visible)
 
 ### Key Differences from Fresh Init

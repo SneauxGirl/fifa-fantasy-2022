@@ -10,9 +10,8 @@ import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
 import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
+import type { PositionShort } from "../../types/player";
 import styles from "./RosterDragZone.module.scss";
-
-type Position = "GK" | "DEF" | "MID" | "FWD";
 
 /**
  * RosterDragZone Component
@@ -28,7 +27,7 @@ export const RosterDragZone: React.FC = () => {
 
   // Organize unsigned players by position, sorted by country then number
   const positionGroups = useMemo(() => {
-    const positions: Record<Position, RosterPlayer[]> = {
+    const positions: Record<PositionShort, RosterPlayer[]> = {
       GK: [],
       DEF: [],
       MID: [],
@@ -36,13 +35,13 @@ export const RosterDragZone: React.FC = () => {
     };
 
     unsignedPlayers.forEach((player) => {
-      const fifaPosition = positionToFifa(player.position) as Position;
+      const fifaPosition = positionToFifa(player.position);
       positions[fifaPosition].push(player);
     });
 
     // Sort each position group by country code, then by number
     Object.keys(positions).forEach((position) => {
-      positions[position as Position].sort((a, b) => {
+      positions[position as PositionShort].sort((a, b) => {
         if (a.countryCode !== b.countryCode) {
           return a.countryCode.localeCompare(b.countryCode);
         }
@@ -96,7 +95,7 @@ export const RosterDragZone: React.FC = () => {
     <div className={styles.rosterDragZone}>
       {/* Bench by Position - Four Column Layout */}
       <div className={styles.benchByPosition}>
-        {(['GK', 'DEF', 'MID', 'FWD'] as Position[]).map((position) => (
+        {(['GK', 'DEF', 'MID', 'FWD'] as PositionShort[]).map((position) => (
           <div
             key={position}
             className={styles.positionColumn}

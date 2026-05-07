@@ -1,12 +1,14 @@
 // ==============================
 // Players
 // ==============================
-// Position types: Both short (GK/DEF/MID/FWD) and full names for different contexts
+// Position types: Internal logic uses long-form names.
+// Short codes (GK/DEF/MID/FWD) are UI-only display values.
 // PlayerStatus: starting | bench | not_expected for match-day availability
 
 
-export type Position = "GK" | "DEF" | "MID" | "FWD";
-export type PositionFull = "Goalkeeper" | "Defender" | "Midfielder" | "Forward";
+export type Position = "Goalkeeper" | "Defender" | "Midfielder" | "Attacker";
+export type PositionShort = "GK" | "DEF" | "MID" | "FWD";
+export type PositionFull = Position;
 export type PlayerStatus = "starting" | "bench" | "not_expected";
 
 // Per-match stats shape — mirrors API-Football /fixtures/players response.

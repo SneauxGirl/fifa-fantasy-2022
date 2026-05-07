@@ -3,9 +3,8 @@ import { useAppDispatch } from './store'
 import { setMatches } from './store/slices/matchesSlice'
 import { initializeRoster } from './store/slices/rosterSlice'
 import { initializeNationTeams } from './store/slices/nationTeamsSlice'
-import { initializeLiveScores } from './store/thunks/liveScoresThunk'
 import { useTestUtils } from './hooks/useTestUtils'
-import type { RosterPlayer, RosterSquad, Match } from './types/match'
+import type { RosterPlayer, RosterSquad, Match, NationalTeam } from './types/match'
 import { Router } from './router'
 import mockMatches from './data/matches.json'
 import mockSquadsData from './data/squads.json'
@@ -16,7 +15,12 @@ function App() {
   useTestUtils() // Initialize dev test utilities
 
   useEffect(() => {
-    const allNationalTeams = mockSquadsData.teams || [];
+    // Normalize source data to match NationalTeam contract from types.
+    // squads.json may omit team-level isEliminated; default to false on init.
+    const allNationalTeams: NationalTeam[] = (mockSquadsData.teams || []).map((team: any) => ({
+      ...team,
+      isEliminated: team.isEliminated ?? false,
+    }));
 
     // Initialize players from all national teams roster data
     // Players are functionally separate from Squads (which are user selections)
@@ -65,15 +69,12 @@ function App() {
       }))
     );
 
-    // Initialize national teams as source of truth for elimination status
-    const nationTeamsSquads: RosterSquad[] = rosterSquads;
-
     // Load match data and initialize national teams (source of truth for elimination cascade)
+    // Pass full NationalTeam objects with nested squads and players
     dispatch(setMatches(mockMatches as Match[]))
-    dispatch(initializeLiveScores(mockMatches as Match[]) as any)
-    dispatch(initializeNationTeams(nationTeamsSquads))
+    dispatch(initializeNationTeams(allNationalTeams))
 
-    // Initialize roster with available players and squads from national teams
+    // Initialize roster with available players and squads extracted from national teams
     dispatch(initializeRoster({ players: rosterPlayers, squads: rosterSquads }))
   }, [dispatch])
 

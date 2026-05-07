@@ -8,7 +8,7 @@ import type { PlayerScore, SquadScore, TurnScore } from "../../types/fantasyScor
 /**
  * Aggregate STARTER Player scores and Squad scores into a turn total.
  *
- * Caller must pre-filter to STARTERS only — bench Players must not be passed in.
+ * Caller must pre-filter to STARTERS only -- bench Players must not be passed in.
  * The 50% SUBSTITUTE multiplier is already baked into each individual score
  * by calculatePlayerScore / calculateSquadScore.
  *
@@ -16,12 +16,12 @@ import type { PlayerScore, SquadScore, TurnScore } from "../../types/fantasyScor
  * Squads are excluded from MVP consideration.
  */
 export function calculateTurnScore(
-  turn:               number,
+  turn:                number,
   starterPlayerScores: PlayerScore[],
   squadScores:         SquadScore[]
 ): TurnScore {
   const playerPoints = starterPlayerScores.reduce((sum, s) => sum + s.totalPoints, 0);
-  const squadPoints  = squadScores.reduce((sum, s) => sum + s.totalPoints, 0);
+  const squadPoints = squadScores.reduce((sum, s) => sum + s.totalPoints, 0);
 
   const mvp = starterPlayerScores.reduce<PlayerScore | null>(
     (best, s) => (!best || s.totalPoints > best.totalPoints ? s : best),
@@ -32,7 +32,7 @@ export function calculateTurnScore(
     turn,
     playerPoints,
     squadPoints,
-    totalPoints:  playerPoints + squadPoints,
-    mvpPlayerId:  mvp?.playerId,
+    totalPoints: playerPoints + squadPoints,
+    mvpPlayerId: mvp?.playerId,
   };
 }

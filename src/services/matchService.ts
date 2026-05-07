@@ -96,12 +96,12 @@ export const normalizeMatches = (apiMatches: any[]): Match[] => {
     id: m.fixture.id,
     homeTeam: {
       id: m.teams.home.id,
-      code: m.teams.home.code || "",
+      countryCode: m.teams.home.code || "",
       name: m.teams.home.name,
     },
     awayTeam: {
       id: m.teams.away.id,
-      code: m.teams.away.code || "",
+      countryCode: m.teams.away.code || "",
       name: m.teams.away.name,
     },
     date: m.fixture.date,

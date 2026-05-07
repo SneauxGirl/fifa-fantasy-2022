@@ -33,7 +33,6 @@ Design principles and technical standards to maintain consistency, accessibility
 
 - **Keyboard Navigation**:
   - All interactive elements must be accessible via Tab and keyboard shortcuts
-  - No keyboard traps—users can tab through and away from all components
   - Proper focus order (logical, top-to-bottom)
   - Test with keyboard only (no mouse) to verify usability
 - **Focus States**:

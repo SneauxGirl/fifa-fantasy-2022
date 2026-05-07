@@ -15,8 +15,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../index";
 import type { Match, RosterPlayer, RosterSquad } from "../../types/match";
-import { applyLiveScore, transformMatch } from "../../lib/dataTransform";
-import { generateLiveScore } from "../slices/liveScoresSlice";
 import {
   selectScoringPlayers,
   selectScoringSquads,
@@ -85,39 +83,7 @@ export const selectIsRosterLocked = (state: RootState) =>
 
 export const selectAllMatches = createSelector(
   (state: RootState) => state.matches.allMatches,
-  (state: RootState) => state.liveScores.scores,
-  (matches: Match[], liveScores): Match[] =>
-    matches.map((match) => {
-      const isLive = ["1H", "2H", "ET", "HT", "P"].includes(match.status.short);
-
-      // Get stored live score or generate one for live matches
-      let liveScore = liveScores[match.id];
-      if (!liveScore && isLive) {
-        const finalScore = transformMatch(match);
-        liveScore = generateLiveScore(finalScore.score.home, finalScore.score.away, match.id);
-      }
-
-      if (!liveScore) return match;
-
-      const displayMatch = transformMatch(match);
-      const matchWithLiveScore = applyLiveScore(displayMatch, {
-        home: liveScore.home,
-        away: liveScore.away,
-        elapsed: liveScore.elapsed,
-      });
-
-      return {
-        ...match,
-        score: {
-          ...match.score,
-          fulltime: { home: matchWithLiveScore.score.home, away: matchWithLiveScore.score.away },
-        },
-        status: {
-          ...match.status,
-          elapsed: matchWithLiveScore.status.elapsed,
-        },
-      };
-    })
+  (matches: Match[]): Match[] => matches
 );
 
 export const selectRosterMatches = (state: RootState) =>
@@ -149,13 +115,6 @@ export const selectScoredMatches = createSelector(
       ["FT", "AET", "PEN", "SUSP", "ABD", "INT"].includes(m.status.short)
     )
 );
-
-/**
- * All matches with live score overlays applied (same as selectAllMatches)
- * For live matches (1H, 2H, etc), applies randomized current scores and elapsed time
- * For finished/upcoming matches, returns original match data
- */
-export const selectAllMatchesWithLiveScores = selectAllMatches;
 
 //Adjust for turn based play #TODO
 /** Matches grouped by tournament stage. */
@@ -214,5 +173,5 @@ export const selectMatchesByStage = createSelector(
 //   );
 //
 //   export const selectSquadScores = createSelector( ... );
-//   export const selectWeeklyScore = createSelector( ... );
+//   export const selectTurnScore = createSelector( ... );
 //   export const selectCumulativeTournamentScore = createSelector( ... );

@@ -19,43 +19,36 @@ export const SummaryTicker: React.FC = () => {
   const finishedMatches = useAppSelector(selectFinishedMatches);
   const upcomingMatches = useAppSelector(selectUpcomingMatches);
 
-  const renderTickerItem = (match: Match, uniqueKey: string) => {
+  const renderFinishedTickerItem = (match: Match, uniqueKey: string): React.ReactElement => {
     const displayMatch = transformMatch(match);
-    const isFinished = finishedMatches.includes(match);
-    const isUpcoming = upcomingMatches.includes(match);
-
-    if (isFinished) {
-      return (
-        <div key={uniqueKey} className={styles.tickerItem}>
-          <span className={styles.matchScore}>
-            {match.homeTeam.name} {displayMatch.score.home} - {displayMatch.score.away} {match.awayTeam.name}
-          </span>
-        </div>
-      );
-    }
-
-    if (isUpcoming) {
-      const matchDate = new Date(match.date);
-      const timeStr = matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-      return (
-        <div key={uniqueKey} className={styles.tickerItem}>
-          <span className={styles.matchScore}>
-            {match.homeTeam.name} vs {match.awayTeam.name}
-          </span>
-          <span className={styles.details}>
-            {matchDate.toLocaleDateString()} · {timeStr}
-          </span>
-        </div>
-      );
-    }
-
-    return null;
+    return (
+      <div key={uniqueKey} className={styles.tickerItem}>
+        <span className={styles.matchScore}>
+          {match.homeTeam.name} {displayMatch.score.home} - {displayMatch.score.away} {match.awayTeam.name}
+        </span>
+      </div>
+    );
   };
 
-  const tickerItems = [
-    ...finishedMatches.map((m) => renderTickerItem(m, `match-${m.id}`)),
-    ...upcomingMatches.slice(0, 5).map((m) => renderTickerItem(m, `match-${m.id}`)),
+  const renderUpcomingTickerItem = (match: Match, uniqueKey: string): React.ReactElement => {
+    const matchDate = new Date(match.date);
+    const timeStr = matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    return (
+      <div key={uniqueKey} className={styles.tickerItem}>
+        <span className={styles.matchScore}>
+          {match.homeTeam.name} vs {match.awayTeam.name}
+        </span>
+        <span className={styles.details}>
+          {matchDate.toLocaleDateString()} · {timeStr}
+        </span>
+      </div>
+    );
+  };
+
+  const tickerItems: React.ReactElement[] = [
+    ...finishedMatches.map((m) => renderFinishedTickerItem(m, `match-${m.id}`)),
+    ...upcomingMatches.slice(0, 5).map((m) => renderUpcomingTickerItem(m, `match-${m.id}`)),
     <div key="stubhub" className={styles.tickerItem}>
       <a
         href="https://www.stubhub.com/fifa-world-cup-tickets/event/149854291"
@@ -78,14 +71,14 @@ export const SummaryTicker: React.FC = () => {
     </div>,
   ];
 
-  // Filter out null items and duplicate for seamless loop with suffixed keys
-  const items = tickerItems.filter(Boolean);
+  // Duplicate for seamless loop with suffixed keys
+  const items = tickerItems;
   const loopedItems = [
     ...items,
     ...items.map((item) => {
       // Suffix the key to make duplicates unique for the second loop
       const originalKey = item.key;
-      return React.cloneElement(item as React.ReactElement<any>, {
+      return React.cloneElement(item, {
         key: `${originalKey}-dup`,
       });
     }),

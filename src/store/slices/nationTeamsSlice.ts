@@ -1,39 +1,36 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { RosterSquad } from "../../types/match";
+import type { NationalTeam, NationalPlayer } from "../../types/match";
 
 /**
  * National Teams Slice
  *
- * Stores the authoritative data about national teams in the tournament
- * (as it comes from the API or mock data).
- *
+ * Stores the authoritative data about all 32 national teams in the tournament.
  * This is the source of truth for:
- * - Which teams are in the tournament
- * - Which teams are eliminated
- * - Team rosters (available players)
+ * - Team metadata (name, confederation, group, coaches)
+ * - Team elimination status (tournament-level)
+ * - All national team rosters (~25 players per team, ~650 total)
+ * - Each team's squad record for fantasy scoring
  *
- * The roster system compares against this data to determine what
- * needs to be updated when a team's tournament status changes.
+ * The elimination cascade logic uses this data as the starting point:
+ * When a team is eliminated, all its players and squads are marked eliminated.
  *
- * NOTE: Team colors are NOT stored in Redux. Use lib/teamColors.ts getTeamColors() utility instead.
- * Colors are single source of truth in src/data/APItoFIFAmaps.json (teamColors section).
+ * Architecture:
+ * - Each NationalTeam contains nested squads and players arrays
+ * - Nested structure matches squads.json for consistency
+ * - Updateable: isEliminated flag cascades to nested players/squads
  *
- * TODO: INCOMPLETE REFACTOR (Phase 3.4 - to be completed)
- * Currently only stores squads array. Should expand to include:
- * - Full team metadata (teamId, teamName, countryCode, flag, confederation, group, coaches)
- * - All ~650 players from all 32 teams (national rosters, not user selections)
- * - This is the 32-team tournament source of truth (distinct from rosterSlice user selections)
- * See: docs/logic-notes.md Section 6 (App.tsx Initialization) for architecture details
+ * NOTE: Team colors are NOT stored here. Use lib/teamColors.ts getTeamColors() utility instead.
+ * Colors single source of truth: src/data/APItoFIFAmaps.json (teamColors section).
  *
  */
 
 export interface NationTeamsState {
-  squads: RosterSquad[];
+  teams: NationalTeam[];
 }
 
 const initialState: NationTeamsState = {
-  squads: [],
+  teams: [],
 };
 
 const nationTeamsSlice = createSlice({
@@ -41,31 +38,71 @@ const nationTeamsSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * Initialize national teams data from tournament data
-     * Called on app startup with data from API or mock JSON
+     * Initialize national teams with full tournament data
+     * Called on app startup with data from squads.json
+     * Input: Array of 32 NationalTeam objects with nested squads & players
      */
-    initializeNationTeams: (state, action: PayloadAction<RosterSquad[]>) => {
-      state.squads = action.payload;
+    initializeNationTeams: (state, action: PayloadAction<NationalTeam[]>) => {
+      state.teams = action.payload;
     },
 
     /**
-     * Update a team's elimination status (simulates API update)
-     * Called when the tournament announces a team is eliminated
+     * Mark a national team as eliminated (cascade via elimination logic)
+     * Sets isEliminated flag on team. Nested players/squads updated by rosterThunk.
+     * Called when tournament announces a team is eliminated (knockout loss).
      */
     updateTeamElimination: (
       state,
       action: PayloadAction<{ teamId: number; isEliminated: boolean }>
     ) => {
       const { teamId, isEliminated } = action.payload;
-      const squad = state.squads.find((s) => s.teamId === teamId);
-      if (squad) {
-        squad.isEliminated = isEliminated;
+      const team = state.teams.find((t) => t.teamId === teamId);
+      if (team) {
+        team.isEliminated = isEliminated;
+      }
+    },
+
+    /**
+     * Update elimination status for nested players in a team
+     * Called by elimination cascade logic after team is marked eliminated
+     */
+    updateTeamPlayersElimination: (
+      state,
+      action: PayloadAction<{ teamId: number; isEliminated: boolean }>
+    ) => {
+      const { teamId, isEliminated } = action.payload;
+      const team = state.teams.find((t) => t.teamId === teamId);
+      if (team) {
+        team.players.forEach((player) => {
+          player.isEliminated = isEliminated;
+        });
+      }
+    },
+
+    /**
+     * Update elimination status for nested squads in a team
+     * Called by elimination cascade logic after team is marked eliminated
+     */
+    updateTeamSquadsElimination: (
+      state,
+      action: PayloadAction<{ teamId: number; isEliminated: boolean }>
+    ) => {
+      const { teamId, isEliminated } = action.payload;
+      const team = state.teams.find((t) => t.teamId === teamId);
+      if (team) {
+        team.squads.forEach((squad) => {
+          squad.isEliminated = isEliminated;
+        });
       }
     },
   },
 });
 
-export const { initializeNationTeams, updateTeamElimination } =
-  nationTeamsSlice.actions;
+export const {
+  initializeNationTeams,
+  updateTeamElimination,
+  updateTeamPlayersElimination,
+  updateTeamSquadsElimination,
+} = nationTeamsSlice.actions;
 
 export default nationTeamsSlice.reducer;

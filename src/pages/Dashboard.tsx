@@ -4,7 +4,7 @@ import styles from "./Dashboard.module.scss";
 import appLayoutStyles from "../layouts/AppLayout.module.scss";
 
 /**
- * Dashboard Page
+ * Schedule Page
  * Overview of current/upcoming/past matches
  * Summary stats ticker, match list, roster sidebar
  */

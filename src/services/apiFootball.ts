@@ -92,21 +92,21 @@ apiClient.interceptors.response.use(
 
 /**
  * Convert API position code to standardized Position type
- * API uses: "G" (GK), "D" (DEF), "M" (MID), "F" (FWD), etc.
+ * API uses: "G" (Goalkeeper), "D" (Defender), "M" (Midfielder), "F" (Attacker), etc.
  */
 function normalizePosition(apiPosition: string): Position {
   const pos = apiPosition.toUpperCase()[0];
   switch (pos) {
     case "G":
-      return "GK";
+      return "Goalkeeper";
     case "D":
-      return "DEF";
+      return "Defender";
     case "M":
-      return "MID";
+      return "Midfielder";
     case "F":
-      return "FWD";
+      return "Attacker";
     default:
-      return "DEF"; // Default fallback
+      return "Defender"; // Default fallback
   }
 }
 
@@ -139,12 +139,12 @@ export function normalizeMatch(apiFixture: any): Match {
     id: apiFixture.fixture.id,
     homeTeam: {
       id: apiFixture.teams.home.id,
-      code: apiFixture.teams.home.code || "UNK",
+      countryCode: apiFixture.teams.home.code || "UNK",
       name: apiFixture.teams.home.name,
     },
     awayTeam: {
       id: apiFixture.teams.away.id,
-      code: apiFixture.teams.away.code || "UNK",
+      countryCode: apiFixture.teams.away.code || "UNK",
       name: apiFixture.teams.away.name,
     },
     date: apiFixture.fixture.date,
@@ -195,7 +195,7 @@ function normalizeMatchEvents(apiEvents: any[]): MatchEvent[] {
     },
     team: {
       id: event.team.id,
-      code: event.team.code || "",
+      countryCode: event.team.code || "",
     },
     player: {
       id: event.player.playerId,
@@ -218,8 +218,7 @@ function normalizeMatchEvents(apiEvents: any[]): MatchEvent[] {
  * Includes recent match performance stats
  */
 export function normalizePlayer(
-  apiPlayer: any,
-  statistics?: any[]
+  apiPlayer: any
 ): Player {
   const { firstName, lastName } = parsePlayerName(apiPlayer.player.name);
   const position = normalizePosition(apiPlayer.player.position || "D");
@@ -231,7 +230,7 @@ export function normalizePlayer(
     lastName,
     apiDisplayName: apiPlayer.player.name,
     position,
-    positionFull: getPositionFull(position),
+    positionFull: position,
     nationality: apiPlayer.team.country || "Unknown",
     countryCode: apiPlayer.team.code || "UNK",
     nationalityLocal: apiPlayer.team.code || "UNK",
@@ -260,23 +259,12 @@ function normalizePlayerStats(stats: any[]): PlayerMatchStats[] {
   }));
 }
 
-// Confirm this isn't backwards and maps correctly
-function getPositionFull(position: Position): "Goalkeeper" | "Defender" | "Midfielder" | "Forward" {
-  const positionMap = {
-    GK: "Goalkeeper" as const,
-    DEF: "Defender" as const,
-    MID: "Midfielder" as const,
-    FWD: "Forward" as const,
-  };
-  return positionMap[position];
-}
-
 // ─── Squad/Team Normalization ───────────────────────────────────────────────
 
 /**
  * Normalize a single API-Football team to Squad type
  */
-export function normalizeTeam(apiTeam: any, stats?: any): Squad {
+export function normalizeTeam(apiTeam: any): Squad {
   return {
     id: apiTeam.team.id,
     name: apiTeam.team.country || apiTeam.team.name,
@@ -284,47 +272,6 @@ export function normalizeTeam(apiTeam: any, stats?: any): Squad {
     code: apiTeam.team.code || "UNK",
     flag: apiTeam.team.flag || "🌍",
     logoUrl: apiTeam.team.logo,
-    historicalPerformance: [],
-  };
-}
-
-/**
- * Normalize tournament/squad statistics
- */
-function normalizeTournamentStats(matches: any[]): any {
-  if (!matches || matches.length === 0) {
-    return {
-      goalsFor: 0,
-      goalsAgainst: 0,
-      yellowCards: 0,
-      redCards: 0,
-      cleanSheets: 0,
-      shootoutGoals: 0,
-      shootoutMisses: 0,
-    };
-  }
-
-  let goalsFor = 0,
-    goalsAgainst = 0,
-    yellowCards = 0,
-    redCards = 0,
-    cleanSheets = 0;
-
-  matches.forEach((m: any) => {
-    goalsFor += m.goals?.for || 0;
-    goalsAgainst += m.goals?.against || 0;
-    yellowCards += m.cards?.yellow || 0;
-    redCards += m.cards?.red || 0;
-    if ((m.goals?.against || 0) === 0) cleanSheets++;
-  });
-
-  return {
-    goalsFor,
-    goalsAgainst,
-    yellowCards,
-    redCards,
-    shootoutGoals: 0,
-    shootoutMisses: 0,
   };
 }
 
@@ -434,7 +381,7 @@ export async function fetchSquadRoster(teamId: number): Promise<Player[]> {
     }
 
     return response.data.response.map((playerData: any) =>
-      normalizePlayer(playerData, playerData.statistics)
+      normalizePlayer(playerData)
     );
   } catch (error) {
     console.error(`Error fetching squad roster for team ${teamId}:`, error);
@@ -461,7 +408,7 @@ export async function fetchAllPlayers(): Promise<Player[]> {
     }
 
     return response.data.response.map((playerData: any) =>
-      normalizePlayer(playerData, playerData.statistics)
+      normalizePlayer(playerData)
     );
   } catch (error) {
     console.error(`Error fetching all players for ${WORLD_CUP.name}:`, error);

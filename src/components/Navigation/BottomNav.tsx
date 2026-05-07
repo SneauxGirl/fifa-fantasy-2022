@@ -16,7 +16,7 @@ const BottomNav = () => {
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }
         >
-          Dashboard
+          Schedule
         </NavLink>
 
         <NavLink
@@ -34,7 +34,7 @@ const BottomNav = () => {
             `${styles.navItem} ${isActive ? styles.active : ""}`
           }
         >
-          Matches
+          Match Play
         </NavLink>
       </div>
 
