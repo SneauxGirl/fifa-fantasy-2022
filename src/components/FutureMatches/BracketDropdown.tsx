@@ -1,7 +1,7 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { openMatchModal } from "../../store/slices/uiSlice";
-import { selectAllMatches, selectMatchesByStage } from "../../store/selectors/scoringSelectors";
+import { selectBracketResolvedMatches, selectMatchesByStage } from "../../store/selectors/scoringSelectors";
 import { countryToFifa } from "../../lib/formatMapping";
 import styles from "./BracketDropdown.module.scss";
 
@@ -11,7 +11,7 @@ import styles from "./BracketDropdown.module.scss";
  */
 export const BracketDropdown: React.FC = () => {
   const dispatch = useAppDispatch();
-  const allMatches = useAppSelector(selectAllMatches);
+  const allMatches = useAppSelector(selectBracketResolvedMatches);
   const groupedMatches = useAppSelector(selectMatchesByStage);
 
   const handleMatchChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

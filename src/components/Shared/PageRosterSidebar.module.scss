@@ -19,7 +19,7 @@
 .title {
   margin: 0 0 $spacing-12 0;
   font-size: $font-size-16;
-  font-weight: 600;
+  font-weight: $font-weight-bold;
   color: $color-text-default;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -79,7 +79,7 @@
 }
 
 .badge {
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   color: $color-text-medium;
   font-weight: 500;
   margin-left: $spacing-2;

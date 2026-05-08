@@ -8,15 +8,16 @@
 
 .title {
   margin-bottom: 12px;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: $font-size-24;
+  font-weight: $font-weight-bold;
   color: $color-action-default;
 }
 
 .rosterCountText {
   color: $color-neutral-text;
   margin-bottom: 8px;
-  font-size: 0.95rem;
+  font-size: $font-size-16;
+  line-height: 1.5;
 }
 
 .warningText {
@@ -26,7 +27,8 @@
   border-left: $border-width-4 solid $color-error-primary;
   border-radius: $border-radius-4;
   color: $color-error-secondary;
-  font-size: $font-size-14;
+  font-size: $font-size-16;
+  line-height: 1.5;
   font-weight: $font-weight-semibold;
   display: flex;
   align-items: center;
@@ -40,7 +42,7 @@
   border-left: $border-width-4 solid $color-warning-primary;
   border-radius: $border-radius-4;
   color: $color-warning-secondary;
-  font-size: $font-size-14;
+  font-size: $font-size-16;
   line-height: 1.5;
 }
 
@@ -54,8 +56,8 @@
   padding: 8px 20px;
   border: 2px solid transparent;
   border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: $font-size-16;
+  font-weight: $font-weight-bold;
   transition: all 0.2s ease;
   cursor: pointer;
 

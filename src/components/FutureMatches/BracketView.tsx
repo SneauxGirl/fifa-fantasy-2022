@@ -72,6 +72,16 @@ export const BracketView: React.FC = () => {
   const groupStage2 = groupMatches.slice(matchesPerPhase, matchesPerPhase * 2);
   const groupStage3 = groupMatches.slice(matchesPerPhase * 2);
 
+  const thirdPlaceMatches = matchesByStage["Third Place"] || [];
+  const finalOnlyMatches = matchesByStage["Final"] || [];
+  const finalRoundMatches = useMemo(
+    () =>
+      [...thirdPlaceMatches, ...finalOnlyMatches].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      ),
+    [thirdPlaceMatches, finalOnlyMatches]
+  );
+
   const stages: Array<{ id: TurnId; name: string; matches: Match[]; count: number }> = [
     { id: "Group_Stage_1", name: "Group Stage 1", matches: groupStage1, count: groupStage1.length },
     { id: "Group_Stage_2", name: "Group Stage 2", matches: groupStage2, count: groupStage2.length },
@@ -97,8 +107,8 @@ export const BracketView: React.FC = () => {
     {
       id: "Final",
       name: "Final",
-      matches: matchesByStage["Final"] || [],
-      count: (matchesByStage["Final"] || []).length,
+      matches: finalRoundMatches,
+      count: finalRoundMatches.length,
     },
   ];
 

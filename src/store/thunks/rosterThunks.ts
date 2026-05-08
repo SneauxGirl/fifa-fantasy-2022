@@ -33,6 +33,66 @@ import {
   persistTurnSimulationToStorage,
   type TurnId,
 } from "../../lib/turnSimulation";
+import { resolveBracketMatches } from "../../lib/bracketResolve";
+import canonicalKnockout from "../../data/wc2022-canonical-knockout.json";
+
+const WC2022_KO_CANONICAL = canonicalKnockout as Record<
+  string,
+  { status: Match["status"]; score: Match["score"] }
+>;
+
+const KO_MATCH_ID_MIN = 49;
+const KO_MATCH_ID_MAX = 64;
+
+/**
+ * Apply fetched turn rows + historical WC 2022 KO scores, then resolve winner-of /
+ * group-place slots for the full schedule.
+ */
+function mergePlayedTurnIntoSchedule(
+  existingMatches: Match[],
+  matchResults: Match[],
+  nationalTeams: RootState["nationTeams"]["teams"]
+): Match[] {
+  const resultById = new Map(matchResults.map((m) => [m.id, m]));
+  const turnIdSet = new Set(matchResults.map((m) => m.id));
+
+  const merged = existingMatches.map((match) => {
+    if (!turnIdSet.has(match.id)) return match;
+    const fetched = resultById.get(match.id);
+    if (!fetched) return match;
+
+    if (match.id >= KO_MATCH_ID_MIN && match.id <= KO_MATCH_ID_MAX) {
+      const canon = WC2022_KO_CANONICAL[String(match.id)];
+      if (!canon) {
+        return {
+          ...match,
+          status: fetched.status,
+          score: fetched.score,
+          events: fetched.events.length ? fetched.events : match.events,
+        };
+      }
+      return {
+        ...match,
+        status: canon.status,
+        score: {
+          halftime: canon.score.halftime,
+          fulltime: canon.score.fulltime,
+          extratime: canon.score.extratime,
+          penalty: canon.score.penalty,
+          live: match.score.live,
+        },
+        events: fetched.events.length ? fetched.events : match.events,
+      };
+    }
+
+    return {
+      ...fetched,
+      bracketFeeds: match.bracketFeeds,
+    };
+  });
+
+  return resolveBracketMatches(merged, nationalTeams);
+}
 
 /**
  * Play Turn Async Thunk — Turn Completion Orchestrator
@@ -140,6 +200,15 @@ export const playTurn = createAsyncThunk<
         });
       }
       const { players: rosterPlayers, squads: rosterSquads } = state.roster;
+      const nationalTeams = state.nationTeams.teams;
+      const mergedSchedule = mergePlayedTurnIntoSchedule(
+        state.matches.allMatches,
+        matchResults,
+        nationalTeams
+      );
+      const playedMatchIds = new Set(matchResults.map((m) => m.id));
+      const turnMatches = mergedSchedule.filter((m) => playedMatchIds.has(m.id));
+
       const turnNumberMap: Record<string, number> = {
         Group_Stage_1: 1,
         Group_Stage_2: 2,
@@ -164,16 +233,14 @@ export const playTurn = createAsyncThunk<
             lastName: rosterPlayer.name?.split(" ").slice(1).join(" ") || "",
             apiDisplayName: rosterPlayer.name || "",
             position: rosterPlayer.position,
-            positionFull: rosterPlayer.position,
             nationality: "",
             countryCode: rosterPlayer.countryCode,
-            nationalityLocal: "",
             club: "",
             status: "bench",
           };
 
           // Check each match to see if this player participated
-          matchResults.forEach((match) => {
+          turnMatches.forEach((match) => {
             const stats = extractPlayerMatchStats(player, match);
             if (!stats) return; // Player didn't play in this match
 
@@ -198,7 +265,7 @@ export const playTurn = createAsyncThunk<
 
       rosterSquads.forEach((rosterSquad) => {
         // Find the squad's match in this turn (squads only play once per turn)
-        const squadMatch = matchResults.find(
+        const squadMatch = turnMatches.find(
           (m) =>
             m.homeTeam.countryCode === rosterSquad.countryCode ||
             m.awayTeam.countryCode === rosterSquad.countryCode
@@ -264,7 +331,7 @@ export const playTurn = createAsyncThunk<
       };
 
       // Detect eliminated national teams from knockout match results
-      const eliminatedCountryCodes = detectEliminatedTeams(matchResults, turnId);
+      const eliminatedCountryCodes = detectEliminatedTeams(turnMatches, turnId);
       console.log(`[playTurn] Detected ${eliminatedCountryCodes.length} eliminated teams:`, eliminatedCountryCodes);
 
       // Find roster squads from eliminated teams
@@ -305,16 +372,13 @@ export const playTurn = createAsyncThunk<
       console.log("[playTurn] Step 5: Eliminated members moved to pool");
 
       // ─── STEP 6: Store match data for future reference ──────────────
-      const existingMatches = getState().matches.allMatches;
-      const resultById = new Map(matchResults.map((m) => [m.id, m]));
-      const mergedMatches = existingMatches.map((match) => resultById.get(match.id) ?? match);
-      dispatch(setMatches(mergedMatches));
+      dispatch(setMatches(mergedSchedule));
 
       const currentTurnSimulation = getState().matches.turnSimulation;
       if (currentTurnSimulation) {
         const nextTurnSimulation = advanceTurnSimulation(
           currentTurnSimulation,
-          mergedMatches,
+          mergedSchedule,
           turnId as TurnId
         );
         dispatch(setTurnSimulation(nextTurnSimulation));
@@ -327,7 +391,7 @@ export const playTurn = createAsyncThunk<
 
       // ─── STEP 7: Return result ──────────────────────────────────────
       return {
-        matches: mergedMatches,
+        matches: mergedSchedule,
         eliminations,
       };
     } catch (error) {
@@ -355,24 +419,39 @@ function detectEliminatedTeams(matches: Match[], turnId: string): string[] {
 
   const eliminated: string[] = [];
 
-  // For knockout matches: losers are eliminated
   matches
     .filter((m) => ["FT", "AET", "PEN"].includes(m.status.short))
     .forEach((match) => {
-      const score = match.score.fulltime;
-      if (!score) return;
-      if (score.home == null || score.away == null) return;
-
-      // Determine loser (eliminated)
-      if (score.home > score.away) {
-        eliminated.push(match.awayTeam.countryCode);
-      } else if (score.away > score.home) {
-        eliminated.push(match.homeTeam.countryCode);
+      if (match.homeTeam.countryCode === "TBD" || match.awayTeam.countryCode === "TBD") {
+        return;
       }
-      // Draws: both teams advance (no elimination in knockout)
+      const status = match.status.short;
+      const ftH = match.score.fulltime?.home ?? 0;
+      const ftA = match.score.fulltime?.away ?? 0;
+      const etH =
+        status === "AET" || status === "PEN"
+          ? match.score.extratime?.home ?? 0
+          : 0;
+      const etA =
+        status === "AET" || status === "PEN"
+          ? match.score.extratime?.away ?? 0
+          : 0;
+      const homeGoals = ftH + etH;
+      const awayGoals = ftA + etA;
+
+      if (status === "PEN" && homeGoals === awayGoals) {
+        const ph = match.score.penalty?.home ?? 0;
+        const pa = match.score.penalty?.away ?? 0;
+        if (ph > pa) eliminated.push(match.awayTeam.countryCode);
+        else if (pa > ph) eliminated.push(match.homeTeam.countryCode);
+        return;
+      }
+
+      if (homeGoals > awayGoals) eliminated.push(match.awayTeam.countryCode);
+      else if (awayGoals > homeGoals) eliminated.push(match.homeTeam.countryCode);
     });
 
-  return [...new Set(eliminated)]; // Remove duplicates
+  return [...new Set(eliminated)];
 }
 
 /**

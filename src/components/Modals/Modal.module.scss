@@ -27,6 +27,8 @@
   box-shadow: $shadow-high;
   animation: slideUp 0.3s ease-out;
   border: $border-width-4 solid $color-bg-tertiary;
+  font-size: $font-size-16;
+  line-height: 1.5;
 }
 
 .closeButton {

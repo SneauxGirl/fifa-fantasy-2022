@@ -162,13 +162,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: $sizing-24;
-  height: $sizing-24;
+  width: $sizing-32;
+  height: $sizing-32;
   border: $border-width-2 solid var(--team-primary-color);
   color: #000000;
   border-radius: 50%;
   font-weight: $font-weight-bold;
-  font-size: $font-size-10;
+  font-size: $font-size-14;
 }
 
 .name {
@@ -192,7 +192,7 @@
   background: $color-bg-primary;
   border: $border-width-1 solid $color-border-mid;
   border-radius: $border-radius-4;
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   font-weight: $font-weight-semibold;
   cursor: pointer;
   transition: $transition-all;
@@ -203,7 +203,7 @@
   }
 
   &:active:not(:disabled) {
-    transform: scale(0.95);
+    opacity: 0.92;
   }
 
   &:disabled {
@@ -248,7 +248,7 @@
   background: $color-success-primary;
   color: $color-text-inverse;
   border-radius: $border-radius-4;
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   font-weight: $font-weight-bold;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -274,7 +274,7 @@
 
   .actionBtn {
     padding: $spacing-2 $spacing-6;
-    font-size: $font-size-10;
+    font-size: $font-size-14;
   }
 }
 
@@ -290,11 +290,11 @@
   .initials {
     width: $sizing-24;
     height: $sizing-24;
-    font-size: $font-size-10;
+    font-size: $font-size-14;
   }
 
   .actionBtn {
     padding: $spacing-2 $spacing-4;
-    font-size: $font-size-10;
+    font-size: $font-size-14;
   }
 }

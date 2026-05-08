@@ -88,15 +88,15 @@ $color-text-inverse: #ffffff;
 // Font Families
 $font-family-base: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-// Font Weights
+// Font Weights (AGENTS.md: 400 body, 500 emphasis, 700 strong — avoid standalone 600)
 $font-weight-light: 300;
 $font-weight-regular: 400;
 $font-weight-semibold: 500;
-$font-weight-bold: 600;
-$font-weight-extrabold: 700;
+$font-weight-bold: 700;
+$font-weight-extrabold: 700; // same as bold — use size/letter-spacing for hierarchy
 
 // Font Sizes (FIFA granular scale in rem)
-$font-size-10: 0.625rem;   // 10px
+$font-size-10: 0.625rem;   // 10px — avoid for UI text; prefer $font-size-14+ (readability)
 $font-size-12: 0.75rem;    // 12px
 $font-size-14: 0.875rem;   // 14px
 $font-size-16: 1rem;       // 16px
@@ -243,10 +243,11 @@ $button-text-color: #fff;
 $button-text-color-hover: #fff;
 $button-text-transform: uppercase;
 $button-transition: all 0.2s ease-in-out;
-$button-transform-hover: scale(1.1);
-$button-font-size: 0.75rem;
-$button-font-size-small: 0.75rem;
-$button-font-size-small-lg: 0.875rem;
+// Prefer box-shadow / opacity for hover — not transform: scale (layout/a11y; see AGENTS.md)
+$button-transform-hover: none;
+$button-font-size: $font-size-16;
+$button-font-size-small: $font-size-14;
+$button-font-size-small-lg: $font-size-16;
 $button-line-height: 160%;
 
 // ========== SHADOWS ==========

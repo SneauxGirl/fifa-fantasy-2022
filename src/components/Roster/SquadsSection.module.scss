@@ -47,6 +47,14 @@
   display: flex;
   flex-direction: column;
   gap: $spacing-24;
+  padding: $spacing-8;
+  border-radius: $border-radius-8;
+  overflow: auto;
+
+  &:focus {
+    outline: $border-width-2 solid $color-bg-tertiary;
+    outline-offset: $spacing-2;
+  }
 }
 
 .squadCard {
@@ -183,7 +191,7 @@
   }
 
   &:active {
-    transform: scale(0.95);
+    opacity: 0.92;
   }
 }
 
@@ -210,7 +218,7 @@
   }
 
   &:active {
-    transform: scale(0.98);
+    opacity: 0.94;
   }
 
   &.remove {
@@ -234,7 +242,7 @@
     background: $color-bg-tertiary;
     color: $color-text-inverse;
     border: $border-width-1 solid $color-bg-tertiary;
-    font-size: $font-size-12;
+    font-size: $font-size-14;
     text-transform: uppercase;
     letter-spacing: 0.3px;
 
@@ -251,7 +259,7 @@
   color: #000000;
   border: 1px solid #000000;
   border-radius: $border-radius-4;
-  font-size: $font-size-12;
+  font-size: $font-size-14;
   font-weight: $font-weight-semibold;
   cursor: pointer;
   transition: $transition-all;
@@ -302,7 +310,7 @@
 }
 
 .countLabel {
-  font-size: $font-size-12;
+  font-size: $font-size-14;
   color: $color-text-medium;
   text-transform: uppercase;
   font-weight: $font-weight-regular;
@@ -329,7 +337,7 @@
 
 .subsectionTitle {
   margin: 0;
-  font-size: $font-size-12;
+  font-size: $font-size-14;
   font-weight: $font-weight-semibold;
   color: #666;
   text-transform: uppercase;
@@ -354,7 +362,7 @@
   cursor: pointer;
   transition: $transition-all;
   position: relative;
-  font-size: $font-size-12;
+  font-size: $font-size-14;
 
   &:hover {
     border-color: $color-bg-tertiary;
@@ -368,7 +376,7 @@
   }
 
   &:active {
-    transform: scale(0.95);
+    opacity: 0.93;
   }
 }
 
@@ -402,7 +410,7 @@
 }
 
 .position {
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   color: $color-text-medium;
   font-weight: $font-weight-regular;
 }
@@ -411,14 +419,14 @@
   position: absolute;
   top: $spacing-2;
   right: $spacing-2;
-  font-size: $font-size-10;
+  font-size: $font-size-14;
 }
 
 .eliminatedIcon {
   position: absolute;
   top: $spacing-2;
   right: $spacing-2;
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   color: $color-error-primary;
 }
 
@@ -438,7 +446,7 @@
 
   .playerBadge {
     padding: $spacing-6 $spacing-4;
-    font-size: $font-size-10;
+    font-size: $font-size-14;
   }
 
   .number {
@@ -462,6 +470,6 @@
 
   .playerBadge {
     padding: $spacing-6 $spacing-2;
-    font-size: $font-size-10;
+    font-size: $font-size-14;
   }
 }

@@ -8,7 +8,6 @@
 
 export type Position = "Goalkeeper" | "Defender" | "Midfielder" | "Attacker";
 export type PositionShort = "GK" | "DEF" | "MID" | "FWD";
-export type PositionFull = Position;
 export type PlayerStatus = "starting" | "bench" | "not_expected";
 
 // Per-match stats shape — mirrors API-Football /fixtures/players response.
@@ -41,14 +40,11 @@ export interface Player {
   lastName: string;               // API: player.lastname
   apiDisplayName: string;         // API: player.name — abbreviated (e.g. "L. Messi"); for mapping/logging only
   position: Position;
-  positionFull?: PositionFull;
   nationality: string;            // API: player.nationality — Anglicized (e.g. "Netherlands"); used for API calls
   countryCode: string;             // Country code (API format, e.g. "NET", "JAP")
-  nationalityLocal: string;       // Locally preferred name (e.g. "Nederland") — mapped via countryNames.ts
   club: string;                   // API: statistics[].team.name — professional club name
   status: PlayerStatus;
   isMvp?: boolean;                // tournament MVP designation — toggles trophy badge on card
-  price?: number;                 // Phase 8: budget constraint value
-  photoUrl?: string;              // API: player.photo
+  jerseyNumber?: number;
   tournamentPerformance?: PlayerMatchStats[]; // tournament match-level stats (populated once tournament begins)
 }

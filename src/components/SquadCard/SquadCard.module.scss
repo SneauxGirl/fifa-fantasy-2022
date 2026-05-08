@@ -97,7 +97,7 @@
 }
 
 .squadCardBadge {
-  font-size: $font-size-12;
+  font-size: $font-size-16;
   font-weight: $font-weight-bold;
   letter-spacing: 0.6px;
   padding: $spacing-4 $spacing-10;
@@ -138,7 +138,7 @@
 }
 
 .coachRole {
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   color: $color-text-medium;
   font-weight: $font-weight-semibold;
   text-transform: uppercase;
@@ -147,7 +147,7 @@
 }
 
 .coachName {
-  font-size: $font-size-14;
+  font-size: $font-size-16;
   color: $color-text-default;
   font-weight: $font-weight-semibold;
 }
@@ -159,7 +159,7 @@
 }
 
 .squadCardStatsLabel {
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   color: $color-text-medium;
   font-weight: $font-weight-semibold;
   text-transform: uppercase;
@@ -197,7 +197,7 @@
 }
 
 .squadCardStatBoxLabel {
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   color: $color-text-medium;
   font-weight: $font-weight-semibold;
   text-transform: uppercase;
@@ -221,7 +221,7 @@
 
 .conflictsLabel {
   display: block;
-  font-size: $font-size-12;
+  font-size: $font-size-16;
   font-weight: $font-weight-bold;
   color: $color-error-primary;
   text-transform: uppercase;
@@ -231,7 +231,7 @@
 
 .conflictsSubheading {
   display: block;
-  font-size: $font-size-10;
+  font-size: $font-size-14;
   font-weight: $font-weight-semibold;
   color: $color-text-medium;
   text-transform: uppercase;
@@ -266,7 +266,7 @@
 }
 
 .playerName {
-  font-size: $font-size-12;
+  font-size: $font-size-16;
   font-weight: $font-weight-semibold;
   color: $color-text-default;
   overflow: hidden;
@@ -276,8 +276,9 @@
 
 .conflictsNote {
   margin: 0;
-  font-size: $font-size-10;
-  color: $color-text-medium;
+  font-size: $font-size-16;
+  line-height: 1.5;
+  color: $color-text-default;
   font-style: italic;
 }
 
@@ -297,7 +298,7 @@
 
 .noConflictsLabel {
   display: block;
-  font-size: $font-size-12;
+  font-size: $font-size-16;
   font-weight: $font-weight-bold;
   color: $color-text-default;
   text-transform: uppercase;
@@ -307,6 +308,7 @@
 
 .noConflictsNote {
   margin: 0;
-  font-size: $font-size-12;
+  font-size: $font-size-16;
+  line-height: 1.5;
   color: $color-text-default;
 }

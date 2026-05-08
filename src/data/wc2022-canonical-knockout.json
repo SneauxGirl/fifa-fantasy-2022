@@ -1,0 +1,146 @@
+{
+  "49": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 3, "away": 1 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "50": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 2, "away": 1 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "51": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 3, "away": 1 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "52": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 3, "away": 0 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "53": {
+    "status": { "short": "PEN", "long": "Match Finished (Pen)", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 1, "away": 1 },
+      "extratime": { "home": 0, "away": 0 },
+      "penalty": { "home": 1, "away": 3 }
+    }
+  },
+  "54": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 4, "away": 1 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "55": {
+    "status": { "short": "PEN", "long": "Match Finished (Pen)", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 0, "away": 0 },
+      "extratime": { "home": 0, "away": 0 },
+      "penalty": { "home": 3, "away": 0 }
+    }
+  },
+  "56": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 6, "away": 1 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "57": {
+    "status": { "short": "PEN", "long": "Match Finished (Pen)", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 0, "away": 0 },
+      "extratime": { "home": 1, "away": 1 },
+      "penalty": { "home": 4, "away": 2 }
+    }
+  },
+  "58": {
+    "status": { "short": "PEN", "long": "Match Finished (Pen)", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 2, "away": 2 },
+      "extratime": { "home": 0, "away": 0 },
+      "penalty": { "home": 3, "away": 4 }
+    }
+  },
+  "59": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 1, "away": 0 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "60": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 1, "away": 2 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "61": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 3, "away": 0 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "62": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 2, "away": 0 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "63": {
+    "status": { "short": "FT", "long": "Match Finished", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 2, "away": 1 },
+      "extratime": { "home": null, "away": null },
+      "penalty": { "home": null, "away": null }
+    }
+  },
+  "64": {
+    "status": { "short": "PEN", "long": "Match Finished (Pen)", "elapsed": null },
+    "score": {
+      "halftime": { "home": null, "away": null },
+      "fulltime": { "home": 2, "away": 2 },
+      "extratime": { "home": 1, "away": 1 },
+      "penalty": { "home": 4, "away": 2 }
+    }
+  }
+}

@@ -10,6 +10,8 @@ import type { Match, MatchEvent } from "../types/match";
 import type { Player, PlayerMatchStats, Position } from "../types/player";
 import type { Squad } from "../types/squad";
 import { config } from "../config";
+import { getDataSourcePreference } from "../lib/dataSourcePreference";
+import mockMatches from "../data/matches.json";
 
 // ─── Configuration ───────────────────────────────────────────────────────
 // Official API-Football documentation: https://www.api-football.com/documentation-v3
@@ -63,8 +65,8 @@ export const TURNS = {
   },
   Final: {
     round: "Final",
-    dateRange: ["2022-12-18", "2022-12-18"],
-    matchCount: 1,
+    dateRange: ["2022-12-17", "2022-12-18"],
+    matchCount: 2,
   },
 };
 
@@ -135,18 +137,21 @@ function parsePlayerName(apiName: string): { firstName: string; lastName: string
  * Normalize a single API-Football fixture to Match type
  */
 export function normalizeMatch(apiFixture: any): Match {
+  const homeTeam = {
+    id: apiFixture.teams.home.id,
+    countryCode: apiFixture.teams.home.code || "UNK",
+    name: apiFixture.teams.home.name,
+  };
+  const awayTeam = {
+    id: apiFixture.teams.away.id,
+    countryCode: apiFixture.teams.away.code || "UNK",
+    name: apiFixture.teams.away.name,
+  };
+
   return {
     id: apiFixture.fixture.id,
-    homeTeam: {
-      id: apiFixture.teams.home.id,
-      countryCode: apiFixture.teams.home.code || "UNK",
-      name: apiFixture.teams.home.name,
-    },
-    awayTeam: {
-      id: apiFixture.teams.away.id,
-      countryCode: apiFixture.teams.away.code || "UNK",
-      name: apiFixture.teams.away.name,
-    },
+    homeTeam,
+    awayTeam,
     date: apiFixture.fixture.date,
     status: {
       short: apiFixture.fixture.status.short,
@@ -180,35 +185,52 @@ export function normalizeMatch(apiFixture: any): Match {
       id: apiFixture.league.season,
       name: apiFixture.league.name,
     } : undefined,
-    events: normalizeMatchEvents(apiFixture.events || []),
+    events: normalizeMatchEventsForFixture(apiFixture.events || [], homeTeam, awayTeam),
   };
 }
 
 /**
- * Normalize match events from API response
+ * Normalize match events from API response.
+ * Fixture events often omit `team.code`; resolve country code from home/away IDs.
  */
-function normalizeMatchEvents(apiEvents: any[]): MatchEvent[] {
-  return (apiEvents || []).map((event) => ({
-    time: {
-      elapsed: event.time.elapsed || 0,
-      extra: event.time.extra || null,
-    },
-    team: {
-      id: event.team.id,
-      countryCode: event.team.code || "",
-    },
-    player: {
-      id: event.player.playerId,
-      name: event.player.name,
-    },
-    assist: {
-      id: event.assist?.id || null,
-      name: event.assist?.name || null,
-    },
-    type: event.type || "Goal",
-    detail: event.detail || "",
-    comments: event.comments || null,
-  }));
+function normalizeMatchEventsForFixture(
+  apiEvents: any[],
+  homeTeam: Match["homeTeam"],
+  awayTeam: Match["awayTeam"]
+): MatchEvent[] {
+  return (apiEvents || []).map((event: any) => {
+    const teamId = event.team?.id;
+    let countryCode =
+      event.team?.code ||
+      event.team?.countryCode ||
+      "";
+    if (!countryCode && teamId === homeTeam.id) countryCode = homeTeam.countryCode;
+    if (!countryCode && teamId === awayTeam.id) countryCode = awayTeam.countryCode;
+
+    const playerId = event.player?.id ?? event.player?.playerId ?? 0;
+
+    return {
+      time: {
+        elapsed: event.time?.elapsed ?? 0,
+        extra: event.time?.extra ?? null,
+      },
+      team: {
+        id: teamId ?? 0,
+        countryCode,
+      },
+      player: {
+        id: playerId,
+        name: event.player?.name ?? "",
+      },
+      assist: {
+        id: event.assist?.id ?? null,
+        name: event.assist?.name ?? null,
+      },
+      type: event.type || "Goal",
+      detail: event.detail || "",
+      comments: event.comments ?? null,
+    };
+  });
 }
 
 // ─── Player Normalization ───────────────────────────────────────────────────
@@ -222,21 +244,24 @@ export function normalizePlayer(
 ): Player {
   const { firstName, lastName } = parsePlayerName(apiPlayer.player.name);
   const position = normalizePosition(apiPlayer.player.position || "D");
+  const pid = apiPlayer.player?.id ?? apiPlayer.player?.playerId ?? 0;
+  const jerseyNumber =
+    apiPlayer.player?.number ??
+    apiPlayer.statistics?.[0]?.games?.number ??
+    undefined;
 
   return {
-    playerId: apiPlayer.player.playerId,
-    id: apiPlayer.player.playerId,
+    playerId: pid,
+    id: pid,
     firstName,
     lastName,
     apiDisplayName: apiPlayer.player.name,
     position,
-    positionFull: position,
     nationality: apiPlayer.team.country || "Unknown",
     countryCode: apiPlayer.team.code || "UNK",
-    nationalityLocal: apiPlayer.team.code || "UNK",
     club: apiPlayer.team.name,
     status: "bench",
-    photoUrl: apiPlayer.player.photo,
+    jerseyNumber,
     tournamentPerformance: [],
   };
 }
@@ -277,6 +302,78 @@ export function normalizeTeam(apiTeam: any): Squad {
 
 // ─── Turn-Based Match Fetching ───────────────────────────────────────────
 
+const TOURNAMENT_SCHEDULE_FROM = TURNS.Group_Stage_1.dateRange[0];
+const TOURNAMENT_SCHEDULE_TO = TURNS.Final.dateRange[1];
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * All World Cup fixtures in one range (schedule / UI). Does not attach per-fixture events
+ * (use getMatchResults or fetchMatchDetails for events).
+ */
+export async function fetchTournamentScheduleMatches(): Promise<Match[]> {
+  const response = await apiClient.get("/fixtures", {
+    params: {
+      league: WORLD_CUP.id,
+      season: WORLD_CUP.season,
+      from: TOURNAMENT_SCHEDULE_FROM,
+      to: TOURNAMENT_SCHEDULE_TO,
+    },
+  });
+
+  if (!response.data?.response) {
+    console.warn("No fixtures returned for tournament schedule range");
+    return [];
+  }
+
+  return response.data.response.map(normalizeMatch);
+}
+
+function filterMockMatchesForTurn(turnId: string): Match[] {
+  const turn = TURNS[turnId as keyof typeof TURNS];
+  if (!turn) {
+    throw new Error(`Invalid turn ID: ${turnId}`);
+  }
+  const from = new Date(`${turn.dateRange[0]}T00:00:00.000Z`).getTime();
+  const to = new Date(`${turn.dateRange[1]}T23:59:59.999Z`).getTime();
+  return (mockMatches as unknown as Match[]).filter((m) => {
+    const t = new Date(m.date).getTime();
+    return t >= from && t <= to;
+  });
+}
+
+async function fetchEventsForFixture(match: Match): Promise<MatchEvent[]> {
+  const response = await apiClient.get("/fixtures/events", {
+    params: { fixture: match.id },
+  });
+  const raw = response.data?.response || [];
+  return normalizeMatchEventsForFixture(raw, match.homeTeam, match.awayTeam);
+}
+
+async function enrichMatchesWithFixtureEvents(matches: Match[]): Promise<Match[]> {
+  const batchSize = 8;
+  const out: Match[] = [];
+  for (let i = 0; i < matches.length; i += batchSize) {
+    const batch = matches.slice(i, i + batchSize);
+    const enriched = await Promise.all(
+      batch.map(async (m) => {
+        try {
+          const events = await fetchEventsForFixture(m);
+          return { ...m, events };
+        } catch (e) {
+          console.warn(`[apiFootball] events fetch failed for fixture ${m.id}`, e);
+          return m;
+        }
+      })
+    );
+    out.push(...enriched);
+    if (i + batchSize < matches.length) await sleep(60);
+  }
+  return out;
+}
+
 /**
  * Fetch match results for a specific turn
  * Maps turn ID to date range and API parameters
@@ -292,8 +389,14 @@ export async function getMatchResults(turnId: string): Promise<Match[]> {
     throw new Error(`Invalid turn ID: ${turnId}`);
   }
 
+  const source = getDataSourcePreference();
+
+  if (source === "mock") {
+    return filterMockMatchesForTurn(turnId);
+  }
+
   try {
-    const params: any = {
+    const params: Record<string, string | number> = {
       league: WORLD_CUP.id,
       season: WORLD_CUP.season,
       from: turn.dateRange[0],
@@ -307,7 +410,8 @@ export async function getMatchResults(turnId: string): Promise<Match[]> {
       return [];
     }
 
-    return response.data.response.map(normalizeMatch);
+    const normalized: Match[] = response.data.response.map(normalizeMatch);
+    return enrichMatchesWithFixtureEvents(normalized);
   } catch (error) {
     console.error(`Error fetching match results for turn ${turnId}:`, error);
     throw error;
@@ -329,7 +433,16 @@ export async function fetchMatchDetails(matchId: number): Promise<Match> {
       throw new Error(`Match ${matchId} not found`);
     }
 
-    return normalizeMatch(response.data.response[0]);
+    let match = normalizeMatch(response.data.response[0]);
+    if (match.events.length === 0) {
+      try {
+        const events = await fetchEventsForFixture(match);
+        match = { ...match, events };
+      } catch {
+        // keep fixture without events
+      }
+    }
+    return match;
   } catch (error) {
     console.error(`Error fetching match ${matchId}:`, error);
     throw error;

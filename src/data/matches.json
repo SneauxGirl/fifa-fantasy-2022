@@ -2322,16 +2322,16 @@
   {
     "id": 49,
     "homeTeam": {
-      "id": 2391,
-      "countryCode": "NET",
-      "name": "Netherlands"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1A"
     },
     "awayTeam": {
-      "id": 2397,
-      "countryCode": "BEL",
-      "name": "Belgium"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2B"
     },
-    "date": "2022-12-03T12:00:00Z",
+    "date": "2022-12-03T17:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2364,21 +2364,33 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "A",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "B",
+        "place": 2
+      }
+    }
   },
   {
     "id": 50,
     "homeTeam": {
-      "id": 2395,
-      "countryCode": "SPA",
-      "name": "Spain"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1C"
     },
     "awayTeam": {
-      "id": 2380,
-      "countryCode": "GER",
-      "name": "Germany"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2D"
     },
-    "date": "2022-12-04T01:00:00Z",
+    "date": "2022-12-03T21:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2411,21 +2423,33 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "C",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "D",
+        "place": 2
+      }
+    }
   },
   {
     "id": 51,
     "homeTeam": {
-      "id": 2381,
-      "countryCode": "FRA",
-      "name": "France"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1D"
     },
     "awayTeam": {
-      "id": 2378,
-      "countryCode": "DEN",
-      "name": "Denmark"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2C"
     },
-    "date": "2022-12-04T12:00:00Z",
+    "date": "2022-12-04T17:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2458,21 +2482,33 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "D",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "C",
+        "place": 2
+      }
+    }
   },
   {
     "id": 52,
     "homeTeam": {
-      "id": 2375,
-      "countryCode": "ARG",
-      "name": "Argentina"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1B"
     },
     "awayTeam": {
-      "id": 2391,
-      "countryCode": "NET",
-      "name": "Netherlands"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2A"
     },
-    "date": "2022-12-05T01:00:00Z",
+    "date": "2022-12-04T21:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2505,21 +2541,33 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "B",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "A",
+        "place": 2
+      }
+    }
   },
   {
     "id": 53,
     "homeTeam": {
-      "id": 2403,
-      "countryCode": "POR",
-      "name": "Portugal"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1E"
     },
     "awayTeam": {
-      "id": 2399,
-      "countryCode": "SWI",
-      "name": "Switzerland"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2F"
     },
-    "date": "2022-12-05T12:00:00Z",
+    "date": "2022-12-05T17:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2552,68 +2600,33 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "E",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "F",
+        "place": 2
+      }
+    }
   },
   {
     "id": 54,
     "homeTeam": {
-      "id": 2405,
-      "countryCode": "BRA",
-      "name": "Brazil"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1G"
     },
     "awayTeam": {
-      "id": 2390,
-      "countryCode": "WAL",
-      "name": "Wales"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2H"
     },
-    "date": "2022-12-06T01:00:00Z",
-    "status": {
-      "short": "NS",
-      "long": "Not Started",
-      "elapsed": null
-    },
-    "score": {
-      "halftime": {
-        "home": null,
-        "away": null
-      },
-      "fulltime": {
-        "home": null,
-        "away": null
-      },
-      "extratime": {
-        "home": null,
-        "away": null
-      },
-      "penalty": {
-        "home": null,
-        "away": null
-      }
-    },
-    "venue": {
-      "id": 6,
-      "name": "Education City Stadium",
-      "city": "Al Rayyan"
-    },
-    "stage": {
-      "id": 2,
-      "name": "Round of 16"
-    },
-    "events": []
-  },
-  {
-    "id": 55,
-    "homeTeam": {
-      "id": 2383,
-      "countryCode": "MOR",
-      "name": "Morocco"
-    },
-    "awayTeam": {
-      "id": 2384,
-      "countryCode": "SEN",
-      "name": "Senegal"
-    },
-    "date": "2022-12-06T12:00:00Z",
+    "date": "2022-12-05T21:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2646,21 +2659,92 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "G",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "H",
+        "place": 2
+      }
+    }
+  },
+  {
+    "id": 55,
+    "homeTeam": {
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1F"
+    },
+    "awayTeam": {
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2E"
+    },
+    "date": "2022-12-06T15:00:00Z",
+    "status": {
+      "short": "NS",
+      "long": "Not Started",
+      "elapsed": null
+    },
+    "score": {
+      "halftime": {
+        "home": null,
+        "away": null
+      },
+      "fulltime": {
+        "home": null,
+        "away": null
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    },
+    "venue": {
+      "id": 6,
+      "name": "Education City Stadium",
+      "city": "Al Rayyan"
+    },
+    "stage": {
+      "id": 2,
+      "name": "Round of 16"
+    },
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "F",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "E",
+        "place": 2
+      }
+    }
   },
   {
     "id": 56,
     "homeTeam": {
-      "id": 2379,
-      "countryCode": "ENG",
-      "name": "England"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "1H"
     },
     "awayTeam": {
-      "id": 2399,
-      "countryCode": "SWI",
-      "name": "Switzerland"
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "2G"
     },
-    "date": "2022-12-07T01:00:00Z",
+    "date": "2022-12-06T19:00:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2693,21 +2777,33 @@
       "id": 2,
       "name": "Round of 16"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "group_place",
+        "group": "H",
+        "place": 1
+      },
+      "away": {
+        "kind": "group_place",
+        "group": "G",
+        "place": 2
+      }
+    }
   },
   {
     "id": 57,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Winner 53 vs Winner 54"
+      "name": "W53"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "W54"
     },
-    "date": "2022-12-09T12:00:00Z",
+    "date": "2022-12-09T17:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2740,21 +2836,31 @@
       "id": 3,
       "name": "Quarterfinals"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 53
+      },
+      "away": {
+        "kind": "winner",
+        "matchId": 54
+      }
+    }
   },
   {
     "id": 58,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Winner 49 vs Winner 50"
+      "name": "W49"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "W50"
     },
-    "date": "2022-12-10T01:00:00Z",
+    "date": "2022-12-09T21:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2787,21 +2893,31 @@
       "id": 3,
       "name": "Quarterfinals"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 49
+      },
+      "away": {
+        "kind": "winner",
+        "matchId": 50
+      }
+    }
   },
   {
     "id": 59,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Winner 55 vs Winner 56"
+      "name": "W55"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "W56"
     },
-    "date": "2022-12-10T12:00:00Z",
+    "date": "2022-12-10T17:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2834,21 +2950,31 @@
       "id": 3,
       "name": "Quarterfinals"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 55
+      },
+      "away": {
+        "kind": "winner",
+        "matchId": 56
+      }
+    }
   },
   {
     "id": 60,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Winner 51 vs Winner 52"
+      "name": "W51"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "W52"
     },
-    "date": "2022-12-11T01:00:00Z",
+    "date": "2022-12-10T21:30:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2881,21 +3007,88 @@
       "id": 3,
       "name": "Quarterfinals"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 51
+      },
+      "away": {
+        "kind": "winner",
+        "matchId": 52
+      }
+    }
   },
   {
     "id": 61,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Winner 57 vs Winner 58"
+      "name": "W57"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "W58"
     },
-    "date": "2022-12-14T12:00:00Z",
+    "date": "2022-12-13T19:00:00Z",
+    "status": {
+      "short": "NS",
+      "long": "Not Started",
+      "elapsed": null
+    },
+    "score": {
+      "halftime": {
+        "home": null,
+        "away": null
+      },
+      "fulltime": {
+        "home": null,
+        "away": null
+      },
+      "extratime": {
+        "home": null,
+        "away": null
+      },
+      "penalty": {
+        "home": null,
+        "away": null
+      }
+    },
+    "venue": {
+      "id": 5,
+      "name": "Lusail Stadium",
+      "city": "Lusail"
+    },
+    "stage": {
+      "id": 4,
+      "name": "Semifinals"
+    },
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 57
+      },
+      "away": {
+        "kind": "winner",
+        "matchId": 58
+      }
+    }
+  },
+  {
+    "id": 62,
+    "homeTeam": {
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "W59"
+    },
+    "awayTeam": {
+      "id": 0,
+      "countryCode": "TBD",
+      "name": "W60"
+    },
+    "date": "2022-12-14T19:00:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -2928,68 +3121,31 @@
       "id": 4,
       "name": "Semifinals"
     },
-    "events": []
-  },
-  {
-    "id": 62,
-    "homeTeam": {
-      "id": 0,
-      "countryCode": "TBD",
-      "name": "Winner 59 vs Winner 60"
-    },
-    "awayTeam": {
-      "id": 0,
-      "countryCode": "TBD",
-      "name": "TBD"
-    },
-    "date": "2022-12-15T12:00:00Z",
-    "status": {
-      "short": "NS",
-      "long": "Not Started",
-      "elapsed": null
-    },
-    "score": {
-      "halftime": {
-        "home": null,
-        "away": null
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 59
       },
-      "fulltime": {
-        "home": null,
-        "away": null
-      },
-      "extratime": {
-        "home": null,
-        "away": null
-      },
-      "penalty": {
-        "home": null,
-        "away": null
+      "away": {
+        "kind": "winner",
+        "matchId": 60
       }
-    },
-    "venue": {
-      "id": 5,
-      "name": "Lusail Stadium",
-      "city": "Lusail"
-    },
-    "stage": {
-      "id": 4,
-      "name": "Semifinals"
-    },
-    "events": []
+    }
   },
   {
     "id": 63,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Loser 61 vs Loser 62"
+      "name": "L61"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "L62"
     },
-    "date": "2022-12-17T12:00:00Z",
+    "date": "2022-12-17T15:00:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -3022,21 +3178,31 @@
       "id": 5,
       "name": "Third Place"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "loser",
+        "matchId": 61
+      },
+      "away": {
+        "kind": "loser",
+        "matchId": 62
+      }
+    }
   },
   {
     "id": 64,
     "homeTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "Winner 61 vs Winner 62"
+      "name": "W61"
     },
     "awayTeam": {
       "id": 0,
       "countryCode": "TBD",
-      "name": "TBD"
+      "name": "W62"
     },
-    "date": "2022-12-18T12:00:00Z",
+    "date": "2022-12-18T15:00:00Z",
     "status": {
       "short": "NS",
       "long": "Not Started",
@@ -3069,6 +3235,16 @@
       "id": 6,
       "name": "Final"
     },
-    "events": []
+    "events": [],
+    "bracketFeeds": {
+      "home": {
+        "kind": "winner",
+        "matchId": 61
+      },
+      "away": {
+        "kind": "winner",
+        "matchId": 62
+      }
+    }
   }
 ]

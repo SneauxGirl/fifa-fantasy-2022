@@ -75,7 +75,7 @@
   border: 1px dashed $color-border-high;
   border-radius: $border-radius-4;
   color: $color-border-high;
-  font-weight: 600;
+  font-weight: $font-weight-bold;
   height: 40px;
   width: 40px;
 }
@@ -100,7 +100,8 @@
   p {
     margin: 0;
     color: $color-text-inverse;
-    font-size: 0.85rem;
+    font-size: $font-size-16;
+    line-height: $line-height-normal;
   }
 }
 
@@ -129,8 +130,8 @@
   flex-shrink: 0;
   width: 40px;
   padding-top: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: $font-size-14;
+  font-weight: $font-weight-bold;
   text-transform: uppercase;
   color: $color-text-inverse;
   text-align: center;
@@ -190,8 +191,8 @@
 }
 
 .number {
-  font-weight: 700;
-  font-size: 0.8rem;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-16;
   color: $color-text-primary;
 }
 
@@ -205,8 +206,8 @@
   color: $color-text-primary;
   border: 2px solid var(--team-primary-color);
   border-radius: 50%;
-  font-weight: 700;
-  font-size: 0.65rem;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-12;
 }
 
 .removeBtn {
@@ -220,8 +221,8 @@
   color: $color-text-inverse;
   border: none;
   border-radius: 50%;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: $font-size-16;
+  font-weight: $font-weight-bold;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -231,7 +232,7 @@
 
   &:hover {
     background: #da190b;
-    transform: scale(1.1);
+    filter: brightness(1.05);
   }
 
   .starterCard:hover & {
@@ -248,7 +249,7 @@
   border: 1px dashed $color-border-high;
   border-radius: $border-radius-4;
   color: $color-border-high;
-  font-weight: 600;
+  font-weight: $font-weight-bold;
   font-size: 1.2rem;
   height: 40px;
   width: 40px;
@@ -271,8 +272,8 @@
   border: none;
   border-bottom: 3px solid transparent;
   cursor: pointer;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: $font-size-16;
+  font-weight: $font-weight-bold;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: $color-text-medium;
@@ -319,15 +320,15 @@
 
 .playerName {
   flex: 1;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: $font-size-16;
+  font-weight: $font-weight-semibold;
   color: $color-text-default;
 }
 
 .playerPosition {
   flex-shrink: 0;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: $font-size-14;
+  font-weight: $font-weight-bold;
   text-transform: uppercase;
   color: #666;
   background: #f0f0f0;
@@ -347,13 +348,14 @@
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: $font-weight-bold;
   font-size: 1rem;
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
     background: #1f3fbf;
-    transform: scale(1.1);
+    filter: brightness(1.06);
+    box-shadow: $shadow-low;
   }
 
   &:disabled {
@@ -367,7 +369,8 @@
   padding: 20px;
   text-align: center;
   color: $color-text-medium;
-  font-size: 0.9rem;
+  font-size: $font-size-16;
+  line-height: $line-height-normal;
   margin: 0;
 }
 
@@ -386,7 +389,8 @@
   border: 1px solid #ffc107;
   border-radius: $border-radius-4;
   color: #856404;
-  font-size: 0.85rem;
+  font-size: $font-size-16;
+  line-height: $line-height-normal;
   text-align: center;
-  font-weight: 500;
+  font-weight: $font-weight-semibold;
 }

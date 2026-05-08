@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { moveSquadToUnsigned } from "../../store/slices/rosterSlice";
 import { openSquadModal } from "../../store/slices/uiSlice";
@@ -30,7 +30,10 @@ export const AvailableSquadsList: React.FC = () => {
   const isRosterLocked = useAppSelector(selectIsRosterLocked);
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  const [activeTarget, setActiveTarget] = useState<"card" | "insights">("card");
   const liveRegionRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const insightRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const announce = (message: string) => {
     if (liveRegionRef.current) {
@@ -53,41 +56,70 @@ export const AvailableSquadsList: React.FC = () => {
     dispatch(openSquadModal(squad));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
+  useEffect(() => {
+    if (allAvailableSquads.length === 0) return;
+    if (activeIndex > allAvailableSquads.length - 1) {
+      setActiveIndex(allAvailableSquads.length - 1);
+    }
+  }, [activeIndex, allAvailableSquads.length]);
+
+  const focusActive = (index: number, target: "card" | "insights") => {
+    const hasInsights = !allAvailableSquads[index]?.isEliminated;
+    const nextTarget = target === "insights" && hasInsights ? "insights" : "card";
+    const element = nextTarget === "insights" ? insightRefs.current[index] : cardRefs.current[index];
+    element?.focus();
+  };
+
+  const handleSectionKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const indexAttr = target.dataset.squadIndex;
+    const targetType = target.dataset.focusTarget as "card" | "insights" | undefined;
+    if (indexAttr == null || !targetType) return;
+
+    const index = Number(indexAttr);
+    if (Number.isNaN(index)) return;
     const squad = allAvailableSquads[index];
 
-    switch (e.key) {
-      case "ArrowUp":
-        e.preventDefault();
-        if (index > 0) {
-          setActiveIndex(index - 1);
-          // Focus the previous element
-          const prevButton = document.querySelector(
-            `[data-squad-index="${index - 1}"]`
-          ) as HTMLButtonElement;
-          prevButton?.focus();
-        }
-        break;
+    if ((e.key === "Enter" || e.key === " ") && targetType === "card") {
+      e.preventDefault();
+      if (squad && !squad.isEliminated && !isRosterLocked) {
+        handleSignSquad(squad);
+      }
+      return;
+    }
 
-      case "ArrowDown":
-        e.preventDefault();
-        if (index < allAvailableSquads.length - 1) {
-          setActiveIndex(index + 1);
-          // Focus the next element
-          const nextButton = document.querySelector(
-            `[data-squad-index="${index + 1}"]`
-          ) as HTMLButtonElement;
-          nextButton?.focus();
-        }
-        break;
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      if (targetType === "card" && !squad?.isEliminated) {
+        setActiveIndex(index);
+        setActiveTarget("insights");
+        focusActive(index, "insights");
+      }
+      return;
+    }
 
-      case " ":
-      case "Enter":
-        e.preventDefault();
-        if (!squad.isEliminated && !isRosterLocked) {
-          handleSignSquad(squad);
-        }
-        break;
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (targetType === "insights") {
+        setActiveIndex(index);
+        setActiveTarget("card");
+        focusActive(index, "card");
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
+      e.preventDefault();
+
+      let nextIndex = index;
+      if (e.key === "ArrowDown") nextIndex = Math.min(allAvailableSquads.length - 1, index + 1);
+      if (e.key === "ArrowUp") nextIndex = Math.max(0, index - 1);
+      if (e.key === "Home") nextIndex = 0;
+      if (e.key === "End") nextIndex = allAvailableSquads.length - 1;
+
+      setActiveIndex(nextIndex);
+      setActiveTarget(targetType);
+      focusActive(nextIndex, targetType);
     }
   };
 
@@ -117,23 +149,40 @@ export const AvailableSquadsList: React.FC = () => {
       {allAvailableSquads.length === 0 ? (
         <p className={styles.empty}>No squads available</p>
       ) : (
-        <div className={styles.squadGrid}>
+        <div
+          className={styles.squadGrid}
+          tabIndex={0}
+          role="region"
+          aria-label="Available squads list"
+          onFocus={(e) => {
+            if (e.target === e.currentTarget) {
+              focusActive(activeIndex, activeTarget);
+            }
+          }}
+          onKeyDown={handleSectionKeyDown}
+        >
           {allAvailableSquads.map((squad, index) => {
             const isEliminated = squad.isEliminated;
             return ( //REVIEW #TODO
               <div
                 key={squad.teamId}
                 data-squad-index={index}
+                data-focus-target="card"
+                ref={(el) => {
+                  cardRefs.current[index] = el;
+                }}
                 className={`${styles.squadCard} ${isEliminated ? styles.eliminated : ""}`}
                 role="button"
                 onClick={() => handleSignSquad(squad)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
                 onDragStart={(e) => handleDragStart(e, squad)}
-                onFocus={() => setActiveIndex(index)}
+                onFocus={() => {
+                  setActiveIndex(index);
+                  setActiveTarget("card");
+                }}
                 title={isEliminated ? `${squad.name} - Eliminated from tournament` : isRosterLocked ? `${squad.name} - Roster locked (Quarterfinals+)` : `Select ${squad.name}. Use arrow keys to navigate, Enter or Space to select.`}
                 aria-label={isEliminated ? `${squad.name} - Eliminated from tournament` : isRosterLocked ? `${squad.name} - Roster locked during Quarterfinals+` : `${squad.name}. Use arrow keys to navigate, Enter or Space to select for review.`}
                 draggable={!isEliminated && !isRosterLocked}
-                tabIndex={activeIndex === index ? 0 : -1}
+                tabIndex={-1}
               >
                 <div className={styles.flag}>{squad.flag}</div>
                 <div className={styles.info}>
@@ -142,20 +191,23 @@ export const AvailableSquadsList: React.FC = () => {
                 {!isEliminated && (
                   <button
                     type="button"
+                    data-squad-index={index}
+                    data-focus-target="insights"
+                    ref={(el) => {
+                      insightRefs.current[index] = el;
+                    }}
                     className={styles.insightsButton}
+                    tabIndex={-1}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleShowSquadCard(squad);
                     }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleShowSquadCard(squad);
-                      }
-                    }}
                     title={`View ${squad.name} squad details`}
                     aria-label={`View ${squad.name} squad details`}
+                    onFocus={() => {
+                      setActiveIndex(index);
+                      setActiveTarget("insights");
+                    }}
                   >
                     Insights
                   </button>

@@ -19,6 +19,7 @@ import {
   buildTurnMatchIds,
   type MatchDisplayStatus,
 } from "../../lib/turnSimulation";
+import { resolveBracketMatches } from "../../lib/bracketResolve";
 import {
   selectScoringPlayers,
   selectScoringSquads,
@@ -86,6 +87,20 @@ export const selectIsRosterLocked = (state: RootState) =>
 export const selectAllMatches = createSelector(
   (state: RootState) => state.matches.allMatches,
   (matches: Match[]): Match[] => matches
+);
+
+/** National teams (group membership) — used to resolve 1A/2B and winner-of slots for KO fixtures. */
+const selectNationalTeamsList = (state: RootState) => state.nationTeams.teams;
+
+/**
+ * Schedule matches with knockout placeholders resolved from group tables and
+ * finished feeder matches (winner-of / loser-of). Raw Redux rows keep bracketFeeds;
+ * UI and conflict detection should prefer this selector when showing sides.
+ */
+export const selectBracketResolvedMatches = createSelector(
+  selectAllMatches,
+  selectNationalTeamsList,
+  (matches, nationalTeams) => resolveBracketMatches(matches, nationalTeams)
 );
 
 export const selectTurnSimulation = (state: RootState) =>
@@ -166,14 +181,14 @@ export const selectRosterMatches = (state: RootState) =>
   state.matches.rosterMatches;
 
 export const selectUpcomingMatches = createSelector(
-  selectAllMatches,
+  selectBracketResolvedMatches,
   selectMatchDisplayStatusById,
   (matches: Match[], statusById): Match[] =>
     matches.filter((m: Match) => statusById[m.id] !== "Final")
 );
 
 export const selectFinishedMatches = createSelector(
-  selectAllMatches,
+  selectBracketResolvedMatches,
   selectMatchDisplayStatusById,
   (matches: Match[], statusById): Match[] =>
     matches.filter((m: Match) => statusById[m.id] === "Final")
@@ -195,7 +210,7 @@ export const selectScoredMatches = createSelector(
 //Adjust for turn based play #TODO
 /** Matches grouped by tournament stage. */
 export const selectMatchesByStage = createSelector(
-  selectAllMatches,
+  selectBracketResolvedMatches,
   (matches: Match[]) => {
     const stages: Record<string, Match[]> = {
       "Group Stage": [],
@@ -203,6 +218,7 @@ export const selectMatchesByStage = createSelector(
       "Round of 16": [],
       "Quarterfinals": [],
       "Semifinals": [],
+      "Third Place": [],
       "Final": [],
       "Other": [],
     };
@@ -219,6 +235,8 @@ export const selectMatchesByStage = createSelector(
         stages["Quarterfinals"].push(match);
       } else if (stageName.includes("Semi")) {
         stages["Semifinals"].push(match);
+      } else if (stageName.includes("Third")) {
+        stages["Third Place"].push(match);
       } else if (stageName.includes("Final")) {
         stages["Final"].push(match);
       } else {

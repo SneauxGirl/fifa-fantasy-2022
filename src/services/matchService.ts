@@ -7,25 +7,14 @@
 
 import type { Match } from "../types/match";
 import mockMatches from "../data/matches.json";
+import { getDataSourcePreference } from "../lib/dataSourcePreference";
 import {
   fetchMatchDetails as fetchMatchDetailsAPI,
+  fetchTournamentScheduleMatches,
 } from "./apiFootball";
 
-/**
- * Get the current data source preference from localStorage
- * Falls back to 'mock' if not set or API not available
- */
 function getDataSource(): "mock" | "live" {
-  const saved = localStorage.getItem("ff26_dataSource");
-  const hasApiKey = !!import.meta.env.VITE_API_FOOTBALL_KEY;
-
-  // If we saved 'live' but API key is missing, fall back to mock
-  if (saved === "live" && !hasApiKey) {
-    console.warn("API key not configured. Using mock data.");
-    return "mock";
-  }
-
-  return (saved as "mock" | "live") || "mock";
+  return getDataSourcePreference();
 }
 
 /**
@@ -33,7 +22,14 @@ function getDataSource(): "mock" | "live" {
  * Phase 3: API calls now use turn-based getMatchResults(turnId) instead
  */
 export const fetchAllMatches = async (): Promise<Match[]> => {
-  // Mock data only (turn-based API calls handled by playTurn() thunk)
+  const source = getDataSource();
+  if (source === "live") {
+    try {
+      return await fetchTournamentScheduleMatches();
+    } catch (error) {
+      console.error("fetchAllMatches live failed, falling back to mock:", error);
+    }
+  }
   return new Promise((resolve) => {
     setTimeout(() => resolve(mockMatches as Match[]), 500);
   });

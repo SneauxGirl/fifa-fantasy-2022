@@ -54,7 +54,7 @@
 
   .reminderText {
     margin: 0;
-    font-size: $font-size-14;
+    font-size: $font-size-16;
     color: $color-warning-secondary;
     line-height: 1.5;
   }
@@ -75,7 +75,7 @@
     gap: $spacing-12;
 
     .label {
-      font-size: $font-size-14;
+      font-size: $font-size-16;
       color: $color-text-medium;
       font-weight: $font-weight-semibold;
       text-transform: uppercase;
@@ -111,7 +111,7 @@
     }
 
     &:active {
-      transform: scale(0.98);
+      opacity: 0.94;
     }
 
     &:disabled {

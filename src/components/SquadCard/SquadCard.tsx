@@ -4,6 +4,7 @@ import type { Squad } from "../../types/squad";
 import type { RosterSquad, RosterPlayer } from "../../types/match";
 import { useAppSelector } from "../../store";
 import { selectSignedPlayers, selectSignedSquads } from "../../store/selectors/rosterSelectors";
+import { selectBracketResolvedMatches } from "../../store/selectors/scoringSelectors";
 import { getTeamColors } from "../../lib/teamColors";
 import {
   describeRosterConflictNote,
@@ -21,7 +22,7 @@ export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => 
   const signedPlayers = useAppSelector(selectSignedPlayers);
   const signedSquads = useAppSelector(selectSignedSquads);
   const nationTeams = useAppSelector((state) => state.nationTeams.teams);
-  const allMatches = useAppSelector((state) => state.matches.allMatches);
+  const allMatches = useAppSelector(selectBracketResolvedMatches);
   const currentTurnId = useAppSelector(
     (state) => (state.matches.turnSimulation?.currentTurnId ?? null) as TurnId | null
   );

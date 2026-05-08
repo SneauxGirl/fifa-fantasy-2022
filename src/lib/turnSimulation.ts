@@ -53,7 +53,10 @@ export function buildTurnMatchIds(matches: Match[]): Record<TurnId, number[]> {
     .filter((m) => m.stage?.name?.includes("Semi"))
     .sort(sortByDate);
   const final = matches
-    .filter((m) => m.stage?.name?.includes("Final"))
+    .filter((m) => {
+      const n = m.stage?.name || "";
+      return n === "Final" || n.includes("Third");
+    })
     .sort(sortByDate);
 
   return {

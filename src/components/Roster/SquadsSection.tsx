@@ -84,6 +84,23 @@ export const SquadsSection: React.FC = () => {
     dispatch(openSquadModal(squad));
   };
 
+  const handleSquadsListKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const horizontalKeys = e.key === "ArrowRight" || e.key === "ArrowLeft";
+    const verticalKeys = e.key === "ArrowDown" || e.key === "ArrowUp";
+    if (!horizontalKeys && !verticalKeys) return;
+
+    e.preventDefault();
+
+    if (horizontalKeys) {
+      const direction = e.key === "ArrowRight" ? 1 : -1;
+      e.currentTarget.scrollBy({ left: direction * 180, behavior: "smooth" });
+      return;
+    }
+
+    const direction = e.key === "ArrowDown" ? 1 : -1;
+    e.currentTarget.scrollBy({ top: direction * 160, behavior: "smooth" });
+  };
+
   return (
     <div
       className={styles.squadsSection}
@@ -93,7 +110,13 @@ export const SquadsSection: React.FC = () => {
     >
       <h2>Squads ({signedSquads.length}/4 confirmed)</h2>
 
-      <div className={`${styles.squadsList} ${dragOver ? styles.dragOver : ""}`}>
+      <div
+        className={`${styles.squadsList} ${dragOver ? styles.dragOver : ""}`}
+        tabIndex={0}
+        role="region"
+        aria-label="Squads list"
+        onKeyDown={handleSquadsListKeyDown}
+      >
         {allSquads.map((squad) => {
           const isUnsigned = squad.pool === "unsigned";
           const isEliminated = squad.isEliminated;

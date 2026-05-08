@@ -7,7 +7,7 @@
   padding: 8px 12px;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: $font-size-14;
 
   @media (prefers-color-scheme: dark) {
     background: rgba(255, 255, 255, 0.05);
@@ -29,8 +29,8 @@
 .badge {
   padding: 4px 8px;
   border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.8rem;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-14;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 
@@ -64,8 +64,8 @@
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: $font-size-14;
+  font-weight: $font-weight-bold;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;

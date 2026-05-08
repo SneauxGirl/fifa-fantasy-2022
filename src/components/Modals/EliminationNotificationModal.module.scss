@@ -11,15 +11,16 @@
 
 .title {
   margin: 0 0 8px 0;
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: $font-size-24;
+  font-weight: $font-weight-bold;
   color: #d32f2f;
   letter-spacing: 0.5px;
 }
 
 .subtitle {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: $font-size-16;
+  line-height: 1.5;
   color: $color-text-medium;
   font-weight: 500;
 }
@@ -39,8 +40,8 @@
 
 .sectionTitle {
   margin: 0 0 12px 0;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: $font-size-14;
+  font-weight: $font-weight-bold;
   color: $color-text-medium;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -63,12 +64,13 @@
   padding: 8px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: $font-size-16;
+  line-height: 1.4;
 }
 
 .flag {
   flex-shrink: 0;
-  font-size: 1.1rem;
+  font-size: $font-size-20;
   line-height: 1;
 }
 
@@ -88,8 +90,8 @@
   background: rgba($color-bg-tertiary, 0.1);
   color: $color-bg-tertiary;
   border-radius: 3px;
-  font-weight: 600;
-  font-size: 0.65rem;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-12;
   text-transform: uppercase;
 }
 
@@ -99,16 +101,16 @@
   background: rgba(211, 47, 47, 0.2);
   color: #d32f2f;
   border-radius: 3px;
-  font-weight: 600;
-  font-size: 0.65rem;
+  font-weight: $font-weight-bold;
+  font-size: $font-size-12;
   text-transform: uppercase;
 }
 
 .message {
   margin: 0 0 24px 0;
-  font-size: 0.85rem;
+  font-size: $font-size-16;
   color: $color-text-medium;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .actions {
@@ -117,15 +119,14 @@
 }
 
 .dismissButton {
-  type: button; /*AI Crap - figure it out #TODO*/
   padding: 10px 32px;
   background: #d32f2f;
   color: white;
   border: 2px solid transparent;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: $font-size-16;
+  font-weight: $font-weight-bold;
   transition: all 0.2s ease;
   outline: none;
 
@@ -141,7 +142,7 @@
   }
 
   &:active {
-    transform: scale(0.98);
+    opacity: 0.94;
   }
 
   &:focus {

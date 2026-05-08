@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { openPlayerModal } from "../../store/slices/uiSlice";
 import { movePlayerToUnsigned } from "../../store/slices/rosterSlice";
@@ -81,7 +81,12 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
   const dispatch = useAppDispatch();
   const activeAvailablePlayers = useAppSelector(selectActiveAvailablePlayers);
   const eliminatedAvailablePlayers = useAppSelector(selectEliminatedAvailablePlayers);
+  const isRosterLocked = useAppSelector(selectIsRosterLocked);
   const allAvailablePlayers = [...activeAvailablePlayers, ...eliminatedAvailablePlayers];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeTarget, setActiveTarget] = useState<"card" | "insights">("card");
+  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const insightRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   // Filter by position and search
   const filteredPlayers = allAvailablePlayers
@@ -113,6 +118,74 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
     dispatch(movePlayerToUnsigned(player));
   };
 
+  useEffect(() => {
+    if (filteredPlayers.length === 0) return;
+    if (activeIndex > filteredPlayers.length - 1) {
+      setActiveIndex(filteredPlayers.length - 1);
+    }
+  }, [activeIndex, filteredPlayers.length]);
+
+  const focusActive = (index: number, target: "card" | "insights") => {
+    const hasInsights = !filteredPlayers[index]?.isEliminated;
+    const nextTarget = target === "insights" && hasInsights ? "insights" : "card";
+    const element = nextTarget === "insights" ? insightRefs.current[index] : cardRefs.current[index];
+    element?.focus();
+  };
+
+  const handlePlayersListKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const indexAttr = target.dataset.playerIndex;
+    const targetType = target.dataset.focusTarget as "card" | "insights" | undefined;
+    if (indexAttr == null || !targetType) return;
+
+    const index = Number(indexAttr);
+    if (Number.isNaN(index)) return;
+    const player = filteredPlayers[index];
+    if (!player) return;
+
+    if ((e.key === "Enter" || e.key === " ") && targetType === "card") {
+      e.preventDefault();
+      if (!player.isEliminated && !isRosterLocked) {
+        handleMoveToUnsigned(player);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      if (targetType === "card" && !player.isEliminated) {
+        setActiveIndex(index);
+        setActiveTarget("insights");
+        focusActive(index, "insights");
+      }
+      return;
+    }
+
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      if (targetType === "insights") {
+        setActiveIndex(index);
+        setActiveTarget("card");
+        focusActive(index, "card");
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
+      e.preventDefault();
+
+      let nextIndex = index;
+      if (e.key === "ArrowDown") nextIndex = Math.min(filteredPlayers.length - 1, index + 1);
+      if (e.key === "ArrowUp") nextIndex = Math.max(0, index - 1);
+      if (e.key === "Home") nextIndex = 0;
+      if (e.key === "End") nextIndex = filteredPlayers.length - 1;
+
+      setActiveIndex(nextIndex);
+      setActiveTarget(targetType);
+      focusActive(nextIndex, targetType);
+    }
+  };
+
   if (filteredPlayers.length === 0) {
     return (
       <div className={styles.availablePlayersList}>
@@ -135,13 +208,41 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
         </p>
       </div>
 
-      <div className={styles.playersList}>
-        {filteredPlayers.map((player) => (
+      <div
+        className={styles.playersList}
+        tabIndex={0}
+        role="region"
+        aria-label="Available players list"
+        onFocus={(e) => {
+          if (e.target === e.currentTarget) {
+            focusActive(activeIndex, activeTarget);
+          }
+        }}
+        onKeyDown={handlePlayersListKeyDown}
+      >
+        {filteredPlayers.map((player, index) => (
           <PlayerListItem
             key={player.playerId}
             player={player}
             onCardClick={() => handleMoveToUnsigned(player)}
             onShowCard={() => handleShowPlayerCard(player)}
+            tabIndex={-1}
+            insightsTabIndex={-1}
+            cardRef={(el) => {
+              cardRefs.current[index] = el;
+            }}
+            insightsRef={(el) => {
+              insightRefs.current[index] = el;
+            }}
+            onCardFocus={() => {
+              setActiveIndex(index);
+              setActiveTarget("card");
+            }}
+            onInsightsFocus={() => {
+              setActiveIndex(index);
+              setActiveTarget("insights");
+            }}
+            dataIndex={index}
           />
         ))}
       </div>
@@ -160,15 +261,32 @@ interface PlayerListItemProps {
   player: RosterPlayer;
   onCardClick: () => void;
   onShowCard: () => void;
+  tabIndex: number;
+  insightsTabIndex: number;
+  cardRef: (el: HTMLDivElement | null) => void;
+  insightsRef: (el: HTMLButtonElement | null) => void;
+  onCardFocus: () => void;
+  onInsightsFocus: () => void;
+  dataIndex: number;
 }
 
 const PlayerListItem: React.FC<PlayerListItemProps> = ({
   player,
   onCardClick,
   onShowCard,
+  tabIndex,
+  insightsTabIndex,
+  cardRef,
+  insightsRef,
+  onCardFocus,
+  onInsightsFocus,
+  dataIndex,
 }) => {
   const isEliminated = player.isEliminated;
   const isRosterLocked = useAppSelector(selectIsRosterLocked);
+  const nameParts = player.name.trim().split(/\s+/);
+  const firstName = nameParts[0] || player.name;
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
 
   // Insights button styling
   const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -178,16 +296,6 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
     }
     if (!isEliminated && !isRosterLocked) {
       onCardClick();
-    }
-  };
-
-  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if ((e.key === "Enter" || e.key === " ") && !isEliminated && !isRosterLocked) {
-      // Don't trigger if focus is on the card details button
-      if ((e.target as HTMLElement) === e.currentTarget) {
-        e.preventDefault();
-        onCardClick();
-      }
     }
   };
 
@@ -205,10 +313,13 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
     <div
       className={`${styles.playerCard} ${isEliminated ? styles.eliminated : ""}`}
       role="button"
-      tabIndex={isEliminated ? -1 : 0}
+      tabIndex={tabIndex}
+      ref={cardRef}
+      data-player-index={dataIndex}
+      data-focus-target="card"
       onClick={handleCardClick}
-      onKeyDown={handleCardKeyDown}
       onDragStart={handleDragStart}
+      onFocus={onCardFocus}
       draggable={!isEliminated && !isRosterLocked}
       aria-label={`${player.name} - ${player.position}. Click to add to roster${!isEliminated ? ", or press + button to view details" : ""}`}
       style={{ cursor: isEliminated ? "not-allowed" : isRosterLocked ? "default" : "grab" }}
@@ -216,7 +327,10 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
       <div className={styles.flag}>{player.flag}</div>
 
       <div className={styles.cardContent}>
-        <div className={styles.playerName}>{player.name}</div>
+        <div className={styles.playerName}>
+          <span className={styles.playerNameFirst}>{firstName}</span>
+          {lastName && <span className={styles.playerNameLast}>{lastName}</span>}
+        </div>
         <div className={styles.playerMetaRow}>
           <div className={styles.playerCode}>{player.countryCode}</div>
           <div className={styles.number}>{player.number || "—"}</div>
@@ -228,6 +342,11 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
         <button
           type="button"
           className={styles.showPlayerCard}
+          tabIndex={insightsTabIndex}
+          ref={insightsRef}
+          data-player-index={dataIndex}
+          data-focus-target="insights"
+          onFocus={onInsightsFocus}
           disabled={isRosterLocked}
           onClick={(e) => {
             e.stopPropagation();
@@ -235,15 +354,6 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
           }}
           title={isRosterLocked ? "Roster locked (Quarterfinals+)" : `View ${player.name} details`}
           aria-label={`View ${player.name} details${isRosterLocked ? " (locked during Quarterfinals+)" : ""}`}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              if (!isRosterLocked) {
-                e.stopPropagation();
-                e.preventDefault();
-                onShowCard();
-              }
-            }
-          }}
         >
           Insights
         </button>

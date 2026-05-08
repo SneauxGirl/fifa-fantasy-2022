@@ -18,6 +18,7 @@ import type { RootState } from "./types";
 
 // Re-export async thunks for use in components
 export { playTurn } from "./thunks/rosterThunks";
+export { restartMatchPlay } from "./thunks/matchPlayThunks";
 
 export const store = configureStore({
   reducer: {

@@ -62,6 +62,12 @@ export interface MatchScore {
   live?: { home: number | null; away: number | null; };
 }
 
+/** How a knockout side is determined before feeder matches are final. */
+export type BracketFeed =
+  | { kind: "group_place"; group: string; place: 1 | 2 }
+  | { kind: "winner"; matchId: number }
+  | { kind: "loser"; matchId: number };
+
 export interface Match {
   id: number;
   homeTeam: { id: number; countryCode: string; name: string; };
@@ -82,6 +88,15 @@ export interface Match {
   stage?: {
     id: number;
     name: string;
+  };
+  /**
+   * Knockout placeholders: until feeder matches (or group standings) are final,
+   * UI/resolver use these instead of fixed national teams. Resolved teams overwrite
+   * homeTeam/awayTeam when possible.
+   */
+  bracketFeeds?: {
+    home?: BracketFeed;
+    away?: BracketFeed;
   };
 }
 
