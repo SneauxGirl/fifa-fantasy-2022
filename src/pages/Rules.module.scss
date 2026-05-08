@@ -1,0 +1,78 @@
+@use "../styles/tokens.scss" as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-bottom: $spacing-40;
+}
+
+.article {
+  width: 100%;
+  max-width: 42rem;
+}
+
+.lede {
+  margin: 0 0 $spacing-24 0;
+  font-size: $font-size-16;
+  font-weight: 400;
+  line-height: 1.5;
+  color: $color-text-high;
+}
+
+.section {
+  margin-bottom: $spacing-16;
+  padding: $spacing-16 $spacing-24;
+  background: $color-bg-primary;
+  border: 1px solid $color-border-low;
+  border-radius: $radius-md;
+}
+
+.sectionTitle {
+  margin: 0 0 $spacing-12 0;
+  font-size: $font-size-18;
+  font-weight: $font-weight-bold;
+  color: $color-text-default;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: $font-size-14;
+  font-weight: 400;
+  line-height: 1.55;
+  color: $color-text-default;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-10;
+}
+
+.listItem + .listItem {
+  margin-top: $spacing-8;
+}
+
+.listBullet {
+  flex-shrink: 0;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.32em;
+  color: $color-neutral-dark;
+}
+
+.footerNote {
+  margin: $spacing-24 0 0;
+  font-size: $font-size-14;
+  color: $color-text-medium;
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .section {
+    padding: $spacing-12 $spacing-16;
+  }
+}

@@ -9,6 +9,7 @@ import {
 import { positionToFifa } from "../../lib/formatMapping";
 import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
+import { SoccerBallIcon } from "../Shared/SoccerBallIcon";
 import styles from "./RosterSidebar.module.scss";
 
 /**
@@ -102,7 +103,11 @@ export const RosterSidebar: React.FC = () => {
                   <span className={styles.playerNumber}>{player.number}</span>
                   <span className={styles.playerName}>
                     {player.name}
-                    {isStarter && <span className={styles.starterIcon} title="In starters formation">⚽</span>}
+                    {isStarter && (
+                      <span className={styles.starterIcon} title="In starters formation">
+                        <SoccerBallIcon className={styles.starterBallSvg} />
+                      </span>
+                    )}
                   </span>
                   <span className={styles.playerPosition}>{positionToFifa(player.position)}</span>
                 </button>

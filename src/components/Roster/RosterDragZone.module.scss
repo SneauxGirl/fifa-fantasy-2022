@@ -42,17 +42,10 @@
 }
 
 .benchByPosition {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: $spacing-16;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
+  box-sizing: border-box;
 }
 
 .positionColumn {
@@ -65,6 +58,11 @@
   border: $border-width-1 solid $color-border-low;
   min-height: 80px;
   color: $color-text-default;
+  box-sizing: border-box;
+  /* Two columns: gap is between siblings only — each cell is half minus half the gap */
+  flex: 0 0 calc(50% - #{$spacing-16} / 2);
+  max-width: calc(50% - #{$spacing-16} / 2);
+  min-width: 0;
 }
 
 .positionHeader {
@@ -109,9 +107,11 @@
 
 .benchPlayerCard {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   justify-content: space-between;
-  align-items: center;
-  padding: $spacing-10 0 $spacing-10 $spacing-10;
+  gap: $spacing-8 $spacing-12;
+  padding: $spacing-10 $spacing-10 $spacing-10 $spacing-10;
   background: $color-bg-primary;
   border: $border-width-1 solid $color-border-mid;
   border-radius: $border-radius-4;
@@ -151,6 +151,7 @@
 
 .playerNamebox {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: $spacing-4;
   flex: 1;
@@ -173,11 +174,12 @@
 
 .name {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
   font-weight: $font-weight-regular;
   font-size: $font-size-14;
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 .playerActions {
@@ -185,6 +187,7 @@
   align-items: center;
   gap: 0;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .actionBtn {
@@ -255,18 +258,18 @@
   white-space: nowrap;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1000px) {
   .benchByPosition {
     gap: $spacing-12;
+  }
+
+  .positionColumn {
+    flex: 1 1 100%;
+    max-width: 100%;
   }
 }
 
 @media (max-width: 768px) {
-  .benchByPosition {
-    grid-template-columns: repeat(2, 1fr);
-    gap: $spacing-12;
-  }
-
   .benchPlayerCard {
     padding: $spacing-8;
     font-size: $font-size-12;
@@ -279,8 +282,14 @@
 }
 
 @media (max-width: 480px) {
-  .benchByPosition {
-    grid-template-columns: 1fr;
+  .benchPlayerCard {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .playerActions {
+    margin-left: 0;
+    justify-content: flex-end;
   }
 
   .playerInfo {

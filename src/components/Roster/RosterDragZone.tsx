@@ -93,7 +93,7 @@ export const RosterDragZone: React.FC = () => {
 
   return (
     <div className={styles.rosterDragZone}>
-      {/* Bench by Position - Four Column Layout */}
+      {/* Bench by position — 2×2 flex grid (GK/DEF | MID/FWD) */}
       <div className={styles.benchByPosition}>
         {(['GK', 'DEF', 'MID', 'FWD'] as PositionShort[]).map((position) => (
           <div
@@ -145,9 +145,6 @@ interface BenchPlayerCardProps {
 
 const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRemove, isRosterLocked }) => {
   const dispatch = useAppDispatch();
-  const firstName = player.name.split(" ")[0];
-  const lastName = player.name.split(" ").pop() || player.name;
-  const displayName = `${firstName[0]} ${lastName}`;
   const countryCode = player.countryCode;
   const teamColors = getTeamColors(player.countryCode);
 
@@ -180,7 +177,7 @@ const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRem
           >
             {countryCode}
           </span>
-          <span className={styles.name}>{displayName}</span>
+          <span className={styles.name}>{player.name}</span>
         </div>
       </div>
 

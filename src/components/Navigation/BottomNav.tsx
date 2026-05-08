@@ -36,6 +36,15 @@ const BottomNav = () => {
         >
           Schedule
         </NavLink>
+
+        <NavLink
+          to="/rules"
+          className={({ isActive }: { isActive: boolean }) =>
+            `${styles.navItem} ${isActive ? styles.active : ""}`
+          }
+        >
+          Rules
+        </NavLink>
       </div>
 
       <div className={styles.copyright}>

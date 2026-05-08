@@ -70,6 +70,12 @@ const MidNav = () => {
             >
               Schedule
             </Link>
+            <Link
+              to="/rules"
+              className={`${styles.navLink} ${isActive("/rules") ? styles.active : ""}`}
+            >
+              Rules
+            </Link>
           </div>
         </div>
       </div>
@@ -115,6 +121,13 @@ const MidNav = () => {
               onClick={handleNavClick}
             >
               Schedule
+            </Link>
+            <Link
+              to="/rules"
+              className={`${styles.mobileLink} ${isActive("/rules") ? styles.active : ""}`}
+              onClick={handleNavClick}
+            >
+              Rules
             </Link>
           </nav>
         </div>

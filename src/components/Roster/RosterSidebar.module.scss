@@ -166,12 +166,18 @@
 }
 
 .starterIcon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   margin-left: 6px;
-  font-size: $font-size-16;
   line-height: 1;
   vertical-align: middle;
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+.starterBallSvg {
+  width: $font-size-16;
+  height: $font-size-16;
+  color: $color-text-default;
 }
 
 .rosterItem {

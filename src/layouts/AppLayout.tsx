@@ -22,6 +22,7 @@ const AppLayout = () => {
   const isDashboard = location.pathname === "/schedule" || location.pathname === "/dashboard";
   const isRoster = location.pathname === "/roster";
   const isMatchPlay = location.pathname === "/future-matches";
+  const isRules = location.pathname === "/rules";
 
   const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState(teamName);
@@ -41,6 +42,9 @@ const AppLayout = () => {
   const getHeaderTitle = () => {
     if (isRoster) {
       return undefined; // Roster uses getRosterHeaderContent instead
+    }
+    if (isRules) {
+      return "How it Works";
     }
     return undefined;
   };

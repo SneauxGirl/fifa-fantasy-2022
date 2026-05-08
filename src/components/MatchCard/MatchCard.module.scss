@@ -416,8 +416,19 @@
   font-size: $font-size-14;
 }
 
-.matchCardTickerEmoji {
+.matchCardTickerGraphic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
   font-size: $font-size-16;
+}
+
+.matchCardTickerBallIcon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: $color-neutral-darker;
 }
 
 .matchCardTickerText {

@@ -2,6 +2,7 @@ import React from "react";
 import { useAppSelector } from "../../store";
 import {
   selectFinishedMatches,
+  selectInProgressHalftimeScores,
   selectMatchDisplayStatusById,
   selectUpcomingMatches,
 } from "../../store/selectors/scoringSelectors";
@@ -20,6 +21,7 @@ export const SummaryTicker: React.FC = () => {
   const finishedMatches = useAppSelector(selectFinishedMatches);
   const upcomingMatches = useAppSelector(selectUpcomingMatches);
   const matchStatusById = useAppSelector(selectMatchDisplayStatusById);
+  const inProgressHalftimeScores = useAppSelector(selectInProgressHalftimeScores);
 
   const renderFinishedTickerItem = (match: Match, uniqueKey: string): React.ReactElement => {
     const displayMatch = transformMatch(match);
@@ -33,22 +35,25 @@ export const SummaryTicker: React.FC = () => {
   };
 
   const renderUpcomingTickerItem = (match: Match, uniqueKey: string): React.ReactElement => {
-    const matchDate = new Date(match.date);
-    const timeStr = matchDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const displayStatus = matchStatusById[match.id] || "Upcoming";
     const isInProgress = displayStatus === "IN PROGRESS";
+    const inProgressScore = inProgressHalftimeScores[match.id];
+    const displayMatch = transformMatch(match);
+    const scoreText = isInProgress
+      ? `${inProgressScore?.home ?? displayMatch.score.home} - ${
+          inProgressScore?.away ?? displayMatch.score.away
+        }`
+      : "vs";
 
     return (
       <div key={uniqueKey} className={styles.tickerItem}>
         <span className={styles.matchScore}>
-          {match.homeTeam.name} vs {match.awayTeam.name}
+          {match.homeTeam.name} {scoreText} {match.awayTeam.name}
         </span>
         {isInProgress ? (
           <span className={styles.inProgressBadge}>🔴 LIVE</span>
         ) : (
-          <span className={styles.details}>
-            Upcoming · {matchDate.toLocaleDateString()} · {timeStr}
-          </span>
+          <span className={styles.details}>Upcoming</span>
         )}
       </div>
     );

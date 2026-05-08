@@ -2,6 +2,7 @@
 import React from "react";
 import type { Match, Roster, RosterMember, RosterPlayer } from "../../types/match";
 import { countryToFifa } from "../../lib/formatMapping";
+import { SoccerBallIcon } from "../Shared/SoccerBallIcon";
 import styles from "./MatchCard.module.scss";
 
 interface MatchCardProps {
@@ -209,27 +210,27 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, roster, onMemberCli
           <div className={styles.matchCardTickerEvents}>
             {matchEvents.map((event, idx) => {
               const minute = event.time.extra ? `${event.time.elapsed}+${event.time.extra}` : event.time.elapsed;
-              let eventEmoji = "⚽";
+              let eventGraphic: React.ReactNode = null;
               let eventText = "";
 
               if (event.type === "Goal") {
-                eventEmoji = "⚽";
+                eventGraphic = <SoccerBallIcon className={styles.matchCardTickerBallIcon} />;
                 eventText = `${event.player.name} ${event.detail.includes("Penalty") ? "(P)" : ""}`;
               } else if (event.type === "Card") {
-                eventEmoji = event.detail === "Yellow Card" ? "🟨" : "🔴";
+                eventGraphic = event.detail === "Yellow Card" ? "🟨" : "🔴";
                 eventText = event.player.name;
               } else if (event.type === "subst") {
-                eventEmoji = "🔄";
+                eventGraphic = "🔄";
                 eventText = `${event.player.name} → ${event.assist.name}`;
               } else if (event.type === "Var") {
-                eventEmoji = "📹";
+                eventGraphic = "📹";
                 eventText = event.detail;
               }
 
               return (
                 <div key={idx} className={styles.matchCardTickerEvent}>
                   <span className={styles.matchCardTickerMinute}>{minute}'</span>
-                  <span className={styles.matchCardTickerEmoji}>{eventEmoji}</span>
+                  <span className={styles.matchCardTickerGraphic}>{eventGraphic}</span>
                   <span className={styles.matchCardTickerText}>{eventText}</span>
                 </div>
               );
