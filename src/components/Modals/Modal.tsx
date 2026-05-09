@@ -5,11 +5,21 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  /** Off-screen heading for assistive tech (default pattern). */
   title?: string;
+  /** When set, `aria-labelledby` points here — put a visible `<h2 id={dialogLabelId}>` inside `children`. */
+  dialogLabelId?: string;
   style?: React.CSSProperties;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, style }) => {
+export const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  children,
+  title,
+  dialogLabelId,
+  style,
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const firstFocusableRef = useRef<HTMLButtonElement>(null);
 
@@ -53,7 +63,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, 
         className={styles.modalContent}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={title ? "modal-title" : undefined}
+        aria-labelledby={dialogLabelId ?? (title ? "modal-title" : undefined)}
         style={style}
       >
         <button
@@ -71,7 +81,11 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title, 
         >
           ✕
         </button>
-        {title && <h2 id="modal-title" style={{ position: "absolute", left: "-9999px" }}>{title}</h2>}
+        {title && !dialogLabelId && (
+          <h2 id="modal-title" style={{ position: "absolute", left: "-9999px" }}>
+            {title}
+          </h2>
+        )}
         {children}
       </div>
     </div>

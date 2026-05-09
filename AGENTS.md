@@ -38,6 +38,8 @@ This version has breaking changes -- APIs, conventions, and file structure may a
   1. Flexbox first
   2. CSS Grid second (when Flex cannot cleanly satisfy the layout)
   3. Absolute positioning only when absolutely necessary
+- **Default prohibited:** Do not use CSS Grid unless the user explicitly requests it or Flex cannot satisfy a documented requirement.
+- **If Grid is used:** include a one-line justification in your summary/PR notes explaining why Flex could not satisfy the requirement.
 - Build for responsiveness by default across common breakpoints.
 - Build for accessibility by default:
   - use semantic HTML structure

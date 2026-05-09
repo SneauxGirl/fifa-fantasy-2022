@@ -1,4 +1,6 @@
+import { useId, useState } from "react";
 import appLayoutStyles from "../layouts/AppLayout.module.scss";
+import { Modal } from "../components/Modals/Modal";
 import { SoccerBallIcon } from "../components/Shared/SoccerBallIcon";
 import styles from "./Rules.module.scss";
 
@@ -8,6 +10,9 @@ import styles from "./Rules.module.scss";
  */
 
 const Rules = () => {
+  const [squadPointsModalOpen, setSquadPointsModalOpen] = useState(false);
+  const squadModalTitleId = useId();
+
   return (
     <div className={appLayoutStyles.pageLayout}>
       <div className={styles.wrapper}>
@@ -64,7 +69,19 @@ const Rules = () => {
               </li>
               <li className={styles.listItem}>
                 <SoccerBallIcon className={styles.listBullet} />
-                <span>Squads earn points from match results (wins and draws) and goals scored, and lose point from goals conceded.</span>
+                <span>
+                  Squads earn points from match results (wins and draws) and goals scored, and lose points from goals
+                  conceded.{" "}
+                  <button
+                    type="button"
+                    className={styles.inlineHelpLink}
+                    onClick={() => setSquadPointsModalOpen(true)}
+                    aria-haspopup="dialog"
+                    aria-expanded={squadPointsModalOpen}
+                  >
+                    Open squad points breakdown
+                  </button>
+                </span>
               </li>
               <li className={styles.listItem}>
                 <SoccerBallIcon className={styles.listBullet} />
@@ -141,6 +158,96 @@ const Rules = () => {
           </p>
         </article>
       </div>
+
+      <Modal
+        isOpen={squadPointsModalOpen}
+        onClose={() => setSquadPointsModalOpen(false)}
+        dialogLabelId={squadModalTitleId}
+      >
+        <div className={styles.squadModalBody}>
+          <h2 id={squadModalTitleId} className={styles.squadModalHeading}>
+            Full points system
+          </h2>
+          <p className={styles.squadModalLead}>
+            Turn totals combine <strong>signed squads</strong> and <strong>starter players</strong>.
+          </p>
+
+          <section className={styles.squadModalSection} aria-labelledby="squad-points">
+            <h3 id="squad-points" className={styles.squadModalSubheading}>
+              Squads
+            </h3>
+            <ul className={styles.squadModalList}>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+10</span><span className={styles.scoreLabel}>Match Win</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+5</span><span className={styles.scoreLabel}>Match Draw</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>0</span><span className={styles.scoreLabel}>Match Loss</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+2</span><span className={styles.scoreLabel}>Goals For (each)</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>-1</span><span className={styles.scoreLabel}>Goals Against (each)</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+5</span><span className={styles.scoreLabel}>Clean Sheet (No Goals Conceded)</span></li>
+            </ul>
+          </section>
+
+          <section className={styles.squadModalSection} aria-labelledby="group-bonus">
+            <h3 id="group-bonus" className={styles.squadModalSubheading}>
+              Group advance bonus
+            </h3>
+            <ul className={styles.squadModalList}>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+40</span><span className={styles.scoreLabel}>Group Winner</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+20</span><span className={styles.scoreLabel}>Group Second</span></li>
+            </ul>
+          </section>
+
+          <section className={styles.squadModalSection} aria-labelledby="player-all">
+            <h3 id="player-all" className={styles.squadModalSubheading}>
+              Players (all)
+            </h3>
+            <ul className={styles.squadModalList}>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+2</span><span className={styles.scoreLabel}>Assist</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>-3</span><span className={styles.scoreLabel}>Own Goal</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>-3</span><span className={styles.scoreLabel}>Yellow Card</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>-7</span><span className={styles.scoreLabel}>Red Card</span></li>
+              <li className={styles.scoreLine}><span className={styles.scoreValue}>+21</span><span className={styles.scoreLabel}>Hat Trick (3+ Goals in One Match)</span></li>
+            </ul>
+          </section>
+
+          <section className={styles.squadModalSection} aria-labelledby="player-position">
+            <h3 id="player-position" className={styles.squadModalSubheading}>
+              Players (by position)
+            </h3>
+            <div className={styles.positionPoints}>
+              <p className={styles.positionTitle}>Goalkeeper</p>
+              <ul className={styles.squadModalList}>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+7</span><span className={styles.scoreLabel}>Goal Scored</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+7</span><span className={styles.scoreLabel}>Clean Sheet Bonus</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+2</span><span className={styles.scoreLabel}>Shootout Save</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+1</span><span className={styles.scoreLabel}>Regular/Extra-Time Save</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>-2</span><span className={styles.scoreLabel}>Shootout Miss</span></li>
+              </ul>
+
+              <p className={styles.positionTitle}>Defender</p>
+              <ul className={styles.squadModalList}>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+5</span><span className={styles.scoreLabel}>Goal Scored</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+4</span><span className={styles.scoreLabel}>Clean Sheet Bonus</span></li>
+              </ul>
+
+              <p className={styles.positionTitle}>Midfielder</p>
+              <ul className={styles.squadModalList}>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+4</span><span className={styles.scoreLabel}>Goal Scored</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+1</span><span className={styles.scoreLabel}>Clean Sheet Bonus</span></li>
+              </ul>
+
+              <p className={styles.positionTitle}>Attacker</p>
+              <ul className={styles.squadModalList}>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>+3</span><span className={styles.scoreLabel}>Goal Scored</span></li>
+                <li className={styles.scoreLine}><span className={styles.scoreValue}>0</span><span className={styles.scoreLabel}>Clean Sheet Bonus</span></li>
+              </ul>
+            </div>
+          </section>
+
+          <p className={styles.squadModalFooter}>
+            Only signed squads and starters count in turn totals. Bench players do not.
+          </p>
+        </div>
+      </Modal>
     </div>
   );
 };
