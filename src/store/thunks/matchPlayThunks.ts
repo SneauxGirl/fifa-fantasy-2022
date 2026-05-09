@@ -13,6 +13,7 @@ import { clearLiveScores } from "../slices/liveScoresSlice";
 import {
   clearEliminationNotification,
   closeModal,
+  closeGroupStageReplacePrompt,
   setRosterLocked,
 } from "../slices/uiSlice";
 import { resetLineup } from "../slices/lineupSlice";
@@ -22,6 +23,7 @@ import {
 } from "../../lib/turnSimulation";
 import mockMatches from "../../data/matches.json";
 import mockSquadsData from "../../data/squads.json";
+import { normalizeMatchesNationalTeamIds } from "../../lib/normalizeMatchNationalTeamIds";
 
 function baselineNationalTeams(): NationalTeam[] {
   const raw = mockSquadsData.teams || [];
@@ -85,11 +87,15 @@ function rosterFromNationTeams(allNationalTeams: NationalTeam[]): {
 export const restartMatchPlay = createAsyncThunk<void, undefined>(
   "matchPlay/restart",
   async (_, { dispatch }) => {
-    const matches = structuredClone(mockMatches) as Match[];
     const nationalTeams = baselineNationalTeams();
+    const matches = normalizeMatchesNationalTeamIds(
+      structuredClone(mockMatches) as Match[],
+      nationalTeams
+    );
     const { players, squads } = rosterFromNationTeams(nationalTeams);
 
     dispatch(closeModal());
+    dispatch(closeGroupStageReplacePrompt());
     dispatch(clearEliminationNotification());
     dispatch(setRosterLocked(false));
     dispatch(clearTurnScores());

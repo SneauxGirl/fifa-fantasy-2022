@@ -29,18 +29,6 @@ import {
 
 // ─── Roster-derived selectors (focus on scoring) ──────────────────────────────────
 
-/** Signed squad team IDs. */
-export const selectSignedSquadIds = createSelector(
-  selectScoringSquads,
-  (squads: RosterSquad[]) => squads.map((s) => s.teamId)
-);
-
-/** Signed player team IDs (active members). */
-export const selectSignedPlayerTeamIds = createSelector(
-  selectActiveSignedPlayers,
-  (players: RosterPlayer[]) => players.map((p) => p.teamId)
-);
-
 /** Active (non-tournament-eliminated) Squads. */
 export const selectActiveSquads = createSelector(
   selectActiveSignedSquads,

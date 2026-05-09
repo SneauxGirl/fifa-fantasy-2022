@@ -1,6 +1,7 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { movePlayerToBench, movePlayerToStarter } from "../../store/slices/rosterSlice";
+import { openGroupStageReplacePrompt } from "../../store/slices/uiSlice";
 import {
   selectScoringPlayers,
   selectScoringPlayersGroupedByPosition,
@@ -67,11 +68,26 @@ export const StartersLineup: React.FC = () => {
       <div className={styles.squadsSection}>
         {signedSquads.map((squad) => {
           const fifaCode = countryToFifa(squad.countryCode);
+          const squadReplaceable =
+            squad.groupStageReplaceable && squad.pool === "signed" && !isRosterLocked;
           console.log("countryCode:", squad.countryCode, "fifaCode:", fifaCode);
           return (
-            <div key={squad.teamId} className={styles.squadCard}>
+            <div
+              key={squad.teamId}
+              className={`${styles.squadCard} ${squadReplaceable ? styles.squadCardReplaceable : ""}`}
+            >
               <span className={styles.squadFlag}>{squad.flag}</span>
               <span className={styles.squadName}>{fifaCode}</span>
+              {squadReplaceable && (
+                <button
+                  type="button"
+                  className={styles.squadReplaceBtn}
+                  onClick={() => dispatch(openGroupStageReplacePrompt({ type: "squad", squad }))}
+                  aria-label={`Optional replacement for squad ${squad.name}`}
+                >
+                  Replace?
+                </button>
+              )}
             </div>
           );
         })}
@@ -99,6 +115,14 @@ export const StartersLineup: React.FC = () => {
                   key={player.playerId}
                   player={player}
                   onRemove={() => handleRemoveStarter(player)}
+                  onReplaceOffer={
+                    player.groupStageReplaceable && !isRosterLocked
+                      ? () =>
+                          dispatch(
+                            openGroupStageReplacePrompt({ type: "player", player })
+                          )
+                      : undefined
+                  }
                 />
               ))}
               {positionGroups.gk.length === 0 && (
@@ -116,6 +140,14 @@ export const StartersLineup: React.FC = () => {
                   key={player.playerId}
                   player={player}
                   onRemove={() => handleRemoveStarter(player)}
+                  onReplaceOffer={
+                    player.groupStageReplaceable && !isRosterLocked
+                      ? () =>
+                          dispatch(
+                            openGroupStageReplacePrompt({ type: "player", player })
+                          )
+                      : undefined
+                  }
                 />
               ))}
               {positionGroups.def.length === 0 && (
@@ -133,6 +165,14 @@ export const StartersLineup: React.FC = () => {
                   key={player.playerId}
                   player={player}
                   onRemove={() => handleRemoveStarter(player)}
+                  onReplaceOffer={
+                    player.groupStageReplaceable && !isRosterLocked
+                      ? () =>
+                          dispatch(
+                            openGroupStageReplacePrompt({ type: "player", player })
+                          )
+                      : undefined
+                  }
                 />
               ))}
               {positionGroups.mid.length === 0 && (
@@ -150,6 +190,14 @@ export const StartersLineup: React.FC = () => {
                   key={player.playerId}
                   player={player}
                   onRemove={() => handleRemoveStarter(player)}
+                  onReplaceOffer={
+                    player.groupStageReplaceable && !isRosterLocked
+                      ? () =>
+                          dispatch(
+                            openGroupStageReplacePrompt({ type: "player", player })
+                          )
+                      : undefined
+                  }
                 />
               ))}
               {positionGroups.fwd.length === 0 && (
@@ -169,9 +217,14 @@ export const StartersLineup: React.FC = () => {
 interface StarterPlayerCardProps {
   player: RosterPlayer;
   onRemove: () => void;
+  onReplaceOffer?: () => void;
 }
 
-const StarterPlayerCard: React.FC<StarterPlayerCardProps> = ({ player, onRemove }) => {
+const StarterPlayerCard: React.FC<StarterPlayerCardProps> = ({
+  player,
+  onRemove,
+  onReplaceOffer,
+}) => {
   const initials = player.name
     .split(" ")
     .map((part) => part[0])
@@ -182,7 +235,7 @@ const StarterPlayerCard: React.FC<StarterPlayerCardProps> = ({ player, onRemove 
 
   return (
     <div
-      className={styles.starterCard}
+      className={`${styles.starterCard} ${player.groupStageReplaceable ? styles.starterCardReplaceable : ""}`}
       title={player.name}
       style={{ "--team-primary-color": teamColors.primary } as React.CSSProperties}
     >
@@ -195,6 +248,19 @@ const StarterPlayerCard: React.FC<StarterPlayerCardProps> = ({ player, onRemove 
           {initials}
         </span>
       </div>
+      {onReplaceOffer && (
+        <button
+          type="button"
+          className={styles.replaceChip}
+          onClick={(e) => {
+            e.stopPropagation();
+            onReplaceOffer();
+          }}
+          aria-label={`Optional replacement for ${player.name}`}
+        >
+          Replace?
+        </button>
+      )}
       <button
         className={styles.removeBtn}
         onClick={onRemove}

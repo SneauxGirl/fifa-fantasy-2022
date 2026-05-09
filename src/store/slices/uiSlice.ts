@@ -4,6 +4,10 @@ import type { Match, RosterSquad, RosterPlayer } from "../../types/match";
 
 export type ModalCard = Match | RosterPlayer | RosterSquad;
 
+export type GroupStageReplacePrompt =
+  | { type: "squad"; squad: RosterSquad }
+  | { type: "player"; player: RosterPlayer };
+
 export interface UIState {
   modal: {
     type: "match" | "player" | "squad" | "squadSigning" | "playerSigning" | null;
@@ -17,6 +21,8 @@ export interface UIState {
     squads: RosterSquad[];
     players: RosterPlayer[];
   };
+  /** Optional replace flow after GS2 for squads/players with two group losses (not KO elimination). */
+  groupStageReplacePrompt: GroupStageReplacePrompt | null;
   isRosterLocked: boolean;
   teamName: string;
 }
@@ -34,6 +40,7 @@ const initialState: UIState = {
     squads: [],
     players: [],
   },
+  groupStageReplacePrompt: null,
   isRosterLocked: false,
   teamName: "",
 };
@@ -106,6 +113,14 @@ const uiSlice = createSlice({
     setTeamName: (state, action: PayloadAction<string>) => {
       state.teamName = action.payload;
     },
+
+    openGroupStageReplacePrompt: (state, action: PayloadAction<GroupStageReplacePrompt>) => {
+      state.groupStageReplacePrompt = action.payload;
+    },
+
+    closeGroupStageReplacePrompt: (state) => {
+      state.groupStageReplacePrompt = null;
+    },
   },
 });
 
@@ -122,6 +137,8 @@ export const {
   clearEliminationNotification,
   setRosterLocked,
   setTeamName,
+  openGroupStageReplacePrompt,
+  closeGroupStageReplacePrompt,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

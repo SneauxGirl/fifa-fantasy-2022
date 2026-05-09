@@ -87,6 +87,44 @@
       opacity: 0.6;
     }
   }
+
+  &.groupStageReplaceable:not(.eliminated):not(.unsigned) {
+    outline: $border-width-2 solid $color-error-primary;
+    outline-offset: $spacing-2;
+  }
+}
+
+.signedActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-8;
+}
+
+.replaceOfferBtn {
+  flex-shrink: 1;
+  padding: $spacing-4 $spacing-8;
+  font-size: $font-size-12;
+  font-weight: $font-weight-semibold;
+  font-family: inherit;
+  color: $color-error-secondary;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-error-primary;
+  border-radius: $radius-md;
+  cursor: pointer;
+  max-width: 11rem;
+  text-align: center;
+  line-height: 1.25;
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
+
+  &:hover {
+    background: rgba($color-error-primary, 0.06);
+  }
 }
 
 .squadHeader {

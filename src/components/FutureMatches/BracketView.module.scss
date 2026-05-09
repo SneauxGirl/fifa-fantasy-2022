@@ -163,6 +163,20 @@
   }
 }
 
+.stageHeaderTrailing {
+  display: flex;
+  align-items: center;
+  gap: $spacing-8;
+  flex-shrink: 0;
+}
+
+.stageFinalLabel {
+  font-size: $font-size-12;
+  font-weight: $font-weight-bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .stageMeta {
   display: flex;
   flex-direction: column;
@@ -206,18 +220,18 @@
 }
 
 .toggle {
-  font-size: $font-size-12;
-  transition: transform $transition-all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  flex-shrink: 0;
 
   .locked & {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     background: $color-neutral-white;
     border-radius: 50%;
-    font-size: $font-size-14;
+    color: $color-neutral-black;
   }
 }
 
@@ -228,7 +242,7 @@
   padding: $spacing-16;
 
   .completed &.expanded {
-    background: $color-success-primary;
+    background: $color-bg-primary;
   }
 
   .upcoming &.expanded {
@@ -258,13 +272,16 @@
     outline-offset: 2px;
   }
 
-  &.rosterMatch {
-    background: rgba($color-bg-tertiary, 0.04);
-    border-color: $color-bg-tertiary;
+  &.rosterInvolvedMatch {
+    border: 2px solid $color-neutral-black;
   }
 
   &.liveMatch {
     border-color: $color-error-primary;
+  }
+
+  &.liveMatch.rosterInvolvedMatch {
+    border: 2px solid $color-neutral-black;
   }
 
   .upcoming & {
@@ -276,6 +293,51 @@
     color: $color-text-inverse;
     border-color: $color-bg-tertiary;
   }
+}
+
+.matchFantasyBand {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-12;
+  width: 100%;
+  font-size: $font-size-12;
+  font-weight: $font-weight-regular;
+  color: $color-text-default;
+  text-align: left;
+}
+
+.matchFantasyCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.matchFantasyColAway {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.fantasyLine {
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.fantasyJersey {
+  font-weight: $font-weight-bold;
+}
+
+.fantasyCountry {
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-12;
+  color: $color-text-medium;
+}
+
+.fantasyPlayerName {
+  font-weight: $font-weight-regular;
 }
 
 .matchContent {
@@ -366,10 +428,6 @@
   position: absolute;
   top: $spacing-16;
   right: $spacing-16;
-}
-
-.rosterBadge {
-  font-size: $font-size-16;
 }
 
 .liveBadge {

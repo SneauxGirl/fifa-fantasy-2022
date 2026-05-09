@@ -5,8 +5,6 @@ import {
   selectAllMatches,
   selectInProgressHalftimeScores,
   selectMatchDisplayStatusById,
-  selectSignedSquadIds,
-  selectSignedPlayerTeamIds,
 } from "../../store/selectors/scoringSelectors";
 import type { Match } from "../../types/match";
 import { formatMatchDate, transformMatch } from "../../lib/dataTransform";
@@ -18,8 +16,7 @@ type FilterStatus = "all" | "upcoming" | "finished";
 /**
  * MatchList Component
  * Displays all matches with filtering by status.
- * Highlights roster matches (where user has selected players).
- * Click to open MatchCardModal.
+ * Click a row to open MatchCardModal.
  */
 export const MatchList: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -29,8 +26,6 @@ export const MatchList: React.FC = () => {
   const matchStatusById = useAppSelector(selectMatchDisplayStatusById);
   const inProgressHalftimeScores = useAppSelector(selectInProgressHalftimeScores);
   const nationalTeams = useAppSelector((state) => state.nationTeams.teams);
-  const rosterSquads = useAppSelector(selectSignedSquadIds);
-  const rosterPlayers = useAppSelector(selectSignedPlayerTeamIds);
   const isLoading = useAppSelector((state) => state.matches.isLoading);
   const error = useAppSelector((state) => state.matches.error);
 
@@ -55,15 +50,6 @@ export const MatchList: React.FC = () => {
     }
     return true; // "all"
   });
-
-  // Check if match is a roster match
-  const isRosterMatch = (match: Match) => {
-    const hasRosterTeam =
-      rosterSquads.includes(match.homeTeam.id) || rosterSquads.includes(match.awayTeam.id);
-    const hasRosterPlayer =
-      rosterPlayers.includes(match.homeTeam.id) || rosterPlayers.includes(match.awayTeam.id);
-    return hasRosterTeam || hasRosterPlayer;
-  };
 
   // Get match status display
   const getStatusDisplay = (match: Match) => {
@@ -149,7 +135,6 @@ export const MatchList: React.FC = () => {
               <h3 className={styles.dateHeader}>{dateKey}</h3>
               <div className={styles.matchGroup}>
                 {matches.map((match) => {
-                  const isRoster = isRosterMatch(match);
                   const displayStatus = getStatusDisplay(match);
                   const isInProgress = displayStatus === "IN PROGRESS";
                   const isFinal = displayStatus === "Final";
@@ -161,9 +146,7 @@ export const MatchList: React.FC = () => {
                     <button
                       key={match.id}
                       type="button"
-                      className={`${styles.matchItem} ${isRoster ? styles.rosterMatch : ""} ${
-                        isInProgress ? styles.liveMatch : ""
-                      }`}
+                      className={`${styles.matchItem} ${isInProgress ? styles.liveMatch : ""}`}
                       onClick={() => handleMatchClick(match)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -172,8 +155,7 @@ export const MatchList: React.FC = () => {
                       }}
                       aria-label={`${match.homeTeam.name} vs ${match.awayTeam.name}, ${getStatusDisplay(match)}`}
                     >
-                      {isRoster && <div className={styles.rosterBadge}>📊</div>}
-                      {isInProgress && <div className={styles.liveBadge}>🔴 LIVE</div>}
+                      {isInProgress && <div className={styles.liveBadge}>Live</div>}
 
                       <div className={styles.matchContent}>
                         <div className={styles.matchHeader}>

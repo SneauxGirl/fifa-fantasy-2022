@@ -48,6 +48,7 @@ This version has breaking changes -- APIs, conventions, and file structure may a
   - avoid unintended keyboard traps; intentional modal focus trapping while a modal is open is required
 - Prefer design tokens/CSS variables over hardcoded values.
 - If hardcoded values are introduced where a variable should likely exist, explicitly warn and suggest a variable-based alternative.
+- **Use icons, not emoji** in UI (buttons, badges, nav, cards, lists): prefer inline SVG, a shared icon component, or small image assets — not Unicode emoji. Emoji vary by platform/font and are a poor default for consistent layout and accessibility; if the user explicitly asks for emoji in copy, that exception stands.
 - **Do not use `transform: scale()`** (or similar transforms used as a substitute for width/height) **unless the user explicitly asks for it.** Scaling changes what is painted, not the box the layout engine reserves -- so it causes overlap, clipping, and confusing spacing unless offset with explicit margins/padding or a sized wrapper.
 - Typography weight defaults: prefer `400` for standard text, `500` for slightly bold text, and `700` for strong text; use `600` only when explicitly requested.
 

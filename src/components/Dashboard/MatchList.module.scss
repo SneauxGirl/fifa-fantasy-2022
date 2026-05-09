@@ -97,26 +97,11 @@
     outline-offset: $spacing-2;
   }
 
-  &.rosterMatch {
-    background: rgba($color-bg-tertiary, 0.04);
-    border-color: $color-bg-tertiary;
-    border-width: $border-width-2;
-    padding: $spacing-16;
-  }
-
   &.liveMatch {
     border-color: $color-error-primary;
     border-width: $border-width-2;
     padding: $spacing-16;
   }
-}
-
-.rosterBadge {
-  font-size: $font-size-20;
-  flex-shrink: 0;
-  position: absolute;
-  top: $spacing-12;
-  right: $spacing-12;
 }
 
 .liveBadge {

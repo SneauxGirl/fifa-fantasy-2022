@@ -1,6 +1,10 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
-import { openSquadSigningModal, openSquadModal } from "../../store/slices/uiSlice";
+import {
+  openGroupStageReplacePrompt,
+  openSquadSigningModal,
+  openSquadModal,
+} from "../../store/slices/uiSlice";
 import { moveSquadToUnsigned, moveSquadToAvailable } from "../../store/slices/rosterSlice";
 import {
   selectUnsignedSquads,
@@ -122,10 +126,13 @@ export const SquadsSection: React.FC = () => {
           const isEliminated = squad.isEliminated;
           const isRosterFull = signedSquads.length === 4;
 
+          const isGroupReplaceable =
+            squad.pool === "signed" && squad.groupStageReplaceable && !isEliminated;
+
           return (
             <div
               key={squad.teamId}
-              className={`${styles.squadCard} ${isUnsigned ? styles.unsigned : ""} ${isEliminated ? styles.eliminated : ""}`}
+              className={`${styles.squadCard} ${isUnsigned ? styles.unsigned : ""} ${isEliminated ? styles.eliminated : ""} ${isGroupReplaceable ? styles.groupStageReplaceable : ""}`}
               style={{
                 borderLeftColor: isEliminated ? "#999" : isUnsigned ? (isRosterFull ? "#DC143C" : "#ffa500") : "#228B22",
               }}
@@ -209,8 +216,26 @@ export const SquadsSection: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className={styles.lockedIcon} title="Squad locked for tournament">
-                    🔒
+                  <div className={styles.signedActions}>
+                    {isGroupReplaceable && !isRosterLocked && (
+                      <button
+                        type="button"
+                        className={styles.replaceOfferBtn}
+                        onClick={() => dispatch(openGroupStageReplacePrompt({ type: "squad", squad }))}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            dispatch(openGroupStageReplacePrompt({ type: "squad", squad }));
+                          }
+                        }}
+                        aria-label={`Optional replacement for ${squad.name}: cannot advance from group`}
+                      >
+                        Cannot advance — replace?
+                      </button>
+                    )}
+                    <div className={styles.lockedIcon} title="Squad locked for tournament">
+                      🔒
+                    </div>
                   </div>
                 )}
               </div>

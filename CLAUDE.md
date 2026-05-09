@@ -14,4 +14,5 @@
 - Avoid unintended keyboard traps; intentional modal focus trapping while a modal is open is required.
 - Prefer CSS variables/tokens over hardcoded styling values.
 - Call out hardcoded values that should likely be promoted to variables.
+- Use icons (SVG / icon components / assets), not Unicode emoji, in UI unless the user explicitly requests emoji in that text.
 - Do not use `transform: scale()` for layout or sizing unless the user explicitly requests it (see `AGENTS.md` -- scale does not expand layout bounds and causes overlap).

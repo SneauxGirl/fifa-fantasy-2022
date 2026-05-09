@@ -12,6 +12,13 @@ UI maintains the more modern FIFA World Cup 2026 styling throughout.
 
 Live deployment: [fifa-fantasy-2022.vercel.app](https://fifa-fantasy-2022.vercel.app)
 
+## Documentation
+
+- **[Data identifiers & ID protocol](docs/DATA_IDENTIFIERS.md)** — National team ids, player ids, fixture normalization, and known doc/code conflicts.
+- [Services architecture](docs/SERVICES_ARCHITECTURE.md) — Turn fetch, scoring layers, env notes.
+- [Logic notes](docs/logic-notes.md) — Roster pool/role model and turn-completion design notes.
+- [Rules](docs/rules/rules.md) — Fantasy scoring rules (product).
+
 ## Tech Stack
 - Vite
 - React
@@ -43,17 +50,18 @@ Build check:
   - staged expansion/locking behavior,
   - current-turn `Play` handling with confirmation for incomplete roster,
   - simulated in-progress display and turn progression visuals,
-  - score summaries in the Match Play header and stage bars.
+  - score summaries in the Match Play header and stage bars,
 - Squad/Player conflict panels are wired for:
   - same-group conflicts,
   - current-turn head-to-head conflicts,
   - signed roster overlap display.
 
-## Known Limitation (Important)
+## Known limitations
 
-- **Scoring + elimination playthrough do not currently work end-to-end on mock-data alone.**
-- In the current branch, full turn scoring/elimination progression depends on API-backed result flow and is not fully reliable with `matches.json` only.
-- Treat mock-only mode as a UI/flow preview, not a final scoring authority.
+- **Player (starter) fantasy points do not exist on mock data:** API requrired but not currently hooked up
+- **National team results stored on mock data for entire tournament, providing Squad scores without API:** Turn scoring uses full-time (and ET/PEN) scorelines; squad totals for **signed** squads are computed on **Play** and stored in `turnScores`.
+- **Elimination cascade:** Knockout progression is implemented for the bundled schedule; validate edge cases when changing schedule sources.
+- Canonical rules for **IDs and normalization** are in [`docs/DATA_IDENTIFIERS.md`](docs/DATA_IDENTIFIERS.md) to avoid fixture-vs-roster id drift.
 
 ## React Compiler
 The React Compiler is not enabled on this project because of its impact on dev & build performance.

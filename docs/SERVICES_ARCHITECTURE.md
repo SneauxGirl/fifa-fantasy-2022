@@ -2,15 +2,20 @@
 
 ## Overview
 
-Turn-based gameplay model: Users click "Play" to trigger a single API call per turn. No continuous polling. All data fetching and normalization happens in `matchService.ts`, then async thunk (`rosterThunks.ts`) orchestrates state updates in strict sequence.
+Turn-based gameplay model: Users click "Play" to trigger a single fetch per turn (mock slice or API). No continuous polling. Match payloads are normalized in **`apiFootball.ts`** (and related helpers); the **`playTurn`** async thunk in **`rosterThunks.ts`** orchestrates scoring, eliminations, and Redux updates in strict sequence.
+
+**Identifiers:** Fixture `homeTeam.id` / `awayTeam.id` must align with national **`teamId`** from `squads.json` after schedule load and each **Play**. See **[`docs/DATA_IDENTIFIERS.md`](DATA_IDENTIFIERS.md)** (canonical protocol; prevents roster-vs-fixture id drift).
 
 ---
 
 ## Current Services Status
 
 ### Active Services
-- ✅ **matchService.ts** — Data fetching & normalization (turn-based)
-- ✅ **apiFootball.ts** — API integration with normalizers
+- ✅ **apiFootball.ts** — API integration, `normalizeMatch`, turn fetches (`getMatchResults`, schedule, fixture details)
+- ✅ **hydrateNationalTeamsFromApi.ts** — Optional live enrichment of national rosters (uses `apiFootball`)
+
+### Removed (lean codebase)
+- ❌ **matchService.ts** — Removed; was unused and duplicated normalization without national id alignment. Use **`apiFootball`** + **`normalizeMatchesNationalTeamIds`** (see **`docs/DATA_IDENTIFIERS.md`**).
 
 ### Deleted Services (Live-Action Only)
 - ❌ **pollService.ts** — Removed (polling not used in turn-based model)
@@ -25,8 +30,8 @@ Turn-based gameplay model: Users click "Play" to trigger a single API call per t
 
 ## Service Design: Separation of Concerns
 
-### apiFootball.ts & matchService.ts
-**Purpose:** Data layer — fetches and normalizes match results for a single turn
+### apiFootball.ts (primary match ingress)
+**Purpose:** Data layer — fetches fixtures and normalizes API responses to `Match`.
 
 **Core Functions:**
 ```typescript
@@ -51,17 +56,11 @@ normalizeTeam(apiTeam): Squad
 
 normalizeMatchEvents(apiEvents): MatchEvent[]
   // Normalizes event array (goals, cards, substitutions)
-
-// matchService.ts — Fallback/wrapper layer
-fetchAllMatches(): Promise<Match[]>
-fetchMatchDetails(matchId): Promise<Match>
-fetchRosterMatches(teamIds): Promise<Match[]>
-normalizeMatches(apiMatches): Match[]
 ```
 
 **Scoring Functions** (separate concern, in `/src/lib/scoring/`):
 ```typescript
-// These are NOT in matchService — they're in dedicated scoring library
+// Dedicated scoring library (not in apiFootball)
 calculatePlayerScore(player, stats, isSubstitute, matchId): PlayerScore
   // Calculates fantasy points for a player in a single match
   // Called by playTurn() thunk Step 1
@@ -96,7 +95,7 @@ detectEliminatedTeams(matches: Match[], turnId: string): string[]
 - ✅ Scoring fully implemented (Phase 3.6 complete)
 
 **Architecture Separation**:
-- **Data Layer** (`apiFootball.ts`, `matchService.ts`): Fetch & normalize API responses
+- **Data Layer** (`apiFootball.ts`): Fetch & normalize API responses; then **`normalizeMatchesNationalTeamIds`** (`src/lib/`) before Redux schedule writes
 - **Stats Layer** (`matchStatsExtractor.ts`): Extract performance data from events
 - **Scoring Layer** (`calculatePlayerScore`, `calculateSquadScore`, `calculateTurnScore`): Pure scoring functions
 - **Orchestration** (`rosterThunks.ts`, `playTurn`): Coordinate all steps in turn completion
@@ -105,21 +104,21 @@ detectEliminatedTeams(matches: Match[], turnId: string): string[]
 
 ## Turn Completion Flow
 
-**matchService.ts role in async thunk:**
+**`playTurn` flow (actual wiring):**
 
 ```
 User clicks "Play"
   ↓
 playTurn() async thunk (rosterThunks.ts)
   ↓
-Step 0: await matchService.getMatchResults(turnId)
-  ↓ (returns match data)
+Step 0: await getMatchResults(turnId) from apiFootball.ts (mock filter or API)
   ↓
-Step 1: dispatch(updateScores()) — uses calculatePlayerScore(), calculateSquadScore()
-  ↓ Step 2-5: Additional Redux updates (lock, eliminate, modal, move)
+Merge into schedule → normalizeMatchNationalTeamIds (see DATA_IDENTIFIERS.md)
+  ↓
+Score calculation → storeTurnScores → eliminations → setMatches(normalized schedule)
 ```
 
-See: `/docs/roster-logic-rebuild.md` Section 11 for full async thunk implementation.
+See: **`docs/logic-notes.md`** Section 11 for historical design notes (pseudocode may lag—trust **`rosterThunks.ts`** + **`DATA_IDENTIFIERS.md`**).
 
 ---
 
@@ -169,7 +168,9 @@ See: `/docs/roster-logic-rebuild.md` Section 11 for full async thunk implementat
 }
 ```
 
-**Normalize to internal Match type** via `normalizeMatch()`
+**Normalize to internal Match type** via `normalizeMatch()` from API responses.
+
+**Then align team ids with nationals:** `normalizeMatchesNationalTeamIds(matches, nationalTeams)` (`src/lib/normalizeMatchNationalTeamIds.ts`) so `homeTeam.id` / `awayTeam.id` match `NationalTeam.teamId`. Documented in **`docs/DATA_IDENTIFIERS.md`**.
 
 ---
 
@@ -177,7 +178,7 @@ See: `/docs/roster-logic-rebuild.md` Section 11 for full async thunk implementat
 
 ### ✅ COMPLETE — Data Layer (Phase 3.1-3.3)
 - ✅ `apiFootball.ts` — API integration with normalizers
-- ✅ `matchService.ts` — Fallback/wrapper layer
+- ✅ National id alignment via `normalizeMatchesNationalTeamIds` (see DATA_IDENTIFIERS)
 - ✅ Turn-based match fetching via `getMatchResults(turnId)`
 - ✅ Event normalization (goals, assists, cards, substitutions)
 - ✅ Error handling for API failures
@@ -221,11 +222,7 @@ VITE_API_FOOTBALL_BASE_URL=https://api-football-v1.p.rapidapi.com
 VITE_API_FOOTBALL_HOST=api-football-v1.p.rapidapi.com
 ```
 
-**Usage in matchService.ts:**
-```typescript
-const API_KEY = import.meta.env.VITE_API_FOOTBALL_KEY;
-const API_BASE = import.meta.env.VITE_API_FOOTBALL_BASE_URL;
-```
+**Usage:** Keys and base URL are read via app config (`src/config`) / `apiFootball.ts` (see env vars above). **`playTurn`** uses **`getMatchResults`** from `apiFootball.ts` only.
 
 ---
 
@@ -239,6 +236,7 @@ const API_BASE = import.meta.env.VITE_API_FOOTBALL_BASE_URL;
 **Removed Selectors:**
 - `selectAllMatchesWithLiveScores` — Was redundant alias, now removed
 - Live score injection logic — Removed from selector, was dead code for turn-based gameplay
+- `selectSignedSquadIds`, `selectSignedPlayerTeamIds` — Removed (unused after Match Play roster-badge removal)
 
 **Selector Best Practice:**
 All scoring selectors in `scoringSelectors.ts` now focus on:

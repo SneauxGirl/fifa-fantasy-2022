@@ -1,0 +1,72 @@
+@use '../../styles/tokens.scss' as *;
+
+.body {
+  padding: $spacing-24 $spacing-32 $spacing-24 $spacing-24;
+  max-width: 26rem;
+}
+
+.message {
+  margin: 0 0 $spacing-12 0;
+  font-size: $font-size-16;
+  line-height: 1.5;
+  color: $color-text-default;
+}
+
+.detail {
+  margin: 0 0 $spacing-24 0;
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
+  color: $color-text-high;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-12;
+  align-items: center;
+}
+
+.confirmBtn {
+  padding: $spacing-8 $spacing-16;
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
+  color: $color-text-inverse;
+  background: $color-error-primary;
+  border: $border-width-1 solid $color-error-primary;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.cancelBtn {
+  padding: $spacing-8 $spacing-16;
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
+  color: $color-text-default;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-border-mid;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-family: inherit;
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
+}
+
+.lockedNote {
+  margin: $spacing-16 0 0;
+  font-size: $font-size-14;
+  color: $color-error-secondary;
+}

@@ -9,6 +9,7 @@ import type { RootState } from "../types";
 import {
   movePlayerToEliminated,
   moveSquadToEliminated,
+  setGroupStageReplaceableFlags,
 } from "../slices/rosterSlice";
 import {
   setMatches,
@@ -30,9 +31,12 @@ import type { Player } from "../../types/player";
 import type { PlayerScore, SquadScore } from "../../types/fantasyScore";
 import {
   advanceTurnSimulation,
+  buildTurnMatchIds,
   persistTurnSimulationToStorage,
   type TurnId,
 } from "../../lib/turnSimulation";
+import { countryCodesWithTwoLossesInFirstTwoGroupTurns } from "../../lib/groupStageReplaceable";
+import { normalizeMatchesNationalTeamIds } from "../../lib/normalizeMatchNationalTeamIds";
 import { resolveBracketMatches } from "../../lib/bracketResolve";
 import canonicalKnockout from "../../data/wc2022-canonical-knockout.json";
 
@@ -206,8 +210,12 @@ export const playTurn = createAsyncThunk<
         matchResults,
         nationalTeams
       );
+      const scheduleForStore = normalizeMatchesNationalTeamIds(
+        mergedSchedule,
+        nationalTeams
+      );
       const playedMatchIds = new Set(matchResults.map((m) => m.id));
-      const turnMatches = mergedSchedule.filter((m) => playedMatchIds.has(m.id));
+      const turnMatches = scheduleForStore.filter((m) => playedMatchIds.has(m.id));
 
       const turnNumberMap: Record<string, number> = {
         Group_Stage_1: 1,
@@ -220,15 +228,24 @@ export const playTurn = createAsyncThunk<
       };
       const turnNumber = turnNumberMap[turnId] || 0;
 
-      // Calculate player scores (STARTERS ONLY)
+      // Calculate player scores (signed roster starters only; bench excluded)
       const starterPlayerScores: PlayerScore[] = [];
 
       rosterPlayers
-        .filter((rp) => rp.role === "starter") // Only starters score
+        .filter((rp) => rp.pool === "signed" && rp.role === "starter")
         .forEach((rosterPlayer) => {
+          const rawPid = rosterPlayer.playerId;
+          const numericPlayerId =
+            typeof rawPid === "number"
+              ? rawPid
+              : typeof rawPid === "string" && rawPid !== "missing" && !Number.isNaN(Number(rawPid))
+                ? Number(rawPid)
+                : 0;
+          if (!numericPlayerId) return;
+
           const player: Player = {
-            playerId: typeof rosterPlayer.playerId === "number" ? rosterPlayer.playerId : 0,
-            id: typeof rosterPlayer.playerId === "number" ? rosterPlayer.playerId : 0,
+            playerId: numericPlayerId,
+            id: numericPlayerId,
             firstName: rosterPlayer.name?.split(" ")[0] || "",
             lastName: rosterPlayer.name?.split(" ").slice(1).join(" ") || "",
             apiDisplayName: rosterPlayer.name || "",
@@ -260,10 +277,10 @@ export const playTurn = createAsyncThunk<
         `[playTurn] Calculated ${starterPlayerScores.length} player match scores`
       );
 
-      // Calculate squad scores
+      // Squad fantasy points only for squads on your roster (signed pool)
       const squadScores: SquadScore[] = [];
 
-      rosterSquads.forEach((rosterSquad) => {
+      rosterSquads.filter((s) => s.pool === "signed").forEach((rosterSquad) => {
         // Find the squad's match in this turn (squads only play once per turn)
         const squadMatch = turnMatches.find(
           (m) =>
@@ -371,14 +388,25 @@ export const playTurn = createAsyncThunk<
 
       console.log("[playTurn] Step 5: Eliminated members moved to pool");
 
+      // ─── Step 5b: Two losses in GS1+GS2 → optional replacement flag (not KO elimination)
+      if (turnId === "Group_Stage_2") {
+        const turnIdsMap = buildTurnMatchIds(scheduleForStore);
+        const codes = countryCodesWithTwoLossesInFirstTwoGroupTurns(
+          scheduleForStore,
+          turnIdsMap.Group_Stage_1,
+          turnIdsMap.Group_Stage_2
+        );
+        dispatch(setGroupStageReplaceableFlags({ countryCodes: codes }));
+      }
+
       // ─── STEP 6: Store match data for future reference ──────────────
-      dispatch(setMatches(mergedSchedule));
+      dispatch(setMatches(scheduleForStore));
 
       const currentTurnSimulation = getState().matches.turnSimulation;
       if (currentTurnSimulation) {
         const nextTurnSimulation = advanceTurnSimulation(
           currentTurnSimulation,
-          mergedSchedule,
+          scheduleForStore,
           turnId as TurnId
         );
         dispatch(setTurnSimulation(nextTurnSimulation));
@@ -391,7 +419,7 @@ export const playTurn = createAsyncThunk<
 
       // ─── STEP 7: Return result ──────────────────────────────────────
       return {
-        matches: mergedSchedule,
+        matches: scheduleForStore,
         eliminations,
       };
     } catch (error) {

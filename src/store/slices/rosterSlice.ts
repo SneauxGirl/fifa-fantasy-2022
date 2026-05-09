@@ -80,6 +80,7 @@ const rosterSlice = createSlice({
           ...state.players[index],
           pool: "available",
           role: null,
+          groupStageReplaceable: false,
         };
       }
     },
@@ -186,6 +187,7 @@ const rosterSlice = createSlice({
             isEliminated: true,
             rosterElimination: "new", // Mark as newly eliminated (triggers notification)
             eliminatedReason: reason as any,
+            groupStageReplaceable: false,
           };
         }
       }
@@ -252,6 +254,7 @@ const rosterSlice = createSlice({
           ...state.squads[index],
           pool: "available",
           role: null,
+          groupStageReplaceable: false,
         };
       }
     },
@@ -306,6 +309,7 @@ const rosterSlice = createSlice({
             role: "eliminatedSigned",
             isEliminated: true,
             rosterElimination: "new",
+            groupStageReplaceable: false,
           };
         } else if (stateSquad.pool === "available" || stateSquad.pool === "unsigned") {
           // Available/Unsigned squads: move to eliminated, mark as "resolved" (no notification)
@@ -315,6 +319,7 @@ const rosterSlice = createSlice({
             role: null,
             isEliminated: true,
             rosterElimination: "resolved",
+            groupStageReplaceable: false,
           };
         }
       }
@@ -456,6 +461,26 @@ const rosterSlice = createSlice({
         state.squads[index].squadGames = action.payload.games;
       }
     },
+
+    /**
+     * After Group Stage 2 play: mark signed roster members whose nation lost twice in GS1+GS2.
+     */
+    setGroupStageReplaceableFlags: (
+      state,
+      action: PayloadAction<{ countryCodes: readonly string[] }>
+    ) => {
+      const eligible = new Set(action.payload.countryCodes);
+      state.players.forEach((player, index) => {
+        if (player.pool === "signed" && !player.isEliminated) {
+          state.players[index].groupStageReplaceable = eligible.has(player.countryCode);
+        }
+      });
+      state.squads.forEach((squad, index) => {
+        if (squad.pool === "signed" && !squad.isEliminated) {
+          state.squads[index].groupStageReplaceable = eligible.has(squad.countryCode);
+        }
+      });
+    },
   },
 });
 
@@ -478,6 +503,7 @@ export const {
   setRoundLocked,
   loadPlayerGames,
   loadSquadGames,
+  setGroupStageReplaceableFlags,
 } = rosterSlice.actions;
 
 export default rosterSlice.reducer;

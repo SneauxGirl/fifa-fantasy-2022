@@ -16,6 +16,7 @@ import { hydrateNationalTeamsFromApi } from './services/hydrateNationalTeamsFrom
 import { Router } from './router'
 import mockMatches from './data/matches.json'
 import mockSquadsData from './data/squads.json'
+import { normalizeMatchesNationalTeamIds } from './lib/normalizeMatchNationalTeamIds'
 
 
 function App() {
@@ -49,6 +50,8 @@ function App() {
       }
 
       if (cancelled) return
+
+      initialMatches = normalizeMatchesNationalTeamIds(initialMatches, allNationalTeams)
 
       const rosterPlayers: RosterPlayer[] = allNationalTeams.flatMap((nationalTeam: any) =>
         (nationalTeam.players || []).map((p: any) => ({

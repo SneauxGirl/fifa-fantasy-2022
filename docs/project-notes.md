@@ -31,10 +31,11 @@ _________________________________________________________
 - Roster conflict surfaces are active in Squad/Player cards (same-group + current-turn opponent detection).
 - Confirm-on-play behavior is active for incomplete pre-Quarterfinal setups (warns, does not hard-block).
 
-### Known Limitation (Current Branch)
+### Known limitations (Current Branch)
 
-- **Scoring and elimination playthrough are not yet reliable in mock-data-only mode.**
-- This means local/mock-only runs may show correct UI flow while scoring totals and elimination cascade are incomplete or inconsistent without API-backed result flow.
+- **Starter (player) points in mock mode:** `matches.json` usually lacks **`events`**, so player fantasy scoring may show zeros until API is connected; squad scoring still uses final scorelines for signed squads.
+- **Elimination / knockout:** Validate when swapping schedule sources.
+- **Id protocol:** Fixture team ids are normalized to national **`teamId`** — see **`docs/DATA_IDENTIFIERS.md`** (avoid comparing raw API fixture ids to roster without that step).
 
 ---
 
@@ -104,7 +105,7 @@ _________________________________________________________
 **File:** `/src/store/thunks/rosterThunks.ts`
 
 **"Play" button sequence:**
-1. Fetch match results from API (via `matchService.getMatchResults(turnId)`)
+1. Fetch match results for the turn (via **`getMatchResults(turnId)`** in `services/apiFootball.ts` — mock or live)
 2. Calculate player/squad scores
 3. Lock turn scores (mark as final)
 4. Update eliminated status (cascade from National Team → Players/Squads)

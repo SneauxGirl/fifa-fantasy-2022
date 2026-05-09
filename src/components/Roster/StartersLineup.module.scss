@@ -57,6 +57,32 @@
   flex-shrink: 0;
 }
 
+.squadCardReplaceable {
+  width: auto;
+  min-width: 52px;
+  height: auto;
+  outline: 2px solid $color-error-primary;
+  outline-offset: 2px;
+}
+
+.squadReplaceBtn {
+  padding: 2px 4px;
+  font-size: 10px;
+  font-weight: $font-weight-bold;
+  font-family: inherit;
+  color: $color-error-secondary;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-error-primary;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
+}
+
 .squadFlag {
   font-size: $font-size-18;
 }
@@ -163,6 +189,11 @@
   transition: all 0.2s ease;
   min-width: 52px;
 
+  &.starterCardReplaceable {
+    outline: 2px solid $color-error-primary;
+    outline-offset: 2px;
+  }
+
   &:hover {
     border-color: var(--team-primary-color);
     box-shadow: 0 4px 12px rgba(0, 85, 164, 0.2);
@@ -208,6 +239,25 @@
   border-radius: 50%;
   font-weight: $font-weight-bold;
   font-size: $font-size-12;
+}
+
+.replaceChip {
+  padding: 2px 4px;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: $font-weight-bold;
+  font-family: inherit;
+  color: $color-error-secondary;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-error-primary;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
 }
 
 .removeBtn {

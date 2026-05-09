@@ -1,6 +1,6 @@
 /**
  * Single place to read mock vs live preference (localStorage + API key).
- * Avoids import cycles between matchService and apiFootball.
+ * Kept separate from `apiFootball.ts` so that module does not import app state / storage.
  */
 export type DataSourcePreference = "mock" | "live";
 

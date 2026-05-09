@@ -642,8 +642,9 @@ applySubstituteMultiplier = (points: number, substitute: boolean): number =>
 **File**: `/src/store/thunks/rosterThunks.ts` (new) or `/src/store/slices/rosterSlice.ts`
 
 > **Current branch note (May 2026):**
-> Scoring totals and elimination cascade are not fully reliable in **mock-data-only** playthrough.
-> The turn UI flow is active, but treat mock-only scoring/elimination as provisional until the API/result path is finalized.
+> **Squad** turn scores are computed for **signed** squads from match scorelines on **Play** (mock or API). **Starter** player scores require **match events** (goals, cards, etc.) from API call.
+>
+> **Fixture vs roster team ids:** Always follow **`docs/DATA_IDENTIFIERS.md`** — schedule rows are normalized so `Match.homeTeam.id` / `awayTeam.id` equal national **`teamId`** from `squads.json`.
 
 **Purpose**: When user clicks "Play", execute turn completion sequence in strict order:
 1. Fetch match results from API
@@ -659,7 +660,7 @@ applySubstituteMultiplier = (points: number, substitute: boolean): number =>
 export const playTurn = (turnId: string) => async (dispatch, getState) => {
   try {
     // Step 0: Fetch match results from API (happens first, outside Redux)
-    const matchResults = await matchService.getMatchResults(turnId);
+    const matchResults = await getMatchResults(turnId); // services/apiFootball.ts
 
     // Step 1: Update all scores (Scoring Record component displays immediately)
     dispatch(updateScores(matchResults));
@@ -718,6 +719,7 @@ export const playTurn = (turnId: string) => async (dispatch, getState) => {
 **High-Level Flow**:
 ```
 playTurn() thunk → getMatchResults(turnId)
+  → merge schedule → normalizeMatchesNationalTeamIds (see docs/DATA_IDENTIFIERS.md)
   → extractPlayerMatchStats() from events
   → calculatePlayerScore() & calculateSquadScore()
   → calculateTurnScore() aggregation
@@ -739,7 +741,7 @@ For complete details on point values, card penalties, clean sheet bonuses, and M
 
 ## 12. Database Persistence & Game State Restoration (Phase 4+)
 
-**Context**: Currently, game state initializes fresh from `squads.json` and `players.json` on every load. When Phase 4 (Auth/Database) is implemented, the app will need to restore saved game state mid-tournament.
+**Context**: Game state initializes fresh from **`squads.json`** (national teams embed **players** per nation—there is no separate `players.json` in this repo). When Phase 4 (Auth/Database) is implemented, the app will need to restore saved game state mid-tournament.
 
 ### Game State to Persist
 
@@ -784,7 +786,7 @@ When a user returns to a saved game:
 
 | Aspect | Fresh Init (Current) | Resumed Game (Future) |
 |--------|---------------------|----------------------|
-| Data source | `squads.json`, `players.json` | Database (user doc) |
+| Data source | `squads.json` (teams + nested players) | Database (user doc) |
 | Elimination status | From JSON `status` field | From saved `isEliminated` flag |
 | Player pool | All available (except pre-eliminated) | Restore exact pool/role state |
 | Squad pool | All available | Restore exact pool/role state |

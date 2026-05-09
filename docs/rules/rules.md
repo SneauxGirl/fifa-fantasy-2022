@@ -9,6 +9,8 @@
 * **ELIMINATED** – Status for a Squad or Player removed from eligibility due to tournament elimination; greyed out in the UI.
 * **SUBSTITUTE** – A Squad or Player added to the ROSTER after R16, scores at 50% of standard points.
 
+*Technical identifiers* (how squads/players/fixtures are keyed in code and data): see **`docs/DATA_IDENTIFIERS.md`**.
+
 ---
 
 ### 1. Initial Setup & Turn-Based ROSTER

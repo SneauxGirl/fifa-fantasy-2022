@@ -58,6 +58,37 @@
   gap: 6px;
 }
 
+.playerRow {
+  display: flex;
+  align-items: stretch;
+  gap: $spacing-6;
+}
+
+.playerRowReplaceable .playerItem {
+  flex: 1;
+  min-width: 0;
+  border-color: $color-error-primary;
+}
+
+.benchReplaceBtn {
+  flex-shrink: 0;
+  align-self: center;
+  padding: $spacing-4 $spacing-6;
+  font-size: $font-size-12;
+  font-weight: $font-weight-semibold;
+  font-family: inherit;
+  color: $color-error-secondary;
+  background: $color-bg-primary;
+  border: $border-width-1 solid $color-error-primary;
+  border-radius: $radius-md;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid $color-bg-tertiary;
+    outline-offset: 2px;
+  }
+}
+
 .playerItem {
   display: flex;
   justify-content: space-between;

@@ -3,7 +3,14 @@ import { Outlet, useLocation } from "react-router-dom";
 import { TopNav, MidNav, BottomNav, DataSourceToggle } from "../components/Navigation";
 import { Header } from "../components/Shared/Header";
 import { SummaryTicker } from "../components/Dashboard/SummaryTicker";
-import { MatchCardModal, PlayerCardModal, SquadCardModal, SquadSigningModal, PlayerSigningModal } from "../components/Modals";
+import {
+  MatchCardModal,
+  PlayerCardModal,
+  SquadCardModal,
+  SquadSigningModal,
+  PlayerSigningModal,
+  GroupStageReplaceModal,
+} from "../components/Modals";
 import { useAppDispatch, useAppSelector } from "../store";
 import { setTeamName } from "../store/slices/uiSlice";
 import styles from "./AppLayout.module.scss";
@@ -177,6 +184,7 @@ const AppLayout = () => {
       <SquadCardModal />
       <SquadSigningModal />
       <PlayerSigningModal />
+      <GroupStageReplaceModal />
     </div>
   );
 };

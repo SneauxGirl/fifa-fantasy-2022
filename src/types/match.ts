@@ -171,6 +171,9 @@ export interface RosterSquad {
   substitute: boolean;                 // Signed during R16? Scores at 50% forever
   squadGames?: Game[];                 // Games scheduled for this squad with isComplete flag
 
+  /** Two losses in GS1+GS2 — optional roster swap (not knockout elimination). */
+  groupStageReplaceable?: boolean;
+
   // Squad-specific
   coaches?: Coach[];                   // Head coach(es) info
   group?: string;                      // Tournament group (e.g., "A", "B")
@@ -205,6 +208,9 @@ export interface RosterPlayer {
   rosterElimination: null | "new" | "resolved"; // Elimination state: null=not eliminated, new=just happened, resolved=processed
   substitute: boolean;                 // Signed during R16? Scores at 50% forever
   playerGames?: Game[];                // Games scheduled for this player with isComplete flag
+
+  /** Two losses in GS1+GS2 — optional roster swap (not knockout elimination). */
+  groupStageReplaceable?: boolean;
 
   // Player-specific
   injury?: PlayerInjury;               // Injury status and availability

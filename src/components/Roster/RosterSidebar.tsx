@@ -1,6 +1,8 @@
 import React from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { movePlayerToStarter } from "../../store/slices/rosterSlice";
+import { openGroupStageReplacePrompt } from "../../store/slices/uiSlice";
+import { selectIsRosterLocked } from "../../store/selectors/scoringSelectors";
 import {
   selectRosterBenchPlayers,
   selectEliminatedSignedPlayers,
@@ -39,6 +41,7 @@ const sortPlayersByPosition = (players: RosterPlayer[]): RosterPlayer[] => {
 
 export const RosterSidebar: React.FC = () => {
   const dispatch = useAppDispatch();
+  const isRosterLocked = useAppSelector(selectIsRosterLocked);
   const benchPlayers = useAppSelector(selectRosterBenchPlayers);
   const eliminatedPlayers = useAppSelector(selectEliminatedSignedPlayers);
   const eliminatedSquads = useAppSelector(selectEliminatedSignedSquads);
@@ -79,38 +82,66 @@ export const RosterSidebar: React.FC = () => {
             {sortedBenchPlayers.map((player) => {
               const isStarter = player.role === "starter";
               const teamColors = getTeamColors(player.countryCode);
+              const showReplace =
+                Boolean(player.groupStageReplaceable) && !isRosterLocked;
               return (
-                <button
-                  type="button"
+                <div
                   key={player.playerId}
-                  className={styles.playerItem}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, player)}
-                  onClick={() => handleMoveToStarter(player)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleMoveToStarter(player);
-                    }
-                  }}
-                  title={isStarter ? `${player.name} - In starters formation` : `${player.name} - Click to move to starter, or drag to formation`}
-                  aria-label={isStarter ? `${player.name} (${player.position}) - In starters formation` : `${player.name} (${player.position}) - Click to move to starter formation`}
-                  style={{
-                    "--team-bg": teamColors.primary,
-                    "--team-text": teamColors.text,
-                  } as React.CSSProperties}
+                  className={`${styles.playerRow} ${showReplace ? styles.playerRowReplaceable : ""}`}
                 >
-                  <span className={styles.playerNumber}>{player.number}</span>
-                  <span className={styles.playerName}>
-                    {player.name}
-                    {isStarter && (
-                      <span className={styles.starterIcon} title="In starters formation">
-                        <SoccerBallIcon className={styles.starterBallSvg} />
-                      </span>
-                    )}
-                  </span>
-                  <span className={styles.playerPosition}>{positionToFifa(player.position)}</span>
-                </button>
+                  <button
+                    type="button"
+                    className={styles.playerItem}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, player)}
+                    onClick={() => handleMoveToStarter(player)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        handleMoveToStarter(player);
+                      }
+                    }}
+                    title={
+                      isStarter
+                        ? `${player.name} - In starters formation`
+                        : `${player.name} - Click to move to starter, or drag to formation`
+                    }
+                    aria-label={
+                      isStarter
+                        ? `${player.name} (${player.position}) - In starters formation`
+                        : `${player.name} (${player.position}) - Click to move to starter formation`
+                    }
+                    style={
+                      {
+                        "--team-bg": teamColors.primary,
+                        "--team-text": teamColors.text,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <span className={styles.playerNumber}>{player.number}</span>
+                    <span className={styles.playerName}>
+                      {player.name}
+                      {isStarter && (
+                        <span className={styles.starterIcon} title="In starters formation">
+                          <SoccerBallIcon className={styles.starterBallSvg} />
+                        </span>
+                      )}
+                    </span>
+                    <span className={styles.playerPosition}>{positionToFifa(player.position)}</span>
+                  </button>
+                  {showReplace && (
+                    <button
+                      type="button"
+                      className={styles.benchReplaceBtn}
+                      onClick={() =>
+                        dispatch(openGroupStageReplacePrompt({ type: "player", player }))
+                      }
+                      aria-label={`Optional replacement for ${player.name}`}
+                    >
+                      Replace?
+                    </button>
+                  )}
+                </div>
               );
             })}
           </div>
