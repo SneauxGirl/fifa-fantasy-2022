@@ -24,6 +24,7 @@ import {
 import mockMatches from "../../data/matches.json";
 import mockSquadsData from "../../data/squads.json";
 import { normalizeMatchesNationalTeamIds } from "../../lib/normalizeMatchNationalTeamIds";
+import { clearPersistedSchedule } from "../../lib/persistSchedule";
 
 function baselineNationalTeams(): NationalTeam[] {
   const raw = mockSquadsData.teams || [];
@@ -102,6 +103,7 @@ export const restartMatchPlay = createAsyncThunk<void, undefined>(
     dispatch(clearLiveScores());
     dispatch(resetLineup());
 
+    clearPersistedSchedule();
     dispatch(setMatches(matches));
 
     const turnSimulation = createInitialTurnSimulation(matches);

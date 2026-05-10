@@ -1,0 +1,27 @@
+@use '../../styles/tokens.scss' as *;
+
+.box {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-10;
+  padding: $spacing-12;
+  background: rgba($color-warning-primary, 0.12);
+  border-left: $border-width-4 solid $color-warning-primary;
+  border-radius: $border-radius-4;
+}
+
+.icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 2px;
+  color: $color-warning-primary;
+}
+
+.text {
+  margin: 0;
+  font-size: $font-size-14;
+  font-weight: $font-weight-regular;
+  color: $color-warning-secondary;
+  line-height: 1.5;
+}

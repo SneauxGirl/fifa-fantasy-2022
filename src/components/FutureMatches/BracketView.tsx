@@ -16,6 +16,7 @@ import { transformMatch, formatMatchDate } from "../../lib/dataTransform";
 import { getTeamFlag } from "../../lib/teamColors";
 import styles from "./BracketView.module.scss";
 import type { MatchDisplayStatus, TurnId } from "../../lib/turnSimulation";
+import { partitionBundledGroupMatches } from "../../lib/wc2022TurnSchedule";
 
 const TURN_NUMBER_BY_ID: Record<TurnId, number> = {
   Group_Stage_1: 1,
@@ -152,10 +153,10 @@ export const BracketView: React.FC = () => {
   }, [currentTurnId, completedKey]);
 
   const groupMatches = matchesByStage["Group Stage"] || [];
-  const matchesPerPhase = Math.ceil(groupMatches.length / 3);
-  const groupStage1 = groupMatches.slice(0, matchesPerPhase);
-  const groupStage2 = groupMatches.slice(matchesPerPhase, matchesPerPhase * 2);
-  const groupStage3 = groupMatches.slice(matchesPerPhase * 2);
+  const { groupStage1, groupStage2, groupStageFinal: groupStage3 } = useMemo(
+    () => partitionBundledGroupMatches(groupMatches),
+    [groupMatches]
+  );
 
   const thirdPlaceMatches = matchesByStage["Third Place"] || [];
   const finalOnlyMatches = matchesByStage["Final"] || [];
@@ -248,6 +249,8 @@ export const BracketView: React.FC = () => {
           const turnNumber = TURN_NUMBER_BY_ID[stage.id];
           const stageScore = turnScoresByTurn[turnNumber]?.turnScore;
           const turnScoreBundle = turnScoresByTurn[turnNumber];
+          const showCloseForNextTurnHint =
+            isCompleted && isExpanded && stage.id === "Group_Stage_1";
 
           return (
             <div
@@ -258,7 +261,11 @@ export const BracketView: React.FC = () => {
                 isExpanded ? styles.expanded : ""
               }`}
             >
-              <div className={styles.stageHeaderContainer}>
+              <div
+                className={`${styles.stageHeaderContainer} ${
+                  isCurrent ? styles.stageHeaderContainerHasPlay : ""
+                }`}
+              >
                 <button
                   type="button"
                   className={`${styles.stageHeader} ${isExpanded ? styles.expanded : ""}`}
@@ -266,22 +273,45 @@ export const BracketView: React.FC = () => {
                     isAccessible && setExpandedStage(isExpanded ? null : stage.id)
                   }
                   disabled={isLocked}
-                  aria-label={`${stage.name}, ${stage.count} matches${
-                    isLocked ? " (not playable yet)" : ""
+                  aria-label={`${stage.name}${
+                    isCompleted ? ", round complete" : ""
+                  }, ${stage.count} matches${isLocked ? " (not playable yet)" : ""}${
+                    showCloseForNextTurnHint
+                      ? ". Close header to show the next turn."
+                      : ""
                   }`}
                   aria-expanded={isExpanded}
                 >
-                  <span className={styles.stageMeta}>
-                    <span className={styles.stageName}>{stage.name}</span>
-                    <span className={styles.stageCount}>
-                      {`Squads: ${stageScore?.squadPoints ?? 0}  Starters: ${
-                        stageScore?.playerPoints ?? 0
-                      }  Total: ${stageScore?.totalPoints ?? 0}`}
-                    </span>
+                  <span
+                    className={styles.stageHeaderLeft}
+                    aria-hidden={!isCompleted}
+                  >
+                    {isCompleted ? (
+                      <span className={styles.stageCount}>
+                        {`Squads: ${stageScore?.squadPoints ?? 0}  Starters: ${
+                          stageScore?.playerPoints ?? 0
+                        }  Total: ${stageScore?.totalPoints ?? 0}`}
+                      </span>
+                    ) : null}
                   </span>
-                  <span className={styles.stageHeaderTrailing}>
-                    {isCompleted && (
-                      <span className={styles.stageFinalLabel}>Final</span>
+                  <span className={styles.stageHeaderCenter}>
+                    {isCompleted ? (
+                      <>
+                        <span className={styles.stageName}>
+                          {stage.id === "Final" ? "Tournament final" : stage.name}
+                        </span>
+                        <span className={styles.stageTitleSeparator} aria-hidden="true">
+                          {" "}-{" "}
+                        </span>
+                        <span className={styles.stageFinalInline}>FINAL</span>
+                      </>
+                    ) : (
+                      <span className={styles.stageName}>{stage.name}</span>
+                    )}
+                  </span>
+                  <span className={styles.stageHeaderRight}>
+                    {showCloseForNextTurnHint && (
+                      <span className={styles.collapseHint}>Close to show next turn</span>
                     )}
                     <span className={styles.toggle}>
                       {isLocked ? (
@@ -423,22 +453,27 @@ const MatchBracketItem: React.FC<MatchBracketItemProps> = ({
   const isFinished = displayStatus === "Final";
   const isInProgress = displayStatus === "IN PROGRESS";
 
-  const homeLines = buildSideFantasyLines(
-    "home",
-    match,
-    squadScores,
-    playerScores,
-    signedSquads,
-    signedStarters
-  );
-  const awayLines = buildSideFantasyLines(
-    "away",
-    match,
-    squadScores,
-    playerScores,
-    signedSquads,
-    signedStarters
-  );
+  const fantasyAllowed = displayStatus === "Final" || displayStatus === "IN PROGRESS";
+  const homeLines = fantasyAllowed
+    ? buildSideFantasyLines(
+        "home",
+        match,
+        squadScores,
+        playerScores,
+        signedSquads,
+        signedStarters
+      )
+    : [];
+  const awayLines = fantasyAllowed
+    ? buildSideFantasyLines(
+        "away",
+        match,
+        squadScores,
+        playerScores,
+        signedSquads,
+        signedStarters
+      )
+    : [];
   const showFantasyBand = homeLines.length > 0 || awayLines.length > 0;
 
   return (

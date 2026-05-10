@@ -3,6 +3,17 @@ ______________________________
 # FF22 Project Notes
 ______________________________
 
+## Latest progress (May 2026)
+
+- **Group stage elimination (MD3):** When **`Group_Stage_Final`** completes, `playTurn` derives **3rd- and 4th-place** teams per group from finished group fixtures (points → goal difference → goals for), same ordering as bracket `group_place` resolution (`countryCodesEliminatedAfterGroupStage` in `src/lib/bracketResolve.ts`). Those nations are cascaded through the roster and **`nationTeams`** flags.
+- **Knockout elimination:** Unchanged — losers on finished KO fixtures (`detectEliminatedTeams` in `src/store/thunks/rosterThunks.ts`).
+- **Available players:** Tournament elimination now calls **`markPlayerAsEliminated`** for pool `available` / `unsigned`; signed players still use **`movePlayerToEliminated`**.
+- **Squad UX:** Optional **two-loss** group warning in squad Insights + signing modal, shown only after **`Group_Stage_2`** is in `completedTurnIds` (`src/hooks/useMathEliminatedCountryCodes.ts`, `src/components/Shared/GroupStageEliminationWarning.tsx`).
+- **Schedule UI:** Bracket and dashboard match rows use **left-aligned** scores with tabular numerals (`BracketView.module.scss`, `MatchList.module.scss`).
+- **Note for testers:** Saves that finished MD3 **before** group elimination shipped need to **replay Group Stage Final** (or reset persisted turn/schedule state) to populate eliminations.
+
+---
+
 ## Phase 0 — Setup & Skeleton - Complete 3/16/26
 
 ## Phase 1 — Mock Data & Core Types complete 3/17/2025
@@ -26,16 +37,18 @@ _________________________________________________________
 ### Current Snapshot (May 2026)
 
 - Core app shell, roster flow, and Match Play UI are functional.
-- Navigation/order updated to `Roster | Match Play | Schedule`.
-- Match Play now includes cumulative score display in the blue header and per-stage score breakdown labels.
-- Roster conflict surfaces are active in Squad/Player cards (same-group + current-turn opponent detection).
-- Confirm-on-play behavior is active for incomplete pre-Quarterfinal setups (warns, does not hard-block).
+- Navigation: `Roster | Match Play | Schedule`.
+- Match Play: staged bracket, **Play** turn advancement, cumulative ticker / per-stage scoring where wired.
+- Roster conflicts: same-group + current-turn fixture overlap on Squad/Player insights.
+- Confirm-on-play for incomplete lineups before Quarterfinals (warns; does not hard-block).
+- **Group MD3:** Standings-based elimination + roster/nation-team sync (see **Latest progress** above).
 
 ### Known limitations (Current Branch)
 
-- **Starter (player) points in mock mode:** `matches.json` usually lacks **`events`**, so player fantasy scoring may show zeros until API is connected; squad scoring still uses final scorelines for signed squads.
-- **Elimination / knockout:** Validate when swapping schedule sources.
-- **Id protocol:** Fixture team ids are normalized to national **`teamId`** — see **`docs/DATA_IDENTIFIERS.md`** (avoid comparing raw API fixture ids to roster without that step).
+- **Starter (player) points in mock mode:** bundled `matches.json` often lacks rich **`events`**; player fantasy scoring may under-report until API/events are wired — squad scoring still uses final scorelines for signed squads on **Play**.
+- **Group standings tie-breakers:** Beyond points / GD / GF (e.g. head-to-head) are **not** modeled; aligns with existing bracket `group_place` helper.
+- **Schedule sources:** Changing `matches.json` or live fetch boundaries — revalidate turn partitioning and elimination edge cases (`src/lib/wc2022TurnSchedule.ts`, `playTurn`).
+- **Id protocol:** Fixture team ids are normalized to national **`teamId`** — **`docs/DATA_IDENTIFIERS.md`**.
 
 ---
 

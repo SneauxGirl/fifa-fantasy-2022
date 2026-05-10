@@ -1,67 +1,39 @@
 # FIFA Fantasy 2022
 
-FF22 is a work-in-progress turn-based futbol fantasy game.
+Turn-based fantasy football on the **2022 World Cup** results (portfolio piece). The UI follows a **2026 FIFA-style** look.
 
 ![Current Roster Screen](/docs/photos/FF22_Current-Roster-View-May2026.png)
 
-This is a portfolio piece to practice working with real-world APIs, modern frontend tooling, brand matching, and data-driven UI.
+**Live:** [fifa-fantasy-2022.vercel.app](https://fifa-fantasy-2022.vercel.app)
 
-API paywall constraints shifted this from a 2026 live game to a turn-based format using 2022 data, with rules giving advantage to player performance over easily found squad results.
 
-UI maintains the more modern FIFA World Cup 2026 styling throughout.
 
-Live deployment: [fifa-fantasy-2022.vercel.app](https://fifa-fantasy-2022.vercel.app)
+## Tech stack
 
+Vite · React · TypeScript · API-Football (optional live source)
+
+## Getting started
+
+```bash
+npm install
+npm run dev
+```
+
+- Production build: `npm run build`  
+- Typecheck: `npx tsc -p tsconfig.app.json --noEmit`
 ## Documentation
 
-- **[Data identifiers & ID protocol](docs/DATA_IDENTIFIERS.md)** — National team ids, player ids, fixture normalization, and known doc/code conflicts.
-- [Services architecture](docs/SERVICES_ARCHITECTURE.md) — Turn fetch, scoring layers, env notes.
-- [Logic notes](docs/logic-notes.md) — Roster pool/role model and turn-completion design notes.
-- [Rules](docs/rules/rules.md) — Fantasy scoring rules (product).
+Implementation detail, progress, and rules live under **`docs/`**:
 
-## Tech Stack
-- Vite
-- React
-- TypeScript
-- Claude Code
-- REST API: API-Football for player, team, and match data
+- **[`docs/project-notes.md`](docs/project-notes.md)** — Phases, **latest progress**, snapshot, limitations  
+- **[`docs/logic-notes.md`](docs/logic-notes.md)** — Roster pool/role model and turn-flow notes  
+- **[`docs/rules/rules.md`](docs/rules/rules.md)** — Fantasy scoring (product rules)  
+- **[`docs/DATA_IDENTIFIERS.md`](docs/DATA_IDENTIFIERS.md)** — Team/player IDs and fixture normalization  
+- **[`docs/SERVICES_ARCHITECTURE.md`](docs/SERVICES_ARCHITECTURE.md)** — Data fetch, mocks, environment  
+- **[`docs/DESIGN-STANDARDS.md`](docs/DESIGN-STANDARDS.md)** — Tokens, layout, accessibility  
 
-## Planned
-- Auth/OAuth: Firebase Authentication for user login
-
-## Getting Started
-To run this project locally:
-
-1. Clone the repository
-2. Install dependencies:
-   npm install
-3. Start the development server:
-   npm run dev
-
-Build check:
-- `npx tsc -p tsconfig.app.json --noEmit`
-- `npm run build`
-
-## Current Status (May 2026)
-
-- App navigation is now `Roster | Match Play | Schedule`.
-- Default load route redirects to `Roster`.
-- Turn-based Match Play UI is active, including:
-  - staged expansion/locking behavior,
-  - current-turn `Play` handling with confirmation for incomplete roster,
-  - simulated in-progress display and turn progression visuals,
-  - score summaries in the Match Play header and stage bars,
-- Squad/Player conflict panels are wired for:
-  - same-group conflicts,
-  - current-turn head-to-head conflicts,
-  - signed roster overlap display.
-
-## Known limitations
-
-- **Player (starter) fantasy points do not exist on mock data:** API requrired but not currently hooked up
-- **National team results stored on mock data for entire tournament, providing Squad scores without API:** Turn scoring uses full-time (and ET/PEN) scorelines; squad totals for **signed** squads are computed on **Play** and stored in `turnScores`.
-- **Elimination cascade:** Knockout progression is implemented for the bundled schedule; validate edge cases when changing schedule sources.
-- Canonical rules for **IDs and normalization** are in [`docs/DATA_IDENTIFIERS.md`](docs/DATA_IDENTIFIERS.md) to avoid fixture-vs-roster id drift.
+Currently working on Team Elimination logic following end of Turn 3, and have not hooked up API for Player scores.
 
 ## React Compiler
-The React Compiler is not enabled on this project because of its impact on dev & build performance.
+
+Not enabled (dev/build performance).

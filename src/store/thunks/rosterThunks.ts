@@ -7,10 +7,16 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../types";
 import {
+  markPlayerAsEliminated,
   movePlayerToEliminated,
   moveSquadToEliminated,
   setGroupStageReplaceableFlags,
 } from "../slices/rosterSlice";
+import {
+  updateTeamElimination,
+  updateTeamPlayersElimination,
+  updateTeamSquadsElimination,
+} from "../slices/nationTeamsSlice";
 import {
   setMatches,
   setLoading,
@@ -37,7 +43,11 @@ import {
 } from "../../lib/turnSimulation";
 import { countryCodesWithTwoLossesInFirstTwoGroupTurns } from "../../lib/groupStageReplaceable";
 import { normalizeMatchesNationalTeamIds } from "../../lib/normalizeMatchNationalTeamIds";
-import { resolveBracketMatches } from "../../lib/bracketResolve";
+import { persistScheduleMatches } from "../../lib/persistSchedule";
+import {
+  countryCodesEliminatedAfterGroupStage,
+  resolveBracketMatches,
+} from "../../lib/bracketResolve";
 import canonicalKnockout from "../../data/wc2022-canonical-knockout.json";
 
 const WC2022_KO_CANONICAL = canonicalKnockout as Record<
@@ -115,18 +125,21 @@ function mergePlayedTurnIntoSchedule(
  * 8. Dispatch elimination move actions
  * 9. Persist match data
  *
- * **Turn ID Mapping**:
- * - "Group_Stage_1" → Turn 1 (Nov 20-26)
- * - "Group_Stage_2" → Turn 2 (Nov 26-30)
- * - "Group_Stage_Final" → Turn 3 (Nov 29-Dec 3)
+ * **Turn ID Mapping** (see `src/lib/wc2022TurnSchedule.ts` — shared with `getMatchResults`):
+ * - "Group_Stage_1" → Turn 1 (MD1: Nov 20–24)
+ * - "Group_Stage_2" → Turn 2 (MD2: Nov 25–28)
+ * - "Group_Stage_Final" → Turn 3 (MD3: Nov 29–Dec 3)
  * - "R16" → Turn 4 (Dec 3-7)
- * - "Quarterfinals" → Turn 5 (Dec 9-11) ← Roster lock activates here
- * - "Semifinals" → Turn 6 (Dec 14-15)
+ * - "Quarterfinals" → Turn 5 (Dec 9–10) ← Roster lock activates here
+ * - "Semifinals" → Turn 6 (Dec 13–14)
  * - "Final" → Turn 7 (Dec 18)
  *
+ * After GS2, optional replacement flags mark nations with **two tournament losses** in GS1+GS2
+ * (real fixtures on the schedule), not fantasy starter outcomes nor MD3 math.
+ *
  * **Elimination Cascade**:
- * - Only knockout stages (R16+) produce eliminations
- * - Losers are eliminated; winners/draws both advance (except PEN winner determined)
+ * - Group Stage Final (MD3): teams finishing 3rd/4th in each group are eliminated (standings)
+ * - Knockout (R16+): losers eliminated per match (FT / AET / PEN)
  * - Eliminated team → All its roster squads marked eliminated
  * - Eliminated team → All its roster players marked eliminated
  *
@@ -347,8 +360,14 @@ export const playTurn = createAsyncThunk<
         squads: [] as RosterSquad[],
       };
 
-      // Detect eliminated national teams from knockout match results
-      const eliminatedCountryCodes = detectEliminatedTeams(turnMatches, turnId);
+      let eliminatedCountryCodes = detectEliminatedTeams(turnMatches, turnId);
+      if (turnId === "Group_Stage_Final" && nationalTeams.length > 0) {
+        const fromGroups = countryCodesEliminatedAfterGroupStage(
+          scheduleForStore,
+          nationalTeams
+        );
+        eliminatedCountryCodes = [...new Set([...eliminatedCountryCodes, ...fromGroups])];
+      }
       console.log(`[playTurn] Detected ${eliminatedCountryCodes.length} eliminated teams:`, eliminatedCountryCodes);
 
       // Find roster squads from eliminated teams
@@ -371,14 +390,22 @@ export const playTurn = createAsyncThunk<
       console.log("[playTurn] Step 4: Elimination modal shown");
 
       // ─── STEP 5: Move eliminated members to pool ───────────────────
-      // Dispatch for each eliminated player
       eliminations.players.forEach((player) => {
-        dispatch(
-          movePlayerToEliminated({
-            player,
-            reason: "tournament", // or "injury", "red_card", etc.
-          })
-        );
+        if (player.pool === "signed") {
+          dispatch(
+            movePlayerToEliminated({
+              player,
+              reason: "tournament",
+            })
+          );
+        } else if (player.pool === "available" || player.pool === "unsigned") {
+          dispatch(
+            markPlayerAsEliminated({
+              player,
+              reason: "tournament",
+            })
+          );
+        }
       });
 
       // Dispatch for each eliminated squad
@@ -386,9 +413,17 @@ export const playTurn = createAsyncThunk<
         dispatch(moveSquadToEliminated(squad));
       });
 
+      eliminatedCountryCodes.forEach((code) => {
+        const nt = nationalTeams.find((t) => t.countryCode === code);
+        if (!nt) return;
+        dispatch(updateTeamElimination({ teamId: nt.teamId, isEliminated: true }));
+        dispatch(updateTeamPlayersElimination({ teamId: nt.teamId, isEliminated: true }));
+        dispatch(updateTeamSquadsElimination({ teamId: nt.teamId, isEliminated: true }));
+      });
+
       console.log("[playTurn] Step 5: Eliminated members moved to pool");
 
-      // ─── Step 5b: Two losses in GS1+GS2 → optional replacement flag (not KO elimination)
+      // ─── Step 5b: Two GS1+GS2 tournament losses → optional replacement flag (not KO elimination)
       if (turnId === "Group_Stage_2") {
         const turnIdsMap = buildTurnMatchIds(scheduleForStore);
         const codes = countryCodesWithTwoLossesInFirstTwoGroupTurns(
@@ -401,6 +436,7 @@ export const playTurn = createAsyncThunk<
 
       // ─── STEP 6: Store match data for future reference ──────────────
       dispatch(setMatches(scheduleForStore));
+      persistScheduleMatches(scheduleForStore);
 
       const currentTurnSimulation = getState().matches.turnSimulation;
       if (currentTurnSimulation) {
@@ -436,11 +472,10 @@ export const playTurn = createAsyncThunk<
 );
 
 /**
- * Detect eliminated national teams from match results
- * Only knockout stages have eliminations (teams are eliminated on loss)
+ * Detect eliminated national teams from knockout match results (losers only).
+ * Group-stage elimination runs separately via `countryCodesEliminatedAfterGroupStage` when MD3 completes.
  */
 function detectEliminatedTeams(matches: Match[], turnId: string): string[] {
-  // Group stage matches don't eliminate teams
   if (turnId.includes("Group") || turnId.includes("group")) {
     return [];
   }

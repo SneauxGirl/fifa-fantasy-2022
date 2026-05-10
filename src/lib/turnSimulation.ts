@@ -1,5 +1,6 @@
 import type { Match } from "../types/match";
 import { generateLiveScore } from "../store/slices/liveScoresSlice";
+import { partitionBundledGroupMatches } from "./wc2022TurnSchedule";
 
 export const TURN_ORDER = [
   "Group_Stage_1",
@@ -34,14 +35,10 @@ export function buildTurnMatchIds(matches: Match[]): Record<TurnId, number[]> {
   const sortByDate = (a: Match, b: Match) =>
     new Date(a.date).getTime() - new Date(b.date).getTime();
 
-  const groupMatches = matches
-    .filter((m) => m.stage?.name?.includes("Group"))
-    .sort(sortByDate);
+  const groupMatches = matches.filter((m) => m.stage?.name?.includes("Group"));
 
-  const chunkSize = Math.ceil(groupMatches.length / 3);
-  const groupStage1 = groupMatches.slice(0, chunkSize);
-  const groupStage2 = groupMatches.slice(chunkSize, chunkSize * 2);
-  const groupStageFinal = groupMatches.slice(chunkSize * 2);
+  const { groupStage1, groupStage2, groupStageFinal } =
+    partitionBundledGroupMatches(groupMatches);
 
   const round16 = matches
     .filter((m) => m.stage?.name?.includes("Round of 16"))

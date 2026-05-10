@@ -1,5 +1,7 @@
 # Plan: Small Roster Edits to Align with Gameplay Revision
 
+**Implementation changelog:** See **`docs/project-notes.md`** (*Latest progress*) for what shipped most recently (group MD3 elimination, roster cascades, warnings, UI). This file is the longer-lived roster / state reference.
+
 ## Context
 
 Upon test API call for specific data, undisclosed paywalls were discovered making 2026 data unavailable. 

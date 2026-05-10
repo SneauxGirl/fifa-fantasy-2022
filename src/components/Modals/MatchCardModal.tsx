@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useMemo } from "react";
 import type { Match, Roster, RosterSquad, RosterPlayer } from "../../types/match";
 import { MatchCard } from "../MatchCard";
 import { useAppDispatch, useAppSelector } from "../../store";
 import { closeModal, openSquadModal, openPlayerModal } from "../../store/slices/uiSlice";
-import { selectMatchRoster } from "../../store/selectors/scoringSelectors";
+import {
+  selectMatchDisplayStatusById,
+  selectMatchRoster,
+} from "../../store/selectors/scoringSelectors";
+import { maskMatchForScheduleReveal } from "../../lib/matchReveal";
 import { selectStarterSquads, selectStarterPlayers } from "../../store/selectors/rosterSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
 import { Modal } from "./Modal";
@@ -16,6 +20,13 @@ export const MatchCardModal: React.FC = () => {
 
   // Get the selected match from the modal state
   const selectedMatch = modal.selectedCard as Match | undefined;
+  const matchDisplayStatusById = useAppSelector(selectMatchDisplayStatusById);
+
+  const matchForModal = useMemo(() => {
+    if (!selectedMatch) return undefined;
+    const displayStatus = matchDisplayStatusById[selectedMatch.id] ?? "Upcoming";
+    return maskMatchForScheduleReveal(selectedMatch, displayStatus);
+  }, [selectedMatch, matchDisplayStatusById]);
 
   // Get current roster and starters from Redux
   const roster = useAppSelector(selectMatchRoster);
@@ -34,7 +45,12 @@ export const MatchCardModal: React.FC = () => {
     dispatch(openPlayerModal(player));
   };
 
-  if (!selectedMatch || !selectedMatch.homeTeam?.countryCode || !selectedMatch.awayTeam?.countryCode) {
+  if (
+    !selectedMatch ||
+    !matchForModal ||
+    !selectedMatch.homeTeam?.countryCode ||
+    !selectedMatch.awayTeam?.countryCode
+  ) {
     return null;
   }
 
@@ -51,12 +67,15 @@ export const MatchCardModal: React.FC = () => {
       player.countryCode === selectedMatch.awayTeam.countryCode
   );
 
+  const matchPointsVisible =
+    (matchDisplayStatusById[selectedMatch.id] ?? "Upcoming") === "Final";
+
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className={styles.matchCardModalContent}>
         <div className={styles.matchCardSection}>
           <MatchCard
-            match={selectedMatch}
+            match={matchForModal}
             roster={roster as Roster}
             onMemberClick={(member) => {
               console.log("Member clicked:", member);
@@ -80,7 +99,7 @@ export const MatchCardModal: React.FC = () => {
                   >
                     <span className={styles.flag}>{squad.flag}</span>
                     <span className={styles.name}>{squad.name}</span>
-                    {squad.matchPoints[selectedMatch.id] !== undefined && (
+                    {matchPointsVisible && squad.matchPoints[selectedMatch.id] !== undefined && (
                       <span className={styles.points}>
                         {squad.matchPoints[selectedMatch.id]} pts
                       </span>
@@ -110,7 +129,7 @@ export const MatchCardModal: React.FC = () => {
                         {positionToFifa(player.position)}
                       </span>
                     </span>
-                    {player.matchPoints[selectedMatch.id] !== undefined && (
+                    {matchPointsVisible && player.matchPoints[selectedMatch.id] !== undefined && (
                       <span className={styles.points}>
                         {player.matchPoints[selectedMatch.id]} pts
                       </span>

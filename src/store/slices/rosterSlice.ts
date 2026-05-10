@@ -463,20 +463,23 @@ const rosterSlice = createSlice({
     },
 
     /**
-     * After Group Stage 2 play: mark signed roster members whose nation lost twice in GS1+GS2.
+     * After Group Stage 2 play: mark roster members whose nation lost twice in GS1+GS2 tournament
+     * fixtures (see `countryCodesWithTwoLossesInFirstTwoGroupTurns`). Applies to signed, available,
+     * and unsigned pools so replacements signed after GS2 still see the flag.
      */
     setGroupStageReplaceableFlags: (
       state,
       action: PayloadAction<{ countryCodes: readonly string[] }>
     ) => {
       const eligible = new Set(action.payload.countryCodes);
+      const pools: RosterPool[] = ["signed", "available", "unsigned"];
       state.players.forEach((player, index) => {
-        if (player.pool === "signed" && !player.isEliminated) {
+        if (!player.isEliminated && pools.includes(player.pool)) {
           state.players[index].groupStageReplaceable = eligible.has(player.countryCode);
         }
       });
       state.squads.forEach((squad, index) => {
-        if (squad.pool === "signed" && !squad.isEliminated) {
+        if (!squad.isEliminated && pools.includes(squad.pool)) {
           state.squads[index].groupStageReplaceable = eligible.has(squad.countryCode);
         }
       });

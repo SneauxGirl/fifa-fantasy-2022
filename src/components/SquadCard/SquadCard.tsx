@@ -11,6 +11,8 @@ import {
   rosterConflictsForSquadView,
 } from "../../lib/rosterConflicts";
 import type { TurnId } from "../../lib/turnSimulation";
+import { GroupStageEliminationWarning } from "../Shared/GroupStageEliminationWarning";
+import { useMathEliminatedCountryCodes } from "../../hooks/useMathEliminatedCountryCodes";
 import styles from "./SquadCard.module.scss";
 
 interface SquadCardProps {
@@ -23,6 +25,7 @@ export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => 
   const signedSquads = useAppSelector(selectSignedSquads);
   const nationTeams = useAppSelector((state) => state.nationTeams.teams);
   const allMatches = useAppSelector(selectBracketResolvedMatches);
+  const mathEliminatedCodes = useMathEliminatedCountryCodes();
   const currentTurnId = useAppSelector(
     (state) => (state.matches.turnSimulation?.currentTurnId ?? null) as TurnId | null
   );
@@ -33,6 +36,7 @@ export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => 
   // Extract data conditionally based on team type
   const name = team.name;
   const countryCode = isRosterSquad(team) ? team.countryCode : (team as Squad).code;
+  const showGroupStageEliminationWarning = mathEliminatedCodes.has(countryCode);
   const flag = team.flag;
   const coaches = isRosterSquad(team) ? team.coaches : undefined;
   const tournamentPerformance = !isRosterSquad(team) ? (team as Squad).tournamentPerformance : undefined;
@@ -113,6 +117,11 @@ export const SquadCard: React.FC<SquadCardProps> = ({ team, fantasyStatus }) => 
             ))}
           </div>
         )}
+
+        <GroupStageEliminationWarning
+          visible={showGroupStageEliminationWarning}
+          className={styles.squadCardEliminationSlot}
+        />
 
         {/* Tournament stats */}
         {tournamentPerformance ? (

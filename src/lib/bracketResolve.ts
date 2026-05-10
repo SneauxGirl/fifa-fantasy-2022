@@ -189,6 +189,36 @@ function resolveFeed(
 }
 
 /**
+ * Third- and fourth-place nations per group after all six group fixtures are final.
+ * Matches `computeGroupStandings` ordering (points, goal difference, goals for).
+ */
+export function countryCodesEliminatedAfterGroupStage(
+  allMatches: Match[],
+  nationalTeams: NationalTeam[]
+): string[] {
+  const codeToGroup = buildCountryToGroup(nationalTeams);
+  const out: string[] = [];
+  const groupLetters = new Set(
+    [...codeToGroup.values()].filter((g): g is string => Boolean(g))
+  );
+
+  for (const letter of groupLetters) {
+    const memberCodes = [...codeToGroup.entries()]
+      .filter(([, g]) => g === letter)
+      .map(([c]) => c);
+    if (memberCodes.length !== 4) continue;
+
+    const gms = groupStageMatchesForGroup(allMatches, letter, codeToGroup);
+    const table = computeGroupStandings(gms, memberCodes);
+    if (!table || table.length < 4) continue;
+
+    out.push(table[2].code, table[3].code);
+  }
+
+  return [...new Set(out)];
+}
+
+/**
  * Clone matches and fill knockout homeTeam/awayTeam from bracketFeeds when
  * feeder groups / matches are final. Keeps bracketFeeds on the object for UI labels if needed.
  */

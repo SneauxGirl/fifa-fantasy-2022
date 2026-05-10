@@ -27,7 +27,7 @@
   }
 
   &.current {
-    border: $border-width-2 solid $color-bg-tertiary;
+    border: $border-width-2 solid $color-success-primary;
   }
 
   &.upcoming {
@@ -36,53 +36,65 @@
 
   &.locked {
     background: $color-neutral-black;
+    border-color: $color-neutral-black;
+  }
+
+  &.completed.expanded .stageMatches {
+    background: $color-bg-primary;
+  }
+
+  &.current.expanded .stageMatches {
+    background: $color-bg-primary;
+  }
+
+  &.upcoming.expanded .stageMatches {
+    background: $color-neutral-white;
   }
 }
 
 .stageHeaderContainer {
-  display: flex;
-  align-items: center;
+  position: relative;
+  display: block;
   width: 100%;
   background: linear-gradient(90deg, $color-bg-primary-alt 0%, $color-bg-primary-alt 100%);
   border-bottom: $border-width-1 solid $color-border-low;
 
+  /* State lives on `.stage`; `.expanded` is additional — these selectors match open + closed */
   .completed & {
+    background: $color-neutral-white;
+    border-bottom-color: $color-border-low;
+  }
+
+  .current & {
     background: $color-success-primary;
+    border-bottom-color: $color-success-primary;
   }
 
   .upcoming & {
     background: $color-bg-tertiary;
-  }
-
-  .expanded & {
-    background: $color-bg-tertiary;
     border-bottom-color: $color-bg-tertiary;
   }
 
-  // Keep the active/current stage visually light when opened.
-  .current.expanded & {
-    background: linear-gradient(90deg, $color-bg-primary-alt 0%, $color-bg-primary-alt 100%);
-    border-bottom-color: $color-border-low;
-  }
-
-  .upcoming &.expanded {
-    background: $color-bg-tertiary;
-  }
-
-  .completed &.expanded {
-    background: $color-success-primary;
-  }
-
+  /* Locked = future, not yet playable — header bar always black (accordion stays closed) */
   .locked & {
     background: $color-neutral-black;
+    border-bottom-color: $color-neutral-black;
+  }
+
+  /* Symmetric horizontal inset balances the absolutely positioned Play control */
+  &.stageHeaderContainerHasPlay .stageHeader {
+    padding-inline: calc(#{$spacing-12} + 4.5rem);
   }
 }
 
 .stageHeader {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
-  flex: 1;
+  justify-content: center;
+  gap: $spacing-8;
+  box-sizing: border-box;
+  width: 100%;
   padding: $spacing-16;
   background: none;
   border: none;
@@ -97,19 +109,27 @@
   }
 
   .completed & {
+    color: $color-text-default;
+  }
+
+  .completed &:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  .current & {
     color: $color-text-inverse;
+  }
+
+  .current &:hover {
+    background: rgba($color-text-inverse, 0.12);
   }
 
   .upcoming & {
     color: $color-text-inverse;
   }
 
-  &.expanded {
-    color: $color-text-inverse;
-  }
-
-  .current &.expanded {
-    color: $color-text-default;
+  .upcoming &:hover {
+    background: rgba($color-text-inverse, 0.1);
   }
 
   .locked & {
@@ -122,14 +142,31 @@
     outline-offset: -2px;
   }
 
+  .completed &:focus-visible {
+    outline-color: $color-bg-tertiary;
+  }
+
+  .current &:focus-visible {
+    outline-color: $color-text-inverse;
+  }
+
+  .upcoming &:focus-visible {
+    outline-color: $color-text-inverse;
+  }
+
   &:disabled {
     opacity: 0.9;
   }
 }
 
 .playButton {
+  position: absolute;
+  top: 50%;
+  right: $spacing-12;
+  transform: translateY(-50%);
+  z-index: 2;
   padding: $spacing-8 $spacing-16;
-  margin-right: $spacing-12;
+  margin: 0;
   background: $color-bg-tertiary;
   color: $color-text-inverse;
   border: none;
@@ -154,41 +191,123 @@
     cursor: not-allowed;
   }
 
+  .current & {
+    background: $color-text-inverse;
+    color: $color-success-primary;
+    border: $border-width-1 solid rgba($color-text-inverse, 0.35);
+
+    &:hover:not(:disabled) {
+      opacity: 1;
+      background: color-mix(in srgb, $color-text-inverse 92%, $color-success-primary);
+    }
+
+    &:focus-visible {
+      outline-color: $color-text-inverse;
+    }
+  }
+}
+
+.stageHeaderLeft {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.stageHeaderCenter {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0;
+  text-align: center;
+  max-width: 100%;
+  /* Single size for stage title + "FINAL" (inherits .stageHeader) */
+  font-size: inherit;
+}
+
+.stageHeaderRight {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $spacing-8;
+}
+
+.stageTitleSeparator {
+  font-weight: $font-weight-regular;
+  white-space: pre;
+
   .completed & {
-    background: $color-success-primary;
+    color: $color-text-default;
+  }
+
+  .current & {
+    color: rgba($color-text-inverse, 0.85);
   }
 
   .upcoming & {
-    background: $color-neutral-black;
+    color: rgba($color-text-inverse, 0.85);
+  }
+
+  .locked & {
+    color: rgba($color-text-inverse, 0.85);
   }
 }
 
-.stageHeaderTrailing {
-  display: flex;
-  align-items: center;
-  gap: $spacing-8;
-  flex-shrink: 0;
-}
-
-.stageFinalLabel {
-  font-size: $font-size-12;
+.stageFinalInline {
+  font-size: inherit;
   font-weight: $font-weight-bold;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+
+  .completed & {
+    color: $color-text-default;
+  }
+
+  .current & {
+    color: $color-text-inverse;
+  }
+
+  .upcoming & {
+    color: $color-text-inverse;
+  }
+
+  .locked & {
+    color: $color-text-inverse;
+  }
 }
 
-.stageMeta {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  gap: $spacing-4;
-  min-width: 0;
+.collapseHint {
+  font-size: $font-size-12;
+  font-weight: $font-weight-regular;
+  line-height: 1.3;
+  max-width: 11rem;
+  text-align: right;
+
+  .completed & {
+    color: $color-text-medium;
+  }
+
+  .current & {
+    color: rgba($color-text-inverse, 0.88);
+  }
+
+  .upcoming & {
+    color: rgba($color-text-inverse, 0.88);
+  }
+
+  .locked & {
+    color: rgba($color-text-inverse, 0.88);
+  }
 }
 
 .stageName {
   text-align: center;
+  font-size: inherit;
 }
 
 .stageCount {
@@ -196,26 +315,22 @@
   font-weight: $font-weight-regular;
   color: $color-text-medium;
   margin: 0;
-  text-align: center;
+  text-align: left;
 
-  .expanded & {
-    color: $color-text-inverse;
-  }
-
-  .current.expanded & {
+  .completed & {
     color: $color-text-medium;
   }
 
-  .locked & {
-    color: $color-text-inverse;
+  .current & {
+    color: rgba($color-text-inverse, 0.92);
   }
 
   .upcoming & {
-    color: $color-text-inverse;
+    color: rgba($color-text-inverse, 0.92);
   }
 
-  .completed & {
-    color: $color-text-inverse;
+  .locked & {
+    color: rgba($color-text-inverse, 0.92);
   }
 }
 
@@ -225,6 +340,7 @@
   justify-content: center;
   color: currentColor;
   flex-shrink: 0;
+  margin-inline-start: $spacing-4;
 
   .locked & {
     width: 28px;
@@ -240,14 +356,6 @@
   flex-direction: column;
   gap: $spacing-12;
   padding: $spacing-16;
-
-  .completed &.expanded {
-    background: $color-bg-primary;
-  }
-
-  .upcoming &.expanded {
-    background: $color-neutral-white;
-  }
 }
 
 .matchItem {
@@ -356,7 +464,8 @@
 .teams {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
   gap: $spacing-4;
   flex: 1;
 }
@@ -379,8 +488,9 @@
   font-weight: $font-weight-bold;
   font-size: $font-size-16;
   color: $color-text-default;
-  min-width: 24px;
-  text-align: center;
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
 }
 
 .status {
@@ -472,10 +582,6 @@
     padding: $spacing-12;
   }
 
-  .stageName {
-    font-size: $font-size-14;
-  }
-
   .stageCount {
     font-size: $font-size-12;
   }
@@ -499,16 +605,50 @@
   }
 
   .stageHeader {
+    flex-direction: column;
     padding: $spacing-10;
     font-size: $font-size-14;
+    gap: $spacing-10;
   }
 
-  .stageName {
-    font-size: $font-size-12;
+  .stageHeaderLeft,
+  .stageHeaderRight {
+    flex: 0 1 auto;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stageHeaderCenter {
+    order: -1;
   }
 
   .stageCount {
-    font-size: $font-size-14;
-    margin: 0 $spacing-8;
+    font-size: $font-size-12;
+    text-align: center;
+  }
+
+  .collapseHint {
+    text-align: center;
+    max-width: none;
+  }
+
+  /* Stack Play under the header row; drop symmetric inset meant for inline Play */
+  .stageHeaderContainerHasPlay {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .stageHeaderContainerHasPlay .stageHeader {
+    padding-inline: $spacing-16;
+    order: 1;
+  }
+
+  .stageHeaderContainerHasPlay .playButton {
+    position: static;
+    transform: none;
+    order: 2;
+    align-self: center;
+    margin: 0 $spacing-12 $spacing-12;
   }
 }

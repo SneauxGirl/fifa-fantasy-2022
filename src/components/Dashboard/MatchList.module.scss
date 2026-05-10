@@ -144,7 +144,7 @@
   font-size: $font-size-16;
   color: $color-text-default;
   flex: 1;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
 }
 
@@ -201,6 +201,9 @@
   font-weight: $font-weight-bold;
   font-size: $font-size-18;
   color: $color-text-default;
+  min-width: 2ch;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
 }
 
 .dateTime {

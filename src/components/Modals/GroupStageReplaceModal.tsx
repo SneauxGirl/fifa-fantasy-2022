@@ -33,21 +33,30 @@ export const GroupStageReplaceModal: React.FC = () => {
 
   if (!prompt) return null;
 
-  const label =
-    prompt.type === "squad"
-      ? `squad ${prompt.squad.name}`
-      : `player ${prompt.player.name}`;
+  const isSquad = prompt.type === "squad";
+  const memberLabel = isSquad ? "Squad" : "Player";
+  const flag = isSquad ? prompt.squad.flag : prompt.player.flag;
+  const memberName = isSquad ? prompt.squad.name : prompt.player.name;
 
   return (
-    <Modal isOpen onClose={handleClose} title="Optional roster replacement" initialFocusRef={yesRef}>
+    <Modal
+      isOpen
+      onClose={handleClose}
+      initialFocusRef={yesRef}
+      dialogLabelId="group-replace-heading"
+    >
       <div className={styles.body}>
+        <div id="group-replace-heading" className={styles.subject}>
+          <span className={styles.subjectFlag} aria-hidden="true">
+            {flag}
+          </span>
+          <p className={styles.subjectText}>
+            {memberLabel}: {memberName}
+          </p>
+        </div>
         <p className={styles.message} id="group-replace-desc">
-          This {prompt.type === "squad" ? "squad" : "player"} cannot advance to the Round of 16
-          (two losses in the first two group rounds). Would you like to replace them and free the
-          roster slot?
-        </p>
-        <p className={styles.detail} aria-live="polite">
-          {label}
+          This {isSquad ? "squad" : "player"} cannot advance to the Round of 16 (two losses in the
+          first two group rounds). Would you like to replace them and free the roster slot?
         </p>
         <div className={styles.actions}>
           <button

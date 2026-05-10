@@ -1,22 +1,39 @@
 @use '../../styles/tokens.scss' as *;
 
 .body {
-  padding: $spacing-24 $spacing-32 $spacing-24 $spacing-24;
+  /* Extra top/right padding so copy clears the modal’s absolutely positioned close control */
+  padding: $spacing-32 $spacing-80 $spacing-24 $spacing-24;
   max-width: 26rem;
+  box-sizing: border-box;
 }
 
-.message {
-  margin: 0 0 $spacing-12 0;
-  font-size: $font-size-16;
-  line-height: 1.5;
+.subject {
+  display: flex;
+  align-items: center;
+  gap: $spacing-12;
+  margin: 0 0 $spacing-16 0;
+}
+
+.subjectFlag {
+  flex-shrink: 0;
+  font-size: $font-size-24;
+  line-height: 1;
+}
+
+.subjectText {
+  margin: 0;
+  font-size: $font-size-18;
+  font-weight: $font-weight-bold;
+  line-height: 1.35;
   color: $color-text-default;
 }
 
-.detail {
+.message {
   margin: 0 0 $spacing-24 0;
-  font-size: $font-size-14;
-  font-weight: $font-weight-semibold;
-  color: $color-text-high;
+  font-size: $font-size-16;
+  line-height: 1.5;
+  color: $color-text-default;
+  overflow-wrap: break-word;
 }
 
 .actions {

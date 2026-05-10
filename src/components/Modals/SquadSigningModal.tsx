@@ -6,6 +6,8 @@ import { selectSignedSquads } from "../../store/selectors/rosterSelectors";
 import { countryToFifa } from "../../lib/formatMapping";
 import { getTeamColors } from "../../lib/teamColors";
 import type { RosterSquad } from "../../types/match";
+import { GroupStageEliminationWarning } from "../Shared/GroupStageEliminationWarning";
+import { useMathEliminatedCountryCodes } from "../../hooks/useMathEliminatedCountryCodes";
 import { Modal } from "./Modal";
 import styles from "./SquadSigningModal.module.scss";
 
@@ -20,10 +22,14 @@ export const SquadSigningModal: React.FC = () => {
   const dispatch = useAppDispatch();
   const modal = useAppSelector((state) => state.ui.modal);
   const signedSquads = useAppSelector(selectSignedSquads);
+  const mathEliminatedCodes = useMathEliminatedCountryCodes();
   const isOpen = modal.type === "squadSigning";
   const selectedSquad = modal.selectedCard as RosterSquad | undefined;
 
   const canSign = signedSquads.length < 4;
+  const showGroupStageEliminationWarning = Boolean(
+    selectedSquad && mathEliminatedCodes.has(selectedSquad.countryCode)
+  );
 
   const handleConfirm = () => {
     if (selectedSquad && canSign) {
@@ -74,6 +80,8 @@ export const SquadSigningModal: React.FC = () => {
               </p>
             )}
           </div>
+
+          <GroupStageEliminationWarning visible={showGroupStageEliminationWarning} />
 
           <div className={styles.details}>
             <div className={styles.detailItem}>

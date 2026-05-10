@@ -17,6 +17,7 @@ import { Router } from './router'
 import mockMatches from './data/matches.json'
 import mockSquadsData from './data/squads.json'
 import { normalizeMatchesNationalTeamIds } from './lib/normalizeMatchNationalTeamIds'
+import { loadPersistedScheduleOrDefault } from './lib/persistSchedule'
 
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
       if (cancelled) return
 
       initialMatches = normalizeMatchesNationalTeamIds(initialMatches, allNationalTeams)
+      initialMatches = loadPersistedScheduleOrDefault(initialMatches)
 
       const rosterPlayers: RosterPlayer[] = allNationalTeams.flatMap((nationalTeam: any) =>
         (nationalTeam.players || []).map((p: any) => ({

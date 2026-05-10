@@ -11,6 +11,10 @@ import type { Player, PlayerMatchStats, Position } from "../types/player";
 import type { Squad } from "../types/squad";
 import { config } from "../config";
 import { getDataSourcePreference } from "../lib/dataSourcePreference";
+import {
+  WC2022_TURN_DATE_RANGES,
+  matchBelongsToSimulationTurn,
+} from "../lib/wc2022TurnSchedule";
 import mockMatches from "../data/matches.json";
 
 // ─── Configuration ───────────────────────────────────────────────────────
@@ -29,43 +33,42 @@ const WORLD_CUP = {
 };
 
 // ─── Turn Structure (Round/Stage + Date Range) ───────────────────────────
-// Maps turn IDs to API query parameters
-// Handles Dec 3 overlap by including it in Group_Stage_Final
+// Maps turn IDs to API query parameters (shared with `buildTurnMatchIds`).
 
 export const TURNS = {
   Group_Stage_1: {
     round: ["Group A", "Group B", "Group C", "Group D"],
-    dateRange: ["2022-11-20", "2022-11-26"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.Group_Stage_1],
     matchCount: 16,
   },
   Group_Stage_2: {
     round: ["Group A", "Group B", "Group C", "Group D"],
-    dateRange: ["2022-11-26", "2022-11-30"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.Group_Stage_2],
     matchCount: 16,
   },
   Group_Stage_Final: {
     round: ["Group A", "Group B", "Group C", "Group D"],
-    dateRange: ["2022-11-29", "2022-12-03"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.Group_Stage_Final],
     matchCount: 16,
   },
   R16: {
     round: "Round of 16",
-    dateRange: ["2022-12-03", "2022-12-07"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.R16],
     matchCount: 8,
   },
   Quarterfinals: {
     round: "Quarter-finals",
-    dateRange: ["2022-12-09", "2022-12-11"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.Quarterfinals],
     matchCount: 4,
   },
   Semifinals: {
     round: "Semi-finals",
-    dateRange: ["2022-12-14", "2022-12-15"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.Semifinals],
     matchCount: 2,
   },
   Final: {
     round: "Final",
-    dateRange: ["2022-12-17", "2022-12-18"],
+    dateRange: [...WC2022_TURN_DATE_RANGES.Final],
     matchCount: 2,
   },
 };
@@ -181,10 +184,20 @@ export function normalizeMatch(apiFixture: any): Match {
       name: apiFixture.fixture.venue.name,
       city: apiFixture.fixture.venue.city,
     } : undefined,
-    stage: apiFixture.league?.season ? {
-      id: apiFixture.league.season,
-      name: apiFixture.league.name,
-    } : undefined,
+    stage: (() => {
+      const roundName = apiFixture.league?.round as string | undefined;
+      if (roundName)
+        return {
+          id: typeof apiFixture.league?.season === "number" ? apiFixture.league.season : 0,
+          name: roundName,
+        };
+      return apiFixture.league?.season
+        ? {
+            id: apiFixture.league.season,
+            name: apiFixture.league.name,
+          }
+        : undefined;
+    })(),
     events: normalizeMatchEventsForFixture(apiFixture.events || [], homeTeam, awayTeam),
   };
 }
@@ -336,12 +349,9 @@ function filterMockMatchesForTurn(turnId: string): Match[] {
   if (!turn) {
     throw new Error(`Invalid turn ID: ${turnId}`);
   }
-  const from = new Date(`${turn.dateRange[0]}T00:00:00.000Z`).getTime();
-  const to = new Date(`${turn.dateRange[1]}T23:59:59.999Z`).getTime();
-  return (mockMatches as unknown as Match[]).filter((m) => {
-    const t = new Date(m.date).getTime();
-    return t >= from && t <= to;
-  });
+  return (mockMatches as unknown as Match[]).filter((m) =>
+    matchBelongsToSimulationTurn(turnId, m)
+  );
 }
 
 async function fetchEventsForFixture(match: Match): Promise<MatchEvent[]> {
@@ -410,7 +420,9 @@ export async function getMatchResults(turnId: string): Promise<Match[]> {
       return [];
     }
 
-    const normalized: Match[] = response.data.response.map(normalizeMatch);
+    const normalized: Match[] = response.data.response
+      .map((raw: unknown) => normalizeMatch(raw))
+      .filter((m: Match) => matchBelongsToSimulationTurn(turnId, m));
     return enrichMatchesWithFixtureEvents(normalized);
   } catch (error) {
     console.error(`Error fetching match results for turn ${turnId}:`, error);
