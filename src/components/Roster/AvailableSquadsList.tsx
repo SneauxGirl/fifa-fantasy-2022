@@ -145,7 +145,8 @@ export const AvailableSquadsList: React.FC = () => {
         style={{ position: "absolute", left: "-9999px" }}
       />
 
-      <h3>Available Squads ({signedSquads.length}/4 signed)</h3>
+      <h3>Available Squads</h3>
+    
       {allAvailableSquads.length === 0 ? (
         <p className={styles.empty}>No squads available</p>
       ) : (

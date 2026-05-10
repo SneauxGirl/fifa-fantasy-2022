@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../store";
 import {
   closeGroupStageReplacePrompt,
@@ -16,12 +16,6 @@ export const GroupStageReplaceModal: React.FC = () => {
   const prompt = useAppSelector((s) => s.ui.groupStageReplacePrompt);
   const isRosterLocked = useAppSelector(selectIsRosterLocked);
   const yesRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (prompt) {
-      yesRef.current?.focus();
-    }
-  }, [prompt]);
 
   const handleClose = () => {
     dispatch(closeGroupStageReplacePrompt());
@@ -45,7 +39,7 @@ export const GroupStageReplaceModal: React.FC = () => {
       : `player ${prompt.player.name}`;
 
   return (
-    <Modal isOpen onClose={handleClose} title="Optional roster replacement">
+    <Modal isOpen onClose={handleClose} title="Optional roster replacement" initialFocusRef={yesRef}>
       <div className={styles.body}>
         <p className={styles.message} id="group-replace-desc">
           This {prompt.type === "squad" ? "squad" : "player"} cannot advance to the Round of 16

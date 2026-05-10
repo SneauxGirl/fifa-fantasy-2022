@@ -106,6 +106,7 @@
 }
 
 .benchPlayerCard {
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -113,22 +114,37 @@
   gap: $spacing-8 $spacing-12;
   padding: $spacing-10 $spacing-10 $spacing-10 $spacing-10;
   background: $color-bg-primary;
-  border: $border-width-1 solid $color-border-mid;
+  border: $border-width-1 solid $color-border-low;
+  border-left: 3px solid $color-border-mid;
   border-radius: $border-radius-4;
   transition: $transition-all;
 
-  &.unsigned {
-    border-left: 3px solid $color-warning-primary;
+  &.posGk {
+    border-left-color: player-pos-accent-border($player-pos-border-gk);
   }
 
-  &.signed {
-    border-left: 3px solid $color-success-primary;
-    background: rgba($color-success-primary, 0.05);
+  &.posDef {
+    border-left-color: player-pos-accent-border($player-pos-border-def);
   }
 
-  &:hover {
+  &.posMid {
+    border-left-color: player-pos-accent-border($player-pos-border-mid);
+  }
+
+  &.posFwd {
+    border-left-color: player-pos-accent-border($player-pos-border-fwd);
+  }
+
+  &.benchPlayerEliminated {
+    opacity: 0.65;
+    border-color: $color-border-mid;
+    border-left-color: $color-border-mid;
+    background: $color-bg-primary-alt;
+  }
+
+  &:hover:not(.benchPlayerEliminated) {
     box-shadow: $shadow-low;
-    border-color: $color-bg-tertiary;
+    border-color: $color-border-mid;
   }
 }
 
@@ -243,6 +259,43 @@
   }
 }
 
+/* Match SquadsSection pending Insights control */
+.insightsButton {
+  flex-shrink: 0;
+  padding: $spacing-4 $spacing-8;
+  margin-right: $spacing-8;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: $border-radius-4;
+  font-size: $font-size-14;
+  font-weight: $font-weight-semibold;
+  font-family: inherit;
+  cursor: pointer;
+  transition: $transition-all;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+
+  &:hover:not(:disabled) {
+    background: #ffffff;
+    color: #000000;
+    outline: $border-width-2 solid #000000;
+    outline-offset: 2px;
+  }
+
+  &:focus-visible {
+    background: #ffffff;
+    color: #000000;
+    outline: $border-width-2 solid #000000;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
 .signedBadge {
   display: inline-flex;
   align-items: center;
@@ -258,7 +311,8 @@
   white-space: nowrap;
 }
 
-@media (max-width: 1000px) {
+/* Single-column pending bench — viewport width < 1150px */
+@media (max-width: 1149px) {
   .benchByPosition {
     gap: $spacing-12;
   }
@@ -276,6 +330,11 @@
   }
 
   .actionBtn {
+    padding: $spacing-2 $spacing-6;
+    font-size: $font-size-14;
+  }
+
+  .insightsButton {
     padding: $spacing-2 $spacing-6;
     font-size: $font-size-14;
   }
@@ -305,5 +364,11 @@
   .actionBtn {
     padding: $spacing-2 $spacing-4;
     font-size: $font-size-14;
+  }
+
+  .insightsButton {
+    padding: $spacing-2 $spacing-4;
+    font-size: $font-size-14;
+    margin-right: $spacing-6;
   }
 }

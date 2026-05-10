@@ -217,6 +217,18 @@ $border-width-4: 0.25rem;      // 4px
 $border-width-8: 0.5rem;       // 8px
 $border-width-16: 1rem;        // 16px
 
+// Position accent borders — available pick cards (full frame) + pending rows (left bar).
+// DEF/FWD/MID align with roster actions: remove (error), Sign (success), FIFA brand blue.
+$player-pos-border-gk: #fedf00; // Brazil NT primary yellow (APItoFIFAmaps teamColors.BRA)
+$player-pos-border-def: $color-error-primary;
+$player-pos-border-mid: $color-bg-tertiary;
+$player-pos-border-fwd: $color-success-primary;
+
+/// Position accent strokes at 50% opacity on light backgrounds.
+@function player-pos-accent-border($color) {
+  @return color-mix(in srgb, $color 70%, transparent);
+}
+
 // ========== SIZING ==========
 
 $sizing-8: 0.5rem;     // 8px

@@ -152,6 +152,24 @@ export function getPlayerFullName(
 }
 
 /**
+ * Compact sidebar-style label: "L Messi", "A Di María".
+ * Splits on whitespace: first grapheme (diacritics stripped for the letter) + remainder.
+ * Single-token names are unchanged (mononym / nickname stored as one word).
+ */
+export function formatPlayerInitialLastName(fullName: string): string {
+  const trimmed = fullName.trim();
+  if (!trimmed) return "";
+  const parts = trimmed.split(/\s+/);
+  if (parts.length === 1) return parts[0];
+
+  const firstWord = parts[0];
+  const rest = parts.slice(1).join(" ");
+  const initialBase = firstWord.normalize("NFD").replace(/\p{M}/gu, "");
+  const letter = initialBase.charAt(0).toLocaleUpperCase(undefined);
+  return `${letter} ${rest}`;
+}
+
+/**
  * Get match display string (e.g., "ARG vs BRA" or "ARG 2-1 BRA")
  */
 export function getMatchDisplayString(match: DisplayMatch): string {

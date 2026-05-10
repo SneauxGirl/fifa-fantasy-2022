@@ -9,8 +9,10 @@ import {
   selectEliminatedSignedSquads,
 } from "../../store/selectors/rosterSelectors";
 import { positionToFifa } from "../../lib/formatMapping";
+import { formatPlayerInitialLastName } from "../../lib/dataTransform";
 import { getTeamColors } from "../../lib/teamColors";
 import type { RosterPlayer } from "../../types/match";
+import type { PositionShort } from "../../types/player";
 import { SoccerBallIcon } from "../Shared/SoccerBallIcon";
 import styles from "./RosterSidebar.module.scss";
 
@@ -29,12 +31,19 @@ const POSITION_ORDER: Record<string, number> = {
   "Attacker": 3,
 };
 
+const BENCH_POSITION_BADGE_CLASS: Record<PositionShort, string> = {
+  GK: styles.posGk,
+  DEF: styles.posDef,
+  MID: styles.posMid,
+  FWD: styles.posFwd,
+};
+
 const sortPlayersByPosition = (players: RosterPlayer[]): RosterPlayer[] => {
   return [...players].sort((a, b) => {
     const orderA = POSITION_ORDER[a.position] ?? 999;
     const orderB = POSITION_ORDER[b.position] ?? 999;
     if (orderA !== orderB) return orderA - orderB;
-    // If same position, sort alphabetically by name
+    // If same position, sort alphabetically by full name
     return a.name.localeCompare(b.name);
   });
 };
@@ -84,6 +93,9 @@ export const RosterSidebar: React.FC = () => {
               const teamColors = getTeamColors(player.countryCode);
               const showReplace =
                 Boolean(player.groupStageReplaceable) && !isRosterLocked;
+              const benchDisplayName = formatPlayerInitialLastName(player.name);
+              const fifaPos = positionToFifa(player.position) as PositionShort;
+              const positionBadgeClass = BENCH_POSITION_BADGE_CLASS[fifaPos] ?? "";
               return (
                 <div
                   key={player.playerId}
@@ -118,16 +130,21 @@ export const RosterSidebar: React.FC = () => {
                       } as React.CSSProperties
                     }
                   >
-                    <span className={styles.playerNumber}>{player.number}</span>
-                    <span className={styles.playerName}>
-                      {player.name}
-                      {isStarter && (
-                        <span className={styles.starterIcon} title="In starters formation">
-                          <SoccerBallIcon className={styles.starterBallSvg} />
-                        </span>
-                      )}
+                    <span className={styles.playerItemLeading}>
+                      <span className={styles.benchFlag} aria-hidden>
+                        {player.flag}
+                      </span>
+                      <span className={styles.playerNumber}>{player.number}</span>
+                      <span className={styles.playerName}>
+                        {benchDisplayName}
+                        {isStarter && (
+                          <span className={styles.starterIcon} title="In starters formation">
+                            <SoccerBallIcon className={styles.starterBallSvg} />
+                          </span>
+                        )}
+                      </span>
                     </span>
-                    <span className={styles.playerPosition}>{positionToFifa(player.position)}</span>
+                    <span className={`${styles.playerPosition} ${positionBadgeClass}`.trim()}>{fifaPos}</span>
                   </button>
                   {showReplace && (
                     <button
@@ -167,7 +184,9 @@ export const RosterSidebar: React.FC = () => {
             {/* Eliminated Players */}
             {eliminatedPlayers.map((player) => (
               <div key={`player-${player.playerId}`} className={`${styles.rosterItem} ${styles.eliminated}`}>
-                <span className={styles.playerName}>{player.name}</span>
+                <span className={styles.playerName}>
+                  {formatPlayerInitialLastName(player.name)}
+                </span>
                 <span className={styles.playerPosition}>{player.position}</span>
               </div>
             ))}

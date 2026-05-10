@@ -13,6 +13,21 @@ import styles from "./AvailablePlayersList.module.scss";
 
 type PositionType = "GK" | "DEF" | "MID" | "FWD" | "ALL";
 
+function positionChromeClass(fifa: ReturnType<typeof positionToFifa>, stylesModule: typeof styles): string {
+  switch (fifa) {
+    case "GK":
+      return stylesModule.posGk;
+    case "DEF":
+      return stylesModule.posDef;
+    case "MID":
+      return stylesModule.posMid;
+    case "FWD":
+      return stylesModule.posFwd;
+    default:
+      return "";
+  }
+}
+
 interface AvailablePlayersListProps {
   selectedPosition: PositionType;
   searchQuery?: string;
@@ -189,6 +204,9 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
   if (filteredPlayers.length === 0) {
     return (
       <div className={styles.availablePlayersList}>
+        <h3 className={styles.availablePlayersTitle} id="available-players-heading">
+          Available Players
+        </h3>
         <div className={styles.emptyState}>
           <p>
             {allAvailablePlayers.length === 0
@@ -202,17 +220,15 @@ export const AvailablePlayersList: React.FC<AvailablePlayersListProps> = ({
 
   return (
     <div className={styles.availablePlayersList}>
-      <div className={styles.header}>
-        <p className={styles.count}>
-          {filteredPlayers.length} player{filteredPlayers.length !== 1 ? "s" : ""} available
-        </p>
-      </div>
+      <h3 className={styles.availablePlayersTitle} id="available-players-heading">
+        Available Players
+      </h3>
 
       <div
         className={styles.playersList}
         tabIndex={0}
         role="region"
-        aria-label="Available players list"
+        aria-labelledby="available-players-heading"
         onFocus={(e) => {
           if (e.target === e.currentTarget) {
             focusActive(activeIndex, activeTarget);
@@ -284,6 +300,7 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
 }) => {
   const isEliminated = player.isEliminated;
   const isRosterLocked = useAppSelector(selectIsRosterLocked);
+  const posClass = !isEliminated ? positionChromeClass(positionToFifa(player.position), styles) : "";
   const nameParts = player.name.trim().split(/\s+/);
   const firstName = nameParts[0] || player.name;
   const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : "";
@@ -311,7 +328,7 @@ const PlayerListItem: React.FC<PlayerListItemProps> = ({
 
   return (
     <div
-      className={`${styles.playerCard} ${isEliminated ? styles.eliminated : ""}`}
+      className={`${styles.playerCard}${posClass ? ` ${posClass}` : ""}${isEliminated ? ` ${styles.eliminated}` : ""}`}
       role="button"
       tabIndex={tabIndex}
       ref={cardRef}

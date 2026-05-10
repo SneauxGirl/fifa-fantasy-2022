@@ -143,10 +143,19 @@ interface BenchPlayerCardProps {
   isRosterLocked: boolean;
 }
 
+const PENDING_POS_CLASS: Record<PositionShort, string> = {
+  GK: styles.posGk,
+  DEF: styles.posDef,
+  MID: styles.posMid,
+  FWD: styles.posFwd,
+};
+
 const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRemove, isRosterLocked }) => {
   const dispatch = useAppDispatch();
   const countryCode = player.countryCode;
   const teamColors = getTeamColors(player.countryCode);
+  const fifa = positionToFifa(player.position) as PositionShort;
+  const posClass = player.isEliminated ? "" : PENDING_POS_CLASS[fifa];
 
   const handlePlayerLabelClick = () => {
     dispatch(openPlayerModal(player));
@@ -160,7 +169,9 @@ const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRem
   };
 
   return (
-    <div className={styles.benchPlayerCard}>
+    <div
+      className={`${styles.benchPlayerCard}${posClass ? ` ${posClass}` : ""}${player.isEliminated ? ` ${styles.benchPlayerEliminated}` : ""}`}
+    >
       <div
         className={styles.playerInfo}
         onClick={handlePlayerLabelClick}
@@ -182,6 +193,23 @@ const BenchPlayerCard: React.FC<BenchPlayerCardProps> = ({ player, onSign, onRem
       </div>
 
       <div className={styles.playerActions}>
+        {!player.isEliminated && (
+          <button
+            type="button"
+            className={styles.insightsButton}
+            onClick={() => dispatch(openPlayerModal(player))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                dispatch(openPlayerModal(player));
+              }
+            }}
+            title={`View ${player.name} player details`}
+            aria-label={`View ${player.name} player details`}
+          >
+            Insights
+          </button>
+        )}
         <button
           type="button"
           className={`${styles.actionBtn} ${styles.signBtn}`}

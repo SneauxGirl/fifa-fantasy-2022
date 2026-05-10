@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAppSelector } from "../store";
+import { selectRosterCounts } from "../store/selectors/rosterSelectors";
 import { AvailableSquadsList } from "../components/Roster/AvailableSquadsList";
 import { SquadsSection } from "../components/Roster/SquadsSection";
 import { PositionFilter } from "../components/Roster/PositionFilter";
@@ -26,6 +28,7 @@ const Roster = () => {
   const [selectedPosition, setSelectedPosition] = useState<PositionType>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activeTab, setActiveTab] = useState<TabType>("roster");
+  const rosterCounts = useAppSelector(selectRosterCounts);
 
   return (
     <>
@@ -50,17 +53,15 @@ const Roster = () => {
         {/* Main Content - Squad/Player Selection */}
         <div className={styles.mainContent}>
           {/* Select Squads Section */}
-          <section className={styles.section}>
-            <h2>Select Squads</h2>
-            <AvailableSquadsList />
+          <section className={styles.section} aria-labelledby="select-squads-heading">
+            <h2 id="select-squads-heading">Select Squads</h2>
+            <div className={styles.selectSquadsStack}>
+              <AvailableSquadsList />
+              <SquadsSection />
+            </div>
           </section>
 
-          {/* Squads Section */}
-          <section className={styles.section}>
-            <SquadsSection />
-          </section>
-
-          {/* Player Selection Section */}
+          {/* Player Selection Section (same outline pattern as Select Squads: h2 + h3 subsections) */}
           <section className={styles.section}>
             <h2>Add Players</h2>
             <div className={styles.filterRow}>
@@ -73,13 +74,28 @@ const Roster = () => {
                 onSearchChange={setSearchQuery}
               />
             </div>
-            <AvailablePlayersList selectedPosition={selectedPosition} searchQuery={searchQuery} />
-          </section>
-
-          {/* Pending Contracts Section */}
-          <section className={styles.section}>
-            <h2>Pending Contracts</h2>
-            <RosterDragZone />
+            <div className={styles.selectPlayersStack}>
+              <AvailablePlayersList selectedPosition={selectedPosition} searchQuery={searchQuery} />
+              <div className={styles.playersPendingInner}>
+                <div className={styles.playersPendingHeadingBlock}>
+                  <h3 className={styles.subsectionHeading} id="pending-players-contracts-heading">
+                    Pending Contracts - Players
+                  </h3>
+                  <p className={styles.pendingContractsPlayersMeta} id="pending-players-contracts-meta">
+                    ({rosterCounts.signedPlayers}/{rosterCounts.rosterCapacity} confirmed, including{" "}
+                    {rosterCounts.rosterGK}/{rosterCounts.rosterGKCapacity} GK)
+                  </p>
+                </div>
+                <div
+                  className={styles.playersPendingBenchRegion}
+                  role="region"
+                  aria-labelledby="pending-players-contracts-heading"
+                  aria-describedby="pending-players-contracts-meta"
+                >
+                  <RosterDragZone />
+                </div>
+              </div>
+            </div>
           </section>
         </div>
 

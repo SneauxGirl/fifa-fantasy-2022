@@ -110,17 +110,33 @@
     outline: 2px solid $color-bg-tertiary;
     outline-offset: 2px;
     background: var(--team-bg, $color-bg-primary-alt);
-    color: var(--team-text, $color-text-default);
     opacity: 0.8;
     border-color: $color-bg-tertiary;
+
+    .playerItemLeading .playerName,
+    .playerItemLeading .playerNumber {
+      color: var(--team-text, $color-text-default);
+    }
+
+    .starterBallSvg {
+      color: var(--team-text, $color-text-default);
+    }
   }
 
   &:hover:not(.eliminated) {
     background: var(--team-bg, $color-bg-primary-alt);
     opacity: 0.8;
     border-color: $color-bg-tertiary;
-    color: var(--team-text, $color-text-default);
     box-shadow: 0 2px 8px rgba($color-bg-tertiary, 0.2);
+
+    .playerItemLeading .playerName,
+    .playerItemLeading .playerNumber {
+      color: var(--team-text, $color-text-default);
+    }
+
+    .starterBallSvg {
+      color: var(--team-text, $color-text-default);
+    }
   }
 
   &:active:not(.eliminated) {
@@ -149,25 +165,28 @@
   }
 }
 
-.playerItem:hover:not(.eliminated) .playerName,
-.playerItem:focus-visible:not(.eliminated) .playerName {
-  color: var(--team-text, $color-text-default);
+.playerItemLeading {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: $spacing-6;
 }
 
-.playerItem:hover:not(.eliminated) .playerNumber,
-.playerItem:focus-visible:not(.eliminated) .playerNumber {
-  color: var(--team-text, $color-text-default);
+.benchFlag {
+  flex-shrink: 0;
+  font-size: $font-size-20;
+  line-height: 1;
 }
 
 .playerName {
   flex: 1;
-  font-weight: 500;
+  font-weight: $font-weight-semibold;
   color: $color-text-default;
   min-width: 0;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-
 }
 
 .playerNumber {
@@ -178,22 +197,36 @@
   color: $color-text-default;
   font-weight: $font-weight-bold;
   font-size: $font-size-14;
-  margin-left: 4px;
-  margin-right: 6px;
-  
 }
 
+/* Match AvailablePlayersList: 2px position-colored frame, black label text */
 .playerPosition {
   flex-shrink: 0;
-  margin-left: 8px;
-  padding: 2px 6px;
-  background: $color-bg-tertiary;
-  color: $color-text-inverse;
-  border: 1px solid $color-bg-tertiary;
-  border-radius: 3px;
+  margin-left: $spacing-8;
+  padding: $spacing-2 $spacing-6;
+  border-radius: $border-radius-4;
   font-weight: $font-weight-bold;
   font-size: $font-size-14;
+  box-sizing: border-box;
+  background: transparent;
+  color: $color-text-default;
+  border: $border-width-2 solid $color-border-low;
 
+  &.posGk {
+    border-color: player-pos-accent-border($player-pos-border-gk);
+  }
+
+  &.posDef {
+    border-color: player-pos-accent-border($player-pos-border-def);
+  }
+
+  &.posMid {
+    border-color: player-pos-accent-border($player-pos-border-mid);
+  }
+
+  &.posFwd {
+    border-color: player-pos-accent-border($player-pos-border-fwd);
+  }
 }
 
 .starterIcon {

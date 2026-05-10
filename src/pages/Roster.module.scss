@@ -104,6 +104,53 @@
     border-bottom: 2px solid $color-bg-tertiary;
     padding-bottom: 12px;
   }
+
+}
+
+/* Tighter vertical rhythm between available picks and pending squad contracts */
+.selectSquadsStack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+/* Match Select Squads: tight gap between Available list block and pending subsection */
+.selectPlayersStack {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+/* Match SquadsSection: stack gap ($spacing-4) + .squadsSection padding-top before h3 */
+.playersPendingInner {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-24;
+  padding-top: $spacing-16;
+}
+
+.playersPendingBenchRegion {
+  width: 100%;
+}
+
+.playersPendingHeadingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.pendingContractsPlayersMeta {
+  margin: 0;
+  font-size: $font-size-16;
+  font-weight: $font-weight-semibold;
+  color: $color-text-default;
+}
+
+.subsectionHeading {
+  margin: 0;
+  font-size: $font-size-16;
+  font-weight: $font-weight-semibold;
+  color: $color-text-default;
 }
 
 .filterRow {

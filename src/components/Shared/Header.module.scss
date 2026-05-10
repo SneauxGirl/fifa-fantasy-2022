@@ -39,11 +39,15 @@
   }
 }
 
-/* Left side: Icon */
+/* Left side: blue-banner FIFA art — visible only above 900px (black MidNav logo covers ≤900px) */
 .headerLeft {
-  display: flex;
+  display: none;
   align-items: center;
   flex-shrink: 0;
+
+  @media (min-width: 1016px) {
+    display: flex;
+  }
 }
 
 /* Center: Ticker wrapper */

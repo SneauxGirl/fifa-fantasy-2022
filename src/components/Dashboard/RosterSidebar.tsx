@@ -7,6 +7,7 @@ import {
   selectEliminatedSignedSquads,
   selectEliminatedSignedPlayers,
 } from "../../store/selectors/rosterSelectors";
+import { formatPlayerInitialLastName } from "../../lib/dataTransform";
 import styles from "./RosterSidebar.module.scss";
 
 /**
@@ -38,8 +39,9 @@ export const RosterSidebar: React.FC = () => {
       {starters.length > 0 && (
         <div className={styles.section}>
           {starters.map((player) => (
-            <div key={player.playerId} className={styles.item}>
-              {player.name} <span className={styles.badge}>(starter)</span>
+            <div key={player.playerId} className={styles.item} title={player.name}>
+              {formatPlayerInitialLastName(player.name)}{" "}
+              <span className={styles.badge}>(starter)</span>
             </div>
           ))}
         </div>
@@ -49,8 +51,9 @@ export const RosterSidebar: React.FC = () => {
       {bench.length > 0 && (
         <div className={styles.section}>
           {bench.map((player) => (
-            <div key={player.playerId} className={styles.item}>
-              {player.name} <span className={styles.badge}>(bench)</span>
+            <div key={player.playerId} className={styles.item} title={player.name}>
+              {formatPlayerInitialLastName(player.name)}{" "}
+              <span className={styles.badge}>(bench)</span>
             </div>
           ))}
         </div>
@@ -66,8 +69,9 @@ export const RosterSidebar: React.FC = () => {
             </div>
           ))}
           {eliminatedPlayers.map((player) => (
-            <div key={player.playerId} className={styles.item}>
-              {player.name} <span className={styles.badge}>(eliminated)</span>
+            <div key={player.playerId} className={styles.item} title={player.name}>
+              {formatPlayerInitialLastName(player.name)}{" "}
+              <span className={styles.badge}>(eliminated)</span>
             </div>
           ))}
         </div>

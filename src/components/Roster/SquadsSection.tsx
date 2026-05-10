@@ -56,22 +56,6 @@ export const SquadsSection: React.FC = () => {
     }
   };
 
-  if (allSquads.length === 0) {
-    return (
-      <div
-        className={styles.squadsSection}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <h2>Squads ({signedSquads.length}/4 confirmed)</h2>
-        <div className={`${styles.emptyState} ${dragOver ? styles.dragOver : ""}`}>
-          <p>No squads selected. Add squads in the selection area above, or drag them here.</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleRemoveSquad = (squad: RosterSquad) => {
     if (!isRosterLocked) {
       dispatch(moveSquadToAvailable(squad));
@@ -105,6 +89,8 @@ export const SquadsSection: React.FC = () => {
     e.currentTarget.scrollBy({ top: direction * 160, behavior: "smooth" });
   };
 
+  const shellClassName = `${styles.squadsPendingShell}${dragOver ? ` ${styles.squadsPendingShellDragOver}` : ""}`;
+
   return (
     <div
       className={styles.squadsSection}
@@ -112,20 +98,30 @@ export const SquadsSection: React.FC = () => {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <h2>Squads ({signedSquads.length}/4 confirmed)</h2>
+      <h3>Pending Contracts - Squads ({signedSquads.length}/4 confirmed)</h3>
 
-      <div
-        className={`${styles.squadsList} ${dragOver ? styles.dragOver : ""}`}
-        tabIndex={0}
-        role="region"
-        aria-label="Squads list"
-        onKeyDown={handleSquadsListKeyDown}
-      >
-        {allSquads.map((squad) => {
+      <div className={shellClassName}>
+        {allSquads.length === 0 ? (
+          <div className={styles.emptyState}>
+            <p>
+              No Squads selected. Click on Squads above or drag them here to shortlist.
+              <br />
+              View Insights to see potential conflicts with your current roster.
+              <br />
+              Select Sign to confirm Squad as a Tournament starter.
+            </p>
+          </div>
+        ) : (
+          <div
+            className={styles.squadsList}
+            tabIndex={0}
+            role="region"
+            aria-label="Squads list"
+            onKeyDown={handleSquadsListKeyDown}
+          >
+            {allSquads.map((squad) => {
           const isUnsigned = squad.pool === "unsigned";
           const isEliminated = squad.isEliminated;
-          const isRosterFull = signedSquads.length === 4;
-
           const isGroupReplaceable =
             squad.pool === "signed" && squad.groupStageReplaceable && !isEliminated;
 
@@ -133,9 +129,6 @@ export const SquadsSection: React.FC = () => {
             <div
               key={squad.teamId}
               className={`${styles.squadCard} ${isUnsigned ? styles.unsigned : ""} ${isEliminated ? styles.eliminated : ""} ${isGroupReplaceable ? styles.groupStageReplaceable : ""}`}
-              style={{
-                borderLeftColor: isEliminated ? "#999" : isUnsigned ? (isRosterFull ? "#DC143C" : "#ffa500") : "#228B22",
-              }}
             >
               {/* Squad Header */}
               <div className={styles.squadHeader}>
@@ -145,7 +138,7 @@ export const SquadsSection: React.FC = () => {
                     {squad.group && <span className={styles.group}>{squad.group}</span>}
                   </div>
                   <div className={styles.nameBlock}>
-                    <h3 className={styles.squadName}>{squad.name}</h3>
+                    <h4 className={styles.squadName}>{squad.name}</h4>
                     {squad.coaches && squad.coaches.length > 0 && (
                       <p className={styles.coach}>
                         {squad.coaches.map((c) => c.name).join(", ")}
@@ -241,7 +234,9 @@ export const SquadsSection: React.FC = () => {
               </div>
             </div>
           );
-        })}
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -6,16 +6,11 @@
   gap: $spacing-12;
 }
 
-.header {
-  padding: $spacing-12 0;
-  border-bottom: $border-width-2 solid #000;
-}
-
-.count {
+.availablePlayersTitle {
   margin: 0;
-  font-size: $font-size-14;
-  color: var(--text-secondary);
-  font-weight: $font-weight-regular;
+  font-size: $font-size-16;
+  color: $color-text-default;
+  font-weight: $font-weight-semibold;
 }
 
 .emptyState {
@@ -104,6 +99,63 @@
     &:hover {
       transform: none;
       box-shadow: none;
+    }
+  }
+
+  /* Position accent — available list only (full border; hover keeps hue) */
+  &.posGk {
+    border-color: player-pos-accent-border($player-pos-border-gk);
+
+    &:hover:not(:disabled) {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-gk 72%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+
+    &:focus {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-gk 72%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+  }
+
+  &.posDef {
+    border-color: player-pos-accent-border($player-pos-border-def);
+
+    &:hover:not(:disabled) {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-def 78%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+
+    &:focus {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-def 78%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+  }
+
+  &.posMid {
+    border-color: player-pos-accent-border($player-pos-border-mid);
+
+    &:hover:not(:disabled) {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-mid 72%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+
+    &:focus {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-mid 72%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+  }
+
+  &.posFwd {
+    border-color: player-pos-accent-border($player-pos-border-fwd);
+
+    &:hover:not(:disabled) {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-fwd 72%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
+    }
+
+    &:focus {
+      border-color: player-pos-accent-border(color-mix(in srgb, $player-pos-border-fwd 72%, #000000));
+      background: rgba($color-bg-tertiary, 0.05);
     }
   }
 }

@@ -52,7 +52,7 @@
 }
 
 
-//standard
+//standard — black bar FIFA mark: visible only at ≤900px (blue banner logo from 901px)
 .logo {
   display: flex;
   text-decoration: none;
@@ -62,17 +62,17 @@
   border-radius: $radius-lg;
 
   @media (min-width: 1016px) {
-  display: flex;
-  text-decoration: none;
-  flex-shrink: 0;
-  padding: 12px;
-  background: $color-bg-secondary;
-  border-radius: $radius-lg;
-  z-index: 10;
-  position: absolute;   // ← out of flow, can't inflate parent
-  top: 0;               // ← pins to top of midNavLeft
-  left: 50px;
-}
+    display: none;
+    text-decoration: none;
+    flex-shrink: 0;
+    padding: 12px;
+    background: $color-bg-secondary;
+    border-radius: $radius-lg;
+    z-index: 10;
+    position: absolute;
+    top: 0;
+    left: 50px;
+  }
 }
 
 .logoImg {
