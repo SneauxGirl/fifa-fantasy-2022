@@ -1,5 +1,6 @@
-import mapsData from '../data/APItoFIFAmaps.json';
-import squadsData from '../data/squads.json';
+import mapsData from "../data/APItoFIFAmaps.json";
+import squadsData from "../data/squads.json";
+import { countryToFifa } from "./formatMapping";
 
 export interface TeamColors {
   primary: string;
@@ -13,15 +14,17 @@ export interface TeamColors {
  * Colors are static data from APItoFIFAmaps.json
  * Used for styling player cards, squad cards, and other UI elements
  *
- * @param countryCode - Team country code (standardized FIFA code, e.g., "ARG", "BRA", "ENG", "NET", "JAP", "SER")
+ * @param countryCode - FIFA code (e.g. "ARG", "NED") or legacy API code (e.g. "NET", "SPA")
  * @returns TeamColors object with primary, secondary, alt, and text colors
  */
 export const getTeamColors = (countryCode: string): TeamColors => {
-  const colors = (mapsData as any).teamColors?.[countryCode];
-  console.log("getTeamColors - looking up:", countryCode, "found:", colors, "allTeamColors keys:", Object.keys((mapsData as any).teamColors || {}));
+  const fifaCode = countryToFifa(countryCode);
+  const colors = (mapsData as { teamColors?: Record<string, TeamColors> }).teamColors?.[
+    fifaCode
+  ];
 
   if (colors) {
-    return colors as TeamColors;
+    return colors;
   }
 
   // Fallback colors if not found
@@ -37,12 +40,12 @@ export const getTeamColors = (countryCode: string): TeamColors => {
  * Get team flag emoji by country code
  * Looks up the flag from squads.json national team data
  *
- * @param countryCode - Team country code (e.g., "ARG", "BRA", "NET", "JAP", "SER")
+ * @param countryCode - Team country code (FIFA or legacy API)
  * @returns Flag emoji string, or empty string if not found
  */
 export const getTeamFlag = (countryCode: string): string => {
-  const team = (squadsData as any).teams?.find(
-    (t: any) => t.countryCode === countryCode
+  const team = (squadsData as { teams?: { countryCode: string; flag?: string }[] }).teams?.find(
+    (t) => t.countryCode === countryCode
   );
   return team?.flag || "";
 };

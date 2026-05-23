@@ -1,11 +1,10 @@
-# FIFA Fantasy 2022
+# FIFA Fantasy 2026
 
-Turn-based fantasy football on the **2022 World Cup** results (portfolio piece). The UI follows a **2026 FIFA-style** look.
+DISCONTINUED game play experiment. Turn-based fantasy football using **2022 World Cup** results to work through game logic and find edge cases. The UI follows a **2026 FIFA-style** look.
 
-![Current Roster Screen](/docs/photos/FF22_Current-Roster-View-May2026.png)
+![Current Roster Screen](/docs/photos/FF26_Current-Roster-View-May2026.png)
 
-**Live:** [fifa-fantasy-2022.vercel.app](https://fifa-fantasy-2022.vercel.app)
-
+**Live:** [ff26-discontinued.vercel.app](https://ff26-discontinued.vercel.app/)
 
 
 ## Tech stack

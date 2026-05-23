@@ -1,5 +1,5 @@
 {
-  "description": "Mapping between API format and FIFA format for countries and positions",
+  "description": "API/FIFA mappings and 2026 World Cup teamColors (48 nations, FIFA 3-letter keys).",
   "countryCodes": {
     "fifaToApi": {
       "NED": "NET",
@@ -47,37 +47,293 @@
     }
   },
   "teamColors": {
-    "ARG": { "primary": "#75AADB", "secondary": "#9EC4E6", "alt": "#F6B40E", "text": "#000000" },
-    "AUS": { "primary": "#000066", "secondary": "#4D4D94", "alt": "#FFCC00", "text": "#FFFFFF" },
-    "BEL": { "primary": "#000000", "secondary": "#FFD100", "alt": "#FF0000", "text": "#FFFFFF" },
-    "BRA": { "primary": "#FEDF00", "secondary": "#009B3A", "alt": "#002776", "text": "#000000" },
-    "CAM": { "primary": "#479A50", "secondary": "#FBD81B", "alt": "#ED1C24", "text": "#FFFFFF" },
-    "CAN": { "primary": "#FF0000", "secondary": "#B20000", "alt": "#FF0000", "text": "#FFFFFF" },
-    "COS": { "primary": "#006847", "secondary": "#4D957E", "alt": "#CE1126", "text": "#FFFFFF" },
-    "CRO": { "primary": "#FF0000", "secondary": "#B20000", "alt": "#0000FF", "text": "#FFFFFF" },
-    "DEN": { "primary": "#C60C30", "secondary": "#8B0822", "alt": "#C60C30", "text": "#FFFFFF" },
-    "ECU": { "primary": "#FFD100", "secondary": "#003893", "alt": "#CE1126", "text": "#000000" },
-    "ENG": { "primary": "#C8102E", "secondary": "#8C0B20", "alt": "#FFFFFF", "text": "#FFFFFF" },
-    "FRA": { "primary": "#0055A4", "secondary": "#003B73", "alt": "#EF4135", "text": "#FFFFFF" },
-    "GER": { "primary": "#000000", "secondary": "#DD0000", "alt": "#FFCE00", "text": "#FFFFFF" },
-    "GHA": { "primary": "#006B3F", "secondary": "#FCD116", "alt": "#CE1126", "text": "#FFFFFF" },
-    "IRA": { "primary": "#DA0000", "secondary": "#990000", "alt": "#239F40", "text": "#FFFFFF" },
-    "JAP": { "primary": "#BC002D", "secondary": "#840020", "alt": "#BC002D", "text": "#FFFFFF" },
-    "MEX": { "primary": "#006847", "secondary": "#004932", "alt": "#CE1126", "text": "#FFFFFF" },
-    "MOR": { "primary": "#006233", "secondary": "#FFD700", "alt": "#C8102E", "text": "#FFFFFF" },
-    "NET": { "primary": "#FF5700", "secondary": "#FF894D", "alt": "#21468B", "text": "#FFFFFF" },
-    "POL": { "primary": "#DC143C", "secondary": "#9A0E2A", "alt": "#DC143C", "text": "#FFFFFF" },
-    "POR": { "primary": "#006600", "secondary": "#004700", "alt": "#FF0000", "text": "#FFFFFF" },
-    "QAT": { "primary": "#8A1538", "secondary": "#610F27", "alt": "#8A1538", "text": "#FFFFFF" },
-    "SAU": { "primary": "#006C35", "secondary": "#004C25", "alt": "#006C35", "text": "#FFFFFF" },
-    "SEN": { "primary": "#00853F", "secondary": "#FDEF42", "alt": "#E31B23", "text": "#FFFFFF" },
-    "SER": { "primary": "#C6363C", "secondary": "#8B262A", "alt": "#002D62", "text": "#FFFFFF" },
-    "SOU": { "primary": "#003478", "secondary": "#4D71A1", "alt": "#C60C30", "text": "#FFFFFF" },
-    "SPA": { "primary": "#AA151B", "secondary": "#770F13", "alt": "#F1BF00", "text": "#FFFFFF" },
-    "SWI": { "primary": "#FF0000", "secondary": "#B20000", "alt": "#000000", "text": "#FFFFFF" },
-    "TUN": { "primary": "#E30B17", "secondary": "#9F0810", "alt": "#E30B17", "text": "#FFFFFF" },
-    "USA": { "primary": "#B22234", "secondary": "#7D1824", "alt": "#3C3B6E", "text": "#FFFFFF" },
-    "URU": { "primary": "#75AADB", "secondary": "#9EC4E6", "alt": "#000000", "text": "#000000" },
-    "WAL": { "primary": "#D80027", "secondary": "#97001B", "alt": "#D80027", "text": "#FFFFFF" }
+    "ALG": {
+      "primary": "#006233",
+      "secondary": "#FFFFFF",
+      "alt": "#D21034",
+      "text": "#FFFFFF"
+    },
+    "ARG": {
+      "primary": "#75AADB",
+      "secondary": "#9EC4E6",
+      "alt": "#F6B40E",
+      "text": "#000000"
+    },
+    "AUS": {
+      "primary": "#000066",
+      "secondary": "#4D4D94",
+      "alt": "#FFCC00",
+      "text": "#FFFFFF"
+    },
+    "AUT": {
+      "primary": "#ED2939",
+      "secondary": "#FFFFFF",
+      "alt": "#ED2939",
+      "text": "#FFFFFF"
+    },
+    "BEL": {
+      "primary": "#000000",
+      "secondary": "#FFD100",
+      "alt": "#FF0000",
+      "text": "#FFFFFF"
+    },
+    "BIH": {
+      "primary": "#002395",
+      "secondary": "#FECB00",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "BRA": {
+      "primary": "#FEDF00",
+      "secondary": "#009B3A",
+      "alt": "#002776",
+      "text": "#000000"
+    },
+    "CAN": {
+      "primary": "#FF0000",
+      "secondary": "#B20000",
+      "alt": "#FF0000",
+      "text": "#FFFFFF"
+    },
+    "CIV": {
+      "primary": "#F77F00",
+      "secondary": "#009E60",
+      "alt": "#FFFFFF",
+      "text": "#000000"
+    },
+    "COD": {
+      "primary": "#007FFF",
+      "secondary": "#F7D618",
+      "alt": "#CE1126",
+      "text": "#000000"
+    },
+    "COL": {
+      "primary": "#FCD116",
+      "secondary": "#003893",
+      "alt": "#CE1126",
+      "text": "#000000"
+    },
+    "CPV": {
+      "primary": "#003893",
+      "secondary": "#CF2027",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "CUW": {
+      "primary": "#002B7F",
+      "secondary": "#FED100",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "CZE": {
+      "primary": "#D7141A",
+      "secondary": "#11457E",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "ECU": {
+      "primary": "#FFD100",
+      "secondary": "#003893",
+      "alt": "#CE1126",
+      "text": "#000000"
+    },
+    "EGY": {
+      "primary": "#CE1126",
+      "secondary": "#000000",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "ENG": {
+      "primary": "#C8102E",
+      "secondary": "#8C0B20",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "ESP": {
+      "primary": "#AA151B",
+      "secondary": "#770F13",
+      "alt": "#F1BF00",
+      "text": "#FFFFFF"
+    },
+    "FRA": {
+      "primary": "#0055A4",
+      "secondary": "#003B73",
+      "alt": "#EF4135",
+      "text": "#FFFFFF"
+    },
+    "GER": {
+      "primary": "#000000",
+      "secondary": "#DD0000",
+      "alt": "#FFCE00",
+      "text": "#FFFFFF"
+    },
+    "GHA": {
+      "primary": "#006B3F",
+      "secondary": "#FCD116",
+      "alt": "#CE1126",
+      "text": "#FFFFFF"
+    },
+    "HAI": {
+      "primary": "#00209F",
+      "secondary": "#D21034",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "HRV": {
+      "primary": "#FF0000",
+      "secondary": "#B20000",
+      "alt": "#0000FF",
+      "text": "#FFFFFF"
+    },
+    "IRN": {
+      "primary": "#DA0000",
+      "secondary": "#990000",
+      "alt": "#239F40",
+      "text": "#FFFFFF"
+    },
+    "IRQ": {
+      "primary": "#007A3D",
+      "secondary": "#CE1126",
+      "alt": "#000000",
+      "text": "#FFFFFF"
+    },
+    "JOR": {
+      "primary": "#007A3D",
+      "secondary": "#000000",
+      "alt": "#CE1126",
+      "text": "#FFFFFF"
+    },
+    "JPN": {
+      "primary": "#BC002D",
+      "secondary": "#840020",
+      "alt": "#BC002D",
+      "text": "#FFFFFF"
+    },
+    "KOR": {
+      "primary": "#003478",
+      "secondary": "#4D71A1",
+      "alt": "#C60C30",
+      "text": "#FFFFFF"
+    },
+    "KSA": {
+      "primary": "#006C35",
+      "secondary": "#004C25",
+      "alt": "#006C35",
+      "text": "#FFFFFF"
+    },
+    "MAR": {
+      "primary": "#006233",
+      "secondary": "#FFD700",
+      "alt": "#C8102E",
+      "text": "#FFFFFF"
+    },
+    "MEX": {
+      "primary": "#006847",
+      "secondary": "#004932",
+      "alt": "#CE1126",
+      "text": "#FFFFFF"
+    },
+    "NED": {
+      "primary": "#FF5700",
+      "secondary": "#FF894D",
+      "alt": "#21468B",
+      "text": "#FFFFFF"
+    },
+    "NOR": {
+      "primary": "#BA0C2F",
+      "secondary": "#00205B",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "NZL": {
+      "primary": "#000000",
+      "secondary": "#FFFFFF",
+      "alt": "#000000",
+      "text": "#FFFFFF"
+    },
+    "PAN": {
+      "primary": "#DA121A",
+      "secondary": "#072357",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "PAR": {
+      "primary": "#D52B1E",
+      "secondary": "#0038A8",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    },
+    "POR": {
+      "primary": "#006600",
+      "secondary": "#004700",
+      "alt": "#FF0000",
+      "text": "#FFFFFF"
+    },
+    "QAT": {
+      "primary": "#8A1538",
+      "secondary": "#610F27",
+      "alt": "#8A1538",
+      "text": "#FFFFFF"
+    },
+    "RSA": {
+      "primary": "#007749",
+      "secondary": "#FFB500",
+      "alt": "#000000",
+      "text": "#FFFFFF"
+    },
+    "SCO": {
+      "primary": "#003262",
+      "secondary": "#FFFFFF",
+      "alt": "#741B47",
+      "text": "#FFFFFF"
+    },
+    "SEN": {
+      "primary": "#00853F",
+      "secondary": "#FDEF42",
+      "alt": "#E31B23",
+      "text": "#FFFFFF"
+    },
+    "SUI": {
+      "primary": "#FF0000",
+      "secondary": "#B20000",
+      "alt": "#000000",
+      "text": "#FFFFFF"
+    },
+    "SWE": {
+      "primary": "#FECC00",
+      "secondary": "#006AA7",
+      "alt": "#FECC00",
+      "text": "#000000"
+    },
+    "TUN": {
+      "primary": "#E30B17",
+      "secondary": "#9F0810",
+      "alt": "#E30B17",
+      "text": "#FFFFFF"
+    },
+    "TUR": {
+      "primary": "#E30A17",
+      "secondary": "#FFFFFF",
+      "alt": "#E30A17",
+      "text": "#FFFFFF"
+    },
+    "URY": {
+      "primary": "#75AADB",
+      "secondary": "#9EC4E6",
+      "alt": "#000000",
+      "text": "#000000"
+    },
+    "USA": {
+      "primary": "#B22234",
+      "secondary": "#7D1824",
+      "alt": "#3C3B6E",
+      "text": "#FFFFFF"
+    },
+    "UZB": {
+      "primary": "#0099B5",
+      "secondary": "#1EB53A",
+      "alt": "#FFFFFF",
+      "text": "#FFFFFF"
+    }
   }
 }
